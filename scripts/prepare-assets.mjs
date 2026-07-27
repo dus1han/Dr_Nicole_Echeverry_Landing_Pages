@@ -127,9 +127,12 @@ async function buildLogos() {
  * source alpha channel: the monogram occupies y29–304 of the 800×450 artwork,
  * the wordmark starts at y338.
  *
- * The mark is white, so it is placed on a plum tile — that reads on both light
- * and dark browser chrome, unlike a transparent white glyph which vanishes on
- * a light tab bar.
+ * The source mark is white, so it is recoloured to plum — the same treatment as
+ * the on-site logo — and left on a TRANSPARENT background, per the client.
+ *
+ * One exception: `apple-icon.png` keeps a cream background. iOS composites a
+ * transparent home-screen icon onto black, which would make a plum monogram
+ * almost invisible.
  */
 async function buildIcons() {
   console.log('\n· Browser icons');
@@ -153,20 +156,39 @@ async function buildIcons() {
     .png()
     .toBuffer();
 
-  const monogram = await sharp(cropped).trim().png().toBuffer();
+  const trimmed = await sharp(cropped).trim().png().toBuffer();
 
-  const plum = { r: 0x58, g: 0x40, b: 0x49, alpha: 1 }; // --color-plum-900
+  // Recolour the white artwork to plum by keeping its alpha and replacing RGB —
+  // the same technique used for logo-plum.png.
+  const tm = await sharp(trimmed).metadata();
+  const alphaCh = await sharp(trimmed).ensureAlpha().extractChannel('alpha').toBuffer();
+  const plumFlat = await sharp({
+    create: {
+      width: tm.width,
+      height: tm.height,
+      channels: 3,
+      background: { r: 0x58, g: 0x40, b: 0x49 }, // --color-plum-900
+    },
+  })
+    .png()
+    .toBuffer();
+  const monogram = await sharp(plumFlat).joinChannel(alphaCh).png().toBuffer();
 
-  for (const [name, size, pad] of [
-    ['icon.png', 512, 0.2],
-    ['apple-icon.png', 180, 0.16], // iOS crops corners; a little less padding
+  const TRANSPARENT = { r: 0, g: 0, b: 0, alpha: 0 };
+  const CREAM = { r: 0xfe, g: 0xfa, b: 0xf8, alpha: 1 }; // --color-cream
+
+  for (const [name, size, pad, background] of [
+    ['icon.png', 512, 0.06, TRANSPARENT],
+    // iOS ignores transparency and composites onto black, which would swallow a
+    // plum glyph — so this one keeps the site's cream behind it.
+    ['apple-icon.png', 180, 0.16, CREAM],
   ]) {
     const inner = Math.round(size * (1 - pad * 2));
     const glyph = await sharp(monogram)
-      .resize(inner, inner, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+      .resize(inner, inner, { fit: 'contain', background: TRANSPARENT })
       .toBuffer();
 
-    await sharp({ create: { width: size, height: size, channels: 4, background: plum } })
+    await sharp({ create: { width: size, height: size, channels: 4, background } })
       .composite([{ input: glyph, gravity: 'centre' }])
       .png({ compressionLevel: 9 })
       .toFile(join(ROOT, 'app', name));
