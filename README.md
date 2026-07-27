@@ -37,12 +37,22 @@ The build is **deliberately blocked** while dummy content is present:
     content/mommy-makeover.ts:294  →  reviews
 ```
 
-To preview with dummy content (client review, staging):
+**This will fail your first Vercel deploy — by design.** To deploy anyway for client
+review, add an environment variable in the hosting dashboard:
+
+| Key | Value |
+|---|---|
+| `ALLOW_PLACEHOLDER_CONTENT` | `1` |
+
+On Vercel: **Project → Settings → Environment Variables**, then redeploy. Locally:
 
 ```bash
-ALLOW_PLACEHOLDER_CONTENT=1 npm run build      # bash
-$env:ALLOW_PLACEHOLDER_CONTENT="1"; npm run build   # PowerShell
+ALLOW_PLACEHOLDER_CONTENT=1 npm run build            # bash
+$env:ALLOW_PLACEHOLDER_CONTENT="1"; npm run build    # PowerShell
 ```
+
+Remove the variable once real reviews and photographs are in, so the gate protects the
+site again.
 
 **Do not deploy an override build to production traffic.** Replace the content, set
 `isPlaceholder: false`, and the gate clears itself. Full checklist:
@@ -192,8 +202,13 @@ The clinic map is a **keyless Google Maps embed** — no API key, no billing acc
 the moment it deploys.
 
 ### Environment variables
-None are required to run. When the form destination is chosen, add whatever that service
-needs (e.g. `RESEND_API_KEY`, `ENQUIRY_INBOX`).
+
+| Key | When | Why |
+|---|---|---|
+| `ALLOW_PLACEHOLDER_CONTENT=1` | **Needed now** | Lets the build run while reviews and before/after photos are still placeholders. Remove it once they're real. |
+| `RESEND_API_KEY`, `ENQUIRY_INBOX` | When the form destination is chosen | Whatever the chosen service needs |
+
+Nothing else is required to run.
 
 ---
 

@@ -70,8 +70,15 @@ async function main() {
 
   console.log('\n  Replace the dummy content with real, consented material and');
   console.log('  set isPlaceholder: false. See docs/open-questions.md.\n');
-  console.log('  For a client preview deploy, run:');
-  console.log('    ALLOW_PLACEHOLDER_CONTENT=1 npm run build\n');
+  console.log('  To deploy anyway (client preview / staging):\n');
+  console.log('    Vercel, Netlify, or any CI:');
+  console.log('      add an environment variable  ALLOW_PLACEHOLDER_CONTENT = 1');
+  console.log('      (Vercel: Project → Settings → Environment Variables)\n');
+  console.log('    Locally:');
+  console.log('      ALLOW_PLACEHOLDER_CONTENT=1 npm run build          # bash');
+  console.log('      $env:ALLOW_PLACEHOLDER_CONTENT="1"; npm run build  # PowerShell\n');
+  console.log('  This gate exists so invented patient reviews cannot reach live');
+  console.log('  traffic unnoticed. Setting the variable is a deliberate override.\n');
   process.exit(1);
 }
 
