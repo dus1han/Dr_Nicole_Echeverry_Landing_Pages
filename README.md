@@ -26,33 +26,35 @@ npm run dev        # http://localhost:3000/mommy-makeover
 
 ---
 
-## ⚠ Before this page goes live
+## ⚠ Before this page is advertised to patients
 
-The build is **deliberately blocked** while dummy content is present:
+Three content blocks are still placeholders. Every build prints a warning naming them:
 
 ```
-✗ Build blocked — placeholder content is still present:
-    content/mommy-makeover.ts:58   →  trust
-    content/mommy-makeover.ts:221  →  results
-    content/mommy-makeover.ts:294  →  reviews
+⚠  Placeholder content is still present:
+      content/mommy-makeover.ts:57   →  trust     (the four statistics)
+      content/mommy-makeover.ts:232  →  results   (before/after gallery)
+      content/mommy-makeover.ts:334  →  reviews   (patient reviews)
 ```
 
-**This will fail your first Vercel deploy — by design.** To deploy anyway for client
-review, add an environment variable in the hosting dashboard:
+**The build continues** — no environment variable needed, deploys work out of the box.
 
-| Key | Value |
-|---|---|
-| `ALLOW_PLACEHOLDER_CONTENT` | `1` |
+Replace them with real, consented material and set `isPlaceholder: false`. Checklist:
+[`docs/open-questions.md`](docs/open-questions.md).
 
-On Vercel: **Project → Settings → Environment Variables**, then redeploy. Locally:
+### What protects you in the meantime
+Placeholder reviews are **excluded from `Review` / `AggregateRating` structured data**
+(`lib/schema.ts`), so no fabricated ratings are ever published to Google. That protection
+is unconditional and does not depend on the warning above.
+
+### Making it a hard failure
+Once real content is in, set `STRICT_CONTENT=1` in your production pipeline. Any
+placeholder that reappears then fails the build instead of warning.
 
 ```bash
-ALLOW_PLACEHOLDER_CONTENT=1 npm run build            # bash
-$env:ALLOW_PLACEHOLDER_CONTENT="1"; npm run build    # PowerShell
+STRICT_CONTENT=1 npm run build            # bash
+$env:STRICT_CONTENT="1"; npm run build    # PowerShell
 ```
-
-Remove the variable once real reviews and photographs are in, so the gate protects the
-site again.
 
 **Do not deploy an override build to production traffic.** Replace the content, set
 `isPlaceholder: false`, and the gate clears itself. Full checklist:
@@ -205,10 +207,10 @@ the moment it deploys.
 
 | Key | When | Why |
 |---|---|---|
-| `ALLOW_PLACEHOLDER_CONTENT=1` | **Needed now** | Lets the build run while reviews and before/after photos are still placeholders. Remove it once they're real. |
+| `STRICT_CONTENT=1` | Once real reviews and photos are in | Turns the placeholder warning into a build failure, so dummy content can never come back unnoticed |
 | `RESEND_API_KEY`, `ENQUIRY_INBOX` | When the form destination is chosen | Whatever the chosen service needs |
 
-Nothing else is required to run.
+**None are required to build or deploy.** Vercel needs no configuration.
 
 ---
 

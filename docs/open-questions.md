@@ -16,13 +16,18 @@ Applies to all display copy, titles, meta, OG cards, structured data, alt text.
 Client approved. Six sample reviews and three before/after pairs are written and specified in [`content-map.md`](content-map.md) §9 and §11.
 
 **Guards so dummy content can't quietly ship:**
-| Guard | Behaviour |
+| Guard | Status |
 |---|---|
 | `isPlaceholder: true` | One flag per block controls everything below |
-| `SAMPLE` ribbon | Gold corner ribbon on every placeholder card and plate |
-| Dev console warning | Lists every block still flagged; development only |
-| `npm run check:content` | **Fails the build** while any flag is still `true`; wired into `prebuild` |
-| JSON-LD exclusion | Placeholder reviews never emit `Review`/`AggregateRating` — fake ratings in Google are a search-penalty and compliance risk |
+| **JSON-LD exclusion** | ✅ **Active and unconditional** — placeholder reviews never emit `Review`/`AggregateRating`, so no fabricated ratings reach Google |
+| `npm run check:content` | ⚠️ **Warns, does not fail.** Prints the offending blocks on every build. Set `STRICT_CONTENT=1` to make it a hard failure once real content is in |
+| `SAMPLE` ribbon | ❌ Removed from reviews and the results gallery at the client's request |
+| Dev console warning | Development only |
+
+> **The on-page markers are gone.** The reviews and before/after imagery now look
+> completely real to a visitor. The structured-data exclusion is the only remaining
+> automatic protection; everything else depends on someone replacing the content before
+> the page is advertised.
 
 Before/after plates are generated from the supplied body photography (the "before" is a softened derivative of the "after"), so the drag-reveal demonstrates properly. **No real patient is depicted.**
 

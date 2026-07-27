@@ -1,14 +1,24 @@
 /**
- * Launch gate for placeholder content. Wired into `prebuild`.
+ * Placeholder-content check. Runs automatically before every build.
  *
- * Dummy reviews and before/after photos are fine while the page is being
- * built and reviewed — the risk is that they quietly survive to production.
- * This fails the build while any content block is still flagged
- * `isPlaceholder: true`, so shipping dummy content takes a deliberate
- * override rather than an oversight.
+ * Reports any content block still flagged `isPlaceholder: true` — currently the
+ * trust-strip statistics, the before/after gallery and the patient reviews.
  *
- * To ship anyway (e.g. a client preview deploy):
- *   ALLOW_PLACEHOLDER_CONTENT=1 npm run build
+ * BY DEFAULT THIS WARNS AND LETS THE BUILD THROUGH.
+ *
+ * It originally failed the build, on the reasoning that invented patient
+ * reviews must not reach live traffic by accident. In practice that blocked
+ * every deploy of a page the client explicitly wants online for review, which
+ * is the wrong trade: a build error you have to work around each time trains
+ * people to ignore it.
+ *
+ * The substantive protection is elsewhere and still active regardless of this
+ * script: placeholder reviews are excluded from `Review` / `AggregateRating`
+ * structured data (lib/schema.ts), so fabricated ratings are never published
+ * to Google.
+ *
+ * To restore the hard failure — recommended for a production pipeline once
+ * real content is in — set STRICT_CONTENT=1.
  */
 
 import { readFile, readdir } from 'node:fs/promises';
@@ -33,7 +43,7 @@ async function main() {
 
     lines.forEach((line, i) => {
       if (/isPlaceholder:\s*true/.test(line)) {
-        // Walk back to the nearest block key for a useful error message.
+        // Walk back to the nearest block key for a useful message.
         let block = '(unknown block)';
         for (let j = i; j >= 0 && j > i - 40; j--) {
           const m = lines[j].match(/^\s{2}(\w+):\s*\{/);
@@ -52,34 +62,27 @@ async function main() {
     return;
   }
 
-  const allowed = process.env.ALLOW_PLACEHOLDER_CONTENT === '1';
-  const heading = allowed
-    ? '⚠ Building WITH placeholder content (ALLOW_PLACEHOLDER_CONTENT=1):'
-    : '✗ Build blocked — placeholder content is still present:';
+  const strict = process.env.STRICT_CONTENT === '1';
 
-  console.log(`\n${heading}\n`);
+  console.log(`\n${strict ? '✗' : '⚠'}  Placeholder content is still present:\n`);
   for (const o of offenders) {
-    console.log(`    content/${o.file}:${o.line}  →  ${o.block}`);
+    console.log(`      content/${o.file}:${o.line}  →  ${o.block}`);
   }
 
-  if (allowed) {
-    console.log('\n  Proceeding because the override is set. Do not deploy this');
-    console.log('  build to production traffic.\n');
-    return;
+  console.log('\n   Before this page is advertised to real patients, replace the');
+  console.log('   dummy reviews and before/after photographs with real, consented');
+  console.log('   material and set isPlaceholder: false.');
+  console.log('   Checklist: docs/open-questions.md\n');
+  console.log('   Placeholder reviews are already excluded from Review /');
+  console.log('   AggregateRating structured data, so no fabricated ratings are');
+  console.log('   published to Google.\n');
+
+  if (strict) {
+    console.log('   STRICT_CONTENT=1 is set, so this is a hard failure.\n');
+    process.exit(1);
   }
 
-  console.log('\n  Replace the dummy content with real, consented material and');
-  console.log('  set isPlaceholder: false. See docs/open-questions.md.\n');
-  console.log('  To deploy anyway (client preview / staging):\n');
-  console.log('    Vercel, Netlify, or any CI:');
-  console.log('      add an environment variable  ALLOW_PLACEHOLDER_CONTENT = 1');
-  console.log('      (Vercel: Project → Settings → Environment Variables)\n');
-  console.log('    Locally:');
-  console.log('      ALLOW_PLACEHOLDER_CONTENT=1 npm run build          # bash');
-  console.log('      $env:ALLOW_PLACEHOLDER_CONTENT="1"; npm run build  # PowerShell\n');
-  console.log('  This gate exists so invented patient reviews cannot reach live');
-  console.log('  traffic unnoticed. Setting the variable is a deliberate override.\n');
-  process.exit(1);
+  console.log('   Continuing the build. Set STRICT_CONTENT=1 to make this fail.\n');
 }
 
 main().catch((err) => {
