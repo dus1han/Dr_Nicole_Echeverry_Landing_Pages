@@ -1,0 +1,467 @@
+import type { LandingPageContent } from './types';
+
+const IMG = '/images/mommy-makeover';
+
+/**
+ * Copy for /mommy-makeover.
+ *
+ * Sourced from "Mommy Makeover in Dubai LP content.docx". Every substantive
+ * line of that document is used. Mapping: docs/content-map.md
+ */
+export const mommyMakeover: LandingPageContent = {
+  slug: 'mommy-makeover',
+
+  meta: {
+    title: 'Mommy Makeover in Dubai | Dr. Nicole Echeverry — Plastic Surgeon',
+    description:
+      'Feel like yourself again with a personalised Mommy Makeover in Dubai by Dr. Nicole Echeverry — world-class body contouring inspired by Colombian aesthetic artistry. Book a private consultation.',
+    ogHeadline: 'Feel Like Yourself Again',
+  },
+
+  nav: [
+    { label: 'What Is It', href: '#what-is-it' },
+    { label: 'Procedures', href: '#procedures' },
+    { label: 'Dr. Nicole', href: '#meet-dr-nicole' },
+    { label: 'Results', href: '#results' },
+    { label: 'FAQ', href: '#faq' },
+  ],
+
+  announcements: [
+    'Colombian Aesthetic Artistry',
+    'Plastic, Aesthetic & Reconstructive Surgeon',
+    'Private Consultations in Dubai',
+    'Personalised Treatment Plans',
+  ],
+
+  /* ---------------------------------------------------------------- */
+
+  hero: {
+    eyebrow: 'Dubai · Plastic & Reconstructive Surgery',
+    headline: ['Feel Like Yourself Again', 'with a Mommy Makeover in Dubai'],
+    attribution: 'with Dr. Nicole Echeverry',
+    subheadline:
+      'World-class body contouring inspired by Colombian aesthetic artistry.',
+    image: {
+      src: `${IMG}/hero-dubai.jpg`,
+      alt: 'A woman standing on a Dubai balcony at sunrise, looking out over the city skyline',
+    },
+    badges: ['Colombian-trained surgeon', 'Tailored to your anatomy'],
+    primaryCta: { label: 'Book Your Consultation', href: '#book' },
+    secondaryCta: { label: 'See The Results', href: '#results' },
+  },
+
+  /* ---------------------------------------------------------------- */
+
+  trust: {
+    // TODO: real figures needed from the client — see docs/open-questions.md.
+    isPlaceholder: true,
+    stats: [
+      { value: 10, suffix: '+', label: 'Years of surgical experience' },
+      { value: 1500, suffix: '+', label: 'Procedures performed' },
+      { value: 3, label: 'Countries trained in' },
+      { value: 98, suffix: '%', label: 'Patient satisfaction' },
+    ],
+  },
+
+  /* ---------------------------------------------------------------- */
+
+  whatIsIt: {
+    eyebrow: 'The Procedure',
+    heading: 'What is a Mommy Makeover?',
+    body: 'A Mommy Makeover is a personalized combination of procedures designed to restore and refine the natural contours of your body following pregnancy, childbirth, and breastfeeding.',
+    leadIn: 'Depending on your goals, your Mommy Makeover may include procedures such as:',
+    chips: [
+      { label: 'Tummy Tuck', href: '#tummy-tuck' },
+      { label: 'Breast Lift or Augmentation', href: '#breast' },
+      { label: 'Liposuction', href: '#liposuction' },
+    ],
+    image: {
+      src: `${IMG}/surgeon-operating.jpg`,
+      alt: 'Dr. Nicole Echeverry in surgical cap and mask, concentrating during an operation',
+    },
+    imageCaption: 'Dr. Nicole in theatre',
+  },
+
+  /* ---------------------------------------------------------------- */
+
+  procedures: {
+    eyebrow: 'What It May Include',
+    heading: 'Procedures, combined around you',
+    items: [
+      {
+        id: 'tummy-tuck',
+        name: 'Tummy Tuck',
+        description:
+          'A tummy tuck removes excess skin after pregnancy and repairs stretched abdominal muscles to create a flatter, firmer tummy.',
+        benefits: [
+          'Removes excess skin',
+          'Repairs separated abdominal muscles',
+          'Creates a firmer, flatter tummy',
+        ],
+        image: {
+          src: `${IMG}/procedure-tummy.jpg`,
+          alt: 'A woman’s toned midsection in neutral activewear',
+        },
+      },
+      {
+        id: 'breast',
+        name: 'Breast Lift or Augmentation',
+        description:
+          'A breast lift reshapes and lifts the breasts, while breast augmentation restores or increases volume to achieve a fuller, more balanced appearance.',
+        benefits: [
+          'Restores shape and fullness',
+          'Improves breast position',
+          'Enhances natural proportions',
+        ],
+        image: {
+          src: `${IMG}/procedure-breast.jpg`,
+          alt: 'A woman in a neutral-toned bodysuit, photographed from the shoulders down',
+        },
+      },
+      {
+        id: 'liposuction',
+        name: 'Liposuction',
+        description:
+          'Liposuction removes unwanted fat from specific areas of the body to improve contours and create more balanced proportions. It can be performed on the abdomen, waist, flanks, hips, and thighs, including 360° lipo body contouring.',
+        benefits: [
+          'Targets stubborn fat deposits',
+          'Sculpts the waist and body contours',
+          'Creates a more balanced silhouette',
+        ],
+        image: {
+          src: `${IMG}/procedure-lipo.jpg`,
+          alt: 'Profile view of a woman’s contoured waist and hips against a warm neutral background',
+        },
+      },
+    ],
+    footerNote: 'Every plan is built around you, never around a package.',
+    cta: { label: 'Book Your Consultation', href: '#book' },
+  },
+
+  /* ---------------------------------------------------------------- */
+
+  candidacy: {
+    eyebrow: 'Candidacy',
+    heading: 'Am I the right candidate?',
+    body: 'Every woman’s body responds differently to pregnancy and childbirth. If you’ve maintained a healthy lifestyle but still struggle with changes that diet and exercise alone can’t improve, a personalized Mommy Makeover can help restore balance, shape, and confidence.',
+    leadIn: 'You may be a good candidate if you:',
+    criteria: [
+      'Have completed your family or are not planning another pregnancy in the near future.',
+      'Have loose abdominal skin or muscle separation following pregnancy.',
+      'Experience sagging or volume loss in your breasts after breastfeeding.',
+      'Maintain a stable weight but struggle with stubborn areas of fat.',
+      'Feel your body no longer reflects how you feel inside.',
+      'Are in good overall health and looking for a comprehensive body restoration procedure.',
+    ],
+    closing:
+      'Not sure whether this is right for you? A consultation will tell you honestly — including if the answer is not yet.',
+    cta: { label: 'Request an Honest Assessment', href: '#book' },
+    image: {
+      src: `${IMG}/procedure-lipo.jpg`,
+      alt: 'Profile view of a woman’s silhouette against a soft neutral background',
+    },
+  },
+
+  /* ---------------------------------------------------------------- */
+
+  doctor: {
+    eyebrow: 'Meet Your Surgeon',
+    heading: 'Dr. Nicole Echeverry',
+    role: 'Plastic, Aesthetic & Reconstructive Surgeon',
+    /*
+     * The client's bio is used in full — the closing sentence is simply
+     * PROMOTED to the pull-quote rather than repeated. It is the line that
+     * answers "will she listen to me?", so it earns the emphasis, and this
+     * way every supplied word still appears exactly once.
+     */
+    pullQuote:
+      'Every treatment plan is designed to help you feel confident, comfortable, and like yourself again.',
+    bio: 'Dr. Nicole Echeverry is a Colombian Plastic, Aesthetic, and Reconstructive Surgeon with international training and extensive experience in aesthetic breast surgery, body contouring, and post-pregnancy body restoration. Understanding that every woman’s journey through motherhood is unique, Dr. Nicole carefully tailors each Mommy Makeover to the individual’s anatomy, lifestyle, and goals.',
+    image: {
+      src: `${IMG}/doctor-portrait.jpg`,
+      alt: 'Dr. Nicole Echeverry seated, wearing a white tailored suit',
+    },
+    cta: { label: 'Book a Consultation with Dr. Nicole', href: '#book' },
+  },
+
+  /* ---------------------------------------------------------------- */
+
+  whyTrust: {
+    eyebrow: 'Her Philosophy',
+    heading: 'Why Trust Dr. Nicole with Your Mommy Makeover?',
+    /*
+     * The client's source paragraph is split across the four pillars below,
+     * sentence by sentence — every word of it is on the page. It is NOT also
+     * rendered as a lead: doing both made the visitor read the same content
+     * twice and produced the largest block of text on the page.
+     */
+    pillars: [
+      {
+        icon: 'artistry',
+        title: 'Colombian Aesthetic Artistry',
+        description:
+          'A philosophy of creating elegant, natural-looking transformations inspired by Colombian aesthetic artistry.',
+      },
+      {
+        icon: 'personalised',
+        title: 'Tailored to the Individual',
+        description:
+          'Every Mommy Makeover is carefully tailored to your anatomy, your lifestyle, and your goals.',
+      },
+      {
+        icon: 'harmony',
+        title: 'Harmony, Not Drama',
+        description:
+          'Restoring harmony through refined body contouring rather than dramatic change.',
+      },
+      {
+        icon: 'care',
+        title: 'Care at Every Stage',
+        description:
+          'From your initial consultation through every stage of recovery, Dr. Nicole and her team remain closely involved.',
+      },
+    ],
+  },
+
+  /* ---------------------------------------------------------------- */
+
+  results: {
+    // DUMMY CONTENT — plates generated from the supplied body photography.
+    // No real patient is depicted. Replace with consented photographs and set
+    // this to false. See docs/open-questions.md.
+    isPlaceholder: true,
+    eyebrow: 'Real Results',
+    heading: 'Before & After',
+    lead: 'Every result belongs to a real woman with a real story. Dr. Nicole shares her full gallery personally during your consultation.',
+    cases: [
+      {
+        id: 'case-1',
+        caption: 'Tummy tuck + 360° liposuction',
+        detail: '6 months post-op',
+        before: { src: `${IMG}/results/case-1-before.jpg`, alt: 'Before treatment' },
+        after: { src: `${IMG}/results/case-1-after.jpg`, alt: 'After treatment' },
+      },
+      {
+        id: 'case-2',
+        caption: 'Breast lift with augmentation',
+        detail: '4 months post-op',
+        before: { src: `${IMG}/results/case-2-before.jpg`, alt: 'Before treatment' },
+        after: { src: `${IMG}/results/case-2-after.jpg`, alt: 'After treatment' },
+      },
+      {
+        id: 'case-3',
+        caption: 'Full Mommy Makeover',
+        detail: '9 months post-op',
+        before: { src: `${IMG}/results/case-3-before.jpg`, alt: 'Before treatment' },
+        after: { src: `${IMG}/results/case-3-after.jpg`, alt: 'After treatment' },
+      },
+      {
+        id: 'case-4',
+        caption: 'Tummy tuck with muscle repair',
+        detail: '5 months post-op',
+        before: { src: `${IMG}/results/case-4-before.jpg`, alt: 'Before treatment' },
+        after: { src: `${IMG}/results/case-4-after.jpg`, alt: 'After treatment' },
+      },
+      {
+        id: 'case-5',
+        caption: '360° liposuction',
+        detail: '7 months post-op',
+        before: { src: `${IMG}/results/case-5-before.jpg`, alt: 'Before treatment' },
+        after: { src: `${IMG}/results/case-5-after.jpg`, alt: 'After treatment' },
+      },
+      {
+        id: 'case-6',
+        caption: 'Breast lift',
+        detail: '6 months post-op',
+        before: { src: `${IMG}/results/case-6-before.jpg`, alt: 'Before treatment' },
+        after: { src: `${IMG}/results/case-6-after.jpg`, alt: 'After treatment' },
+      },
+    ],
+    /*
+     * Client-supplied wording. One correction: the original said "your own
+     * FACIAL anatomy" — this is a body page (tummy tuck, breast, liposuction),
+     * so it reads "your own anatomy". The facial wording looks carried over
+     * from a different treatment page.
+     */
+    disclaimer:
+      'Photographs are illustrative of typical outcomes. Individual results vary and are determined by your own anatomy.',
+    cta: { label: 'See More in a Private Consultation', href: '#book' },
+  },
+
+  /* ---------------------------------------------------------------- */
+
+  journey: {
+    eyebrow: 'What to Expect',
+    heading: 'Your journey, step by step',
+    lead: 'The unknown is the hardest part. Here is exactly what happens, from your first message to your last follow-up.',
+    // Tightened for the horizontal 5-across layout — each description is one
+    // short sentence so the columns stay even and the section stays compact.
+    steps: [
+      {
+        title: 'Private Consultation',
+        description:
+          'An unhurried conversation about your history, your goals, and what is realistic for your body.',
+      },
+      {
+        title: 'Your Personalised Plan',
+        description:
+          'A combination of procedures matched to your anatomy, lifestyle and recovery window.',
+      },
+      {
+        title: 'Preparation',
+        description:
+          'Assessments, clear guidance and a checklist, so nothing about the day is a surprise.',
+      },
+      {
+        title: 'Your Surgery Day',
+        description:
+          'An accredited facility, a full surgical team, and Dr. Nicole present at every stage.',
+      },
+      {
+        title: 'Guided Recovery',
+        description:
+          'Scheduled follow-ups and direct access to the team — you are never left to guess.',
+      },
+    ],
+  },
+
+  /* ---------------------------------------------------------------- */
+
+  reviews: {
+    // DUMMY CONTENT — approved by the client for now. These are samples that
+    // model the tone real reviews should have. Excluded from Review /
+    // AggregateRating structured data while this flag is true.
+    isPlaceholder: true,
+    eyebrow: 'In Their Words',
+    heading: 'Patient Reviews',
+    items: [
+      {
+        quote:
+          'I didn’t want to look like someone else. I wanted to look like me before three pregnancies. Dr. Nicole was the first surgeon who actually understood the difference.',
+        name: 'Layla H.',
+        descriptor: 'Mother of three · Dubai',
+        rating: 5,
+      },
+      {
+        quote:
+          'What surprised me most was how much time she gave me. No rushing, no pressure — she even told me which things she wouldn’t recommend for my body.',
+        name: 'Sarah M.',
+        descriptor: 'Mother of two · Dubai Marina',
+        rating: 5,
+      },
+      {
+        quote:
+          'I put this off for six years because I was scared of the recovery. Her team called to check on me almost every day. I was never once left wondering if something was normal.',
+        name: 'Priya R.',
+        descriptor: 'Mother of one · Jumeirah',
+        rating: 5,
+      },
+      {
+        quote:
+          'My husband says I stand differently now. I think that’s the part nobody tells you about — it isn’t just the body, it’s how you carry it.',
+        name: 'Noor A.',
+        descriptor: 'Mother of two · Dubai',
+        rating: 5,
+      },
+      {
+        quote:
+          'I flew in from Riyadh for the consultation and stayed for the surgery. Worth every hour of the trip. The results look like nothing was ever done.',
+        name: 'Fatima K.',
+        descriptor: 'Mother of four · Riyadh',
+        rating: 5,
+      },
+      {
+        quote:
+          'I’d seen surgeons who talked about my body like a project. Dr. Nicole talked about it like it belonged to a person. That’s why I chose her.',
+        name: 'Elena V.',
+        descriptor: 'Mother of two · Downtown Dubai',
+        rating: 5,
+      },
+    ],
+  },
+
+  /* ---------------------------------------------------------------- */
+
+  faq: {
+    eyebrow: 'Questions',
+    heading: 'Frequently Asked Questions',
+    items: [
+      {
+        question: 'Will I still look natural?',
+        answer:
+          'Absolutely. Dr. Nicole focuses on restoring your body’s natural proportions rather than creating an exaggerated appearance. Every treatment plan is personalized to complement your unique shape.',
+      },
+      {
+        question: 'What procedures are included in a Mommy Makeover?',
+        answer:
+          'Every Mommy Makeover is customized. Depending on your goals, it may include a tummy tuck, breast lift, breast augmentation, liposuction, or other body contouring procedures discussed during your consultation.',
+      },
+      {
+        question: 'Can everything be done in one surgery?',
+        answer:
+          'For suitable candidates, multiple procedures can often be safely combined into one carefully planned operation, allowing for a single recovery period. Your treatment plan will depend on your health, goals, and surgical assessment.',
+      },
+      {
+        question: 'How long is the recovery?',
+        answer:
+          'Recovery varies depending on the procedures performed. Most patients gradually return to light daily activities within a few weeks, while full recovery takes longer. Dr. Nicole will guide you through every stage of healing.',
+      },
+      {
+        question: 'Will there be scars?',
+        answer:
+          'Every surgical procedure creates some scarring, but incisions are carefully planned to be as discreet as possible and placed where they can typically be concealed beneath clothing or swimwear.',
+      },
+      {
+        question: 'Is a Mommy Makeover only for mothers?',
+        answer:
+          'Although it was originally developed for women after pregnancy, the procedures included in a Mommy Makeover can also benefit anyone experiencing similar concerns such as loose skin, breast changes, or stubborn fat deposits.',
+      },
+      {
+        question: 'When is the right time to have a Mommy Makeover?',
+        answer:
+          'The ideal time is after you’ve completed your family, finished breastfeeding, reached a stable weight, and are ready to invest in yourself with adequate time for recovery.',
+      },
+    ],
+    footerNote: 'Still have a question?',
+    footerCta: { label: 'Ask Dr. Nicole directly', href: 'whatsapp' },
+  },
+
+  /* ---------------------------------------------------------------- */
+
+  closingCta: {
+    heading: 'Your Confidence Deserves Your Attention',
+    paragraphs: [
+      'Motherhood changes your life in remarkable ways. But that doesn’t mean you have to stop feeling confident in your own body.',
+      'A personalized Mommy Makeover is about restoring balance, helping you feel comfortable in your clothes, and reconnecting with the version of yourself you’ve been missing.',
+    ],
+    primaryCta: { label: 'Book Your Consultation', href: '#book' },
+    secondaryCta: { label: 'Message us on WhatsApp', href: 'whatsapp' },
+  },
+
+  /* ---------------------------------------------------------------- */
+
+  booking: {
+    eyebrow: 'Book Your Consultation',
+    heading: 'Your consultation is a conversation, not a commitment.',
+    lead: 'Leave your details and Dr. Nicole’s team will contact you to arrange a private appointment — in person or online.',
+    submitLabel: 'Request My Consultation',
+    successTitle: 'Thank you.',
+    successBody:
+      'Dr. Nicole’s team will contact you within one working day to arrange your private consultation.',
+    consentNote:
+      'By requesting a consultation you agree to be contacted about your enquiry.',
+    privacyNote: 'Your details are confidential and never shared.',
+    // Fill the space left by the removed contact rail and balance the form.
+    assurances: [
+      'A private, unhurried conversation — never a sales call',
+      'In person in Dubai, or online if you are travelling',
+      'A reply within one working day',
+    ],
+  },
+
+  /*
+   * `map` is intentionally absent — the "Visit the Clinic" section was removed
+   * from this page. The clinic name, address and directions link still appear
+   * in the footer. The ClinicMap component remains available for other pages.
+   */
+};

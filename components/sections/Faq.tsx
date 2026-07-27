@@ -1,0 +1,123 @@
+'use client';
+
+import { useState, useId } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { Plus } from 'lucide-react';
+import type { FaqContent } from '@/content/types';
+import { site, whatsappUrl } from '@/content/site';
+import { SectionHeading } from '@/components/ui/SectionHeading';
+import { Reveal, RevealGroup, RevealItem } from '@/components/ui/Reveal';
+import { ButtonLink } from '@/components/ui/Button';
+import { cn } from '@/lib/utils';
+
+export function Faq(content: FaqContent) {
+  // null = every question collapsed on load. Nothing opens until it's clicked,
+  // so the section stays compact and scannable as a list of questions.
+  const [open, setOpen] = useState<number | null>(null);
+  const reduced = useReducedMotion();
+  const baseId = useId();
+
+  const ctaHref =
+    content.footerCta.href === 'whatsapp'
+      ? whatsappUrl(`Hi, I have a question about a Mommy Makeover with ${site.doctor.shortName}.`)
+      : content.footerCta.href;
+
+  return (
+    <section id="faq" className="relative bg-cream section-y">
+      <div className="container-page">
+        <SectionHeading
+          eyebrow={content.eyebrow}
+          heading={content.heading}
+          align="center"
+          className="mx-auto max-w-2xl"
+        />
+
+        <RevealGroup className="mx-auto mt-10 flex max-w-3xl flex-col gap-2.5">
+          {content.items.map((item, i) => {
+            const isOpen = open === i;
+            const panelId = `${baseId}-panel-${i}`;
+            const buttonId = `${baseId}-button-${i}`;
+
+            return (
+              <RevealItem key={item.question}>
+                <div
+                  className={cn(
+                    'relative overflow-hidden rounded-[var(--radius-md)] border bg-white transition-all duration-300',
+                    isOpen
+                      ? 'border-rose-300/60 shadow-[var(--shadow-card)]'
+                      : 'border-blush-200 shadow-[var(--shadow-sm)] hover:border-rose-300/50',
+                  )}
+                >
+                  {/* Gradient left edge grows on the open item */}
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      'absolute inset-y-0 left-0 w-[3px] origin-top bg-[image:var(--gradient-brand)] transition-transform duration-400',
+                      isOpen ? 'scale-y-100' : 'scale-y-0',
+                    )}
+                  />
+
+                  <h3>
+                    <button
+                      type="button"
+                      id={buttonId}
+                      aria-expanded={isOpen}
+                      aria-controls={panelId}
+                      onClick={() => setOpen(isOpen ? null : i)}
+                      className="flex w-full items-center justify-between gap-5 px-6 py-5 text-left sm:px-7"
+                    >
+                      <span className="font-display text-[1.0625rem] font-semibold leading-snug text-plum-800 sm:text-xl">
+                        {item.question}
+                      </span>
+                      <span
+                        className={cn(
+                          'flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all duration-300',
+                          isOpen
+                            ? 'rotate-[135deg] bg-[image:var(--gradient-fill)] text-white'
+                            : 'bg-blush-100 text-plum-700',
+                        )}
+                      >
+                        <Plus className="h-4 w-4" aria-hidden="true" />
+                      </span>
+                    </button>
+                  </h3>
+
+                  <AnimatePresence initial={false}>
+                    {isOpen && (
+                      <motion.div
+                        id={panelId}
+                        role="region"
+                        aria-labelledby={buttonId}
+                        initial={reduced ? { opacity: 0 } : { height: 0, opacity: 0 }}
+                        animate={reduced ? { opacity: 1 } : { height: 'auto', opacity: 1 }}
+                        exit={reduced ? { opacity: 0 } : { height: 0, opacity: 0 }}
+                        transition={{
+                          type: reduced ? 'tween' : 'spring',
+                          stiffness: 260,
+                          damping: 30,
+                          duration: reduced ? 0.15 : undefined,
+                        }}
+                        className="overflow-hidden"
+                      >
+                        <p className="px-6 pb-6 text-[0.9375rem] leading-[1.78] text-muted sm:px-7">
+                          {item.answer}
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </RevealItem>
+            );
+          })}
+        </RevealGroup>
+
+        <Reveal className="mt-12 flex flex-col items-center gap-4 text-center">
+          <p className="font-sans text-sm text-muted">{content.footerNote}</p>
+          <ButtonLink href={ctaHref} variant="secondary" size="md" withArrow>
+            {content.footerCta.label}
+          </ButtonLink>
+        </Reveal>
+      </div>
+    </section>
+  );
+}

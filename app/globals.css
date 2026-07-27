@@ -1,0 +1,484 @@
+@import 'tailwindcss';
+
+/* ============================================================
+   BLUSH ATELIER — design tokens
+   The single source of visual truth for every landing page.
+   Reference: docs/design-system.md
+   ============================================================ */
+
+@theme {
+  /* ----------------------------------------------------------------
+     Colour — "soft blush" revision.
+     Lighter, warmer and calmer than the first pass, which read too
+     deep. Every value below is contrast-checked; run
+     `node scripts/audit-contrast.mjs <url>` after changing any of them.
+     ---------------------------------------------------------------- */
+  /*
+   * Backgrounds carry real tint. The earlier values sat within 1–2% of pure
+   * white, so sections had no visible identity and the page read as flat.
+   * These are deep enough to see and still light enough to stay calm.
+   */
+  --color-cream: #fefaf8; /* warm ivory, not white */
+  --color-blush-50: #fdf2f7;
+  --color-blush-100: #fae7ef;
+  --color-blush-200: #f5d9e5;
+  --color-rose-300: #f7cbda;
+  --color-rose-400: #f0a8c2;
+  --color-rose-500: #e88aab; /* PRIMARY — decorative / large text only */
+  --color-rose-600: #b54670; /* small text safe: 5.1:1 on cream */
+  --color-plum-700: #914569; /* 5.1:1 even on blush-200 — eyebrows, links */
+  --color-plum-800: #7b3a5c; /* 7.8:1 — headings */
+  /*
+   * Dark sections. Warm rosewood, NOT plum — the previous value (#5C2B45)
+   * had more blue than green in it, which read as saturated purple and
+   * fought the calm the page is going for. This is desaturated and warmed
+   * so the big dark blocks feel restful rather than heavy.
+   */
+  --color-plum-900: #584049;
+  /* ----------------------------------------------------------------
+     Sage — the calming counterpart to blush.
+     A page of nothing but pink read as flat and, once the dark blocks
+     came out, empty. Sage is pink's complement desaturated: it gives
+     the page a second hue to alternate against, reads clean and
+     spa-like rather than clinical, and lets sections have rhythm
+     without resorting to heavy dark bands.
+     ---------------------------------------------------------------- */
+  --color-sage-50: #eff5f0;
+  --color-sage-100: #e1ebe3;
+  --color-sage-200: #cfdfd3;
+  --color-sage-300: #adc3b3;
+  --color-sage-500: #6e8a78; /* icons / large text */
+  --color-sage-700: #4a6353; /* 6.5:1 — safe for body text */
+
+  --color-gold-400: #e2caa6; /* light gold — for dark backgrounds */
+  --color-gold-500: #ae8544; /* 3.4:1 — icons/rules on light backgrounds */
+  --color-ink: #3a2430; /* softer than near-black, still 14:1 */
+  --color-muted: #7a5a65; /* 4.6:1 even on the deepest band (blush-200) */
+
+  /* ---------- Type ---------- */
+  --font-display: var(--font-playfair), Georgia, 'Times New Roman', serif;
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+
+  /* ---------- Radius ---------- */
+  --radius-sm: 10px;
+  --radius-md: 18px;
+  --radius-lg: 28px;
+  --radius-pill: 999px;
+
+  /* ---------- Shadow (always pink-tinted, never grey) ----------
+     Softened alongside the palette — diffuse and low-opacity so cards
+     feel like they're resting on the page rather than cut out of it. */
+  --shadow-sm: 0 4px 16px -6px rgb(232 138 171 / 0.20);
+  --shadow-card: 0 20px 50px -22px rgb(232 138 171 / 0.26);
+  --shadow-lift: 0 32px 70px -26px rgb(156 76 115 / 0.28);
+  --shadow-glow: 0 0 44px rgb(232 138 171 / 0.42);
+
+  /* ---------- Motion ---------- */
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-soft: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Non-@theme tokens: gradients and organic shapes that utilities don't need to generate. */
+:root {
+  --gradient-brand: linear-gradient(
+    135deg,
+    #fef2f6 0%,
+    #f7cbda 38%,
+    #e88aab 72%,
+    #a84069 100%
+  );
+  --gradient-aura: radial-gradient(closest-side, rgb(232 138 171 / 0.5), transparent);
+  /*
+   * Warm rosewood sweep. Blue is kept close to green in every stop — the
+   * further those two diverge, the more the colour reads as purple, which is
+   * exactly what made the old dark sections feel cold and heavy.
+   * The lightest stop is capped so 11px marquee text and body copy still
+   * clear 4.5:1 against it.
+   */
+  --gradient-dark: linear-gradient(160deg, #513a40 0%, #654a52 55%, #785863 100%);
+
+  /*
+   * Separate gradient for text. The brand gradient's lightest stop (#FDEEF3)
+   * is near-white and disappears against cream/blush backgrounds, so text
+   * uses only stops that hold contrast on a light page.
+   */
+  /* Large display text only — every stop clears 3:1 on a light background. */
+  --gradient-text: linear-gradient(
+    102deg,
+    #bc4c77 0%,
+    #9c4c73 40%,
+    #d06c92 75%,
+    #a84069 100%
+  );
+
+  /*
+   * Fill for any surface carrying WHITE text or icons (buttons, active pills,
+   * icon tiles). Every stop clears 4.5:1 against white, so the label stays
+   * legible wherever it lands on the sweep. --gradient-brand must never be
+   * used this way: its lightest stop is near-white and swallows the label.
+   */
+  --gradient-fill: linear-gradient(120deg, #bc4c77 0%, #a84069 45%, #833354 100%);
+
+  --radius-organic: 48% 52% 40% 60% / 55% 45% 55% 45%;
+  --radius-arch: 50% 50% 24px 24px / 32% 32% 24px 24px;
+
+  --container-max: 1240px;
+  --container-pad: clamp(1.25rem, 5vw, 3rem);
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
+
+@layer base {
+  * {
+    border-color: var(--color-blush-200);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    /* Sticky nav is 72px; keeps anchor targets from hiding beneath it. */
+    scroll-padding-top: 5.5rem;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-cream);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: clamp(1rem, 1.05vw, 1.0625rem);
+    line-height: 1.72;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    color: var(--color-plum-800);
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Visible focus everywhere — never removed, only restyled. */
+  :focus-visible {
+    outline: 2px solid var(--color-rose-500);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  ::selection {
+    background: var(--color-rose-300);
+    color: var(--color-plum-900);
+  }
+
+  /* Tabular numerals so count-up animations don't jitter. */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+
+@utility container-page {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--container-pad);
+}
+
+/*
+ * The vertical rhythm for every content section — ONE place to tune it.
+ *
+ * Started at clamp(5rem, 10vw, 9rem) → 144px, which the client found far too
+ * airy across a page this long. Now 56px at desktop, 32px on mobile. Every
+ * section uses this utility rather than its own value, so the whole page stays
+ * in step and future adjustments are a single edit here.
+ */
+@utility section-y {
+  padding-block: clamp(1.75rem, 3.2vw, 2.75rem);
+}
+
+/* Headline treatment: gradient clipped to the glyphs. */
+@utility text-gradient {
+  background-image: var(--gradient-text);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  /* Painting a gradient into text can clip descenders in some engines. */
+  padding-bottom: 0.08em;
+}
+
+@utility bg-gradient-brand {
+  background-image: var(--gradient-brand);
+}
+
+/* Use for any surface with white text/icons on it. */
+@utility bg-gradient-fill {
+  background-image: var(--gradient-fill);
+}
+
+@utility bg-gradient-dark {
+  background-image: var(--gradient-dark);
+}
+
+@utility radius-organic {
+  border-radius: var(--radius-organic);
+}
+
+@utility radius-arch {
+  border-radius: var(--radius-arch);
+}
+
+/* Below-the-fold sections skip layout/paint until they approach the viewport. */
+@utility defer-paint {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 900px;
+}
+
+/* ============================================================
+   AMBIENT ANIMATION
+   Loop durations are deliberately coprime so blobs never sync up.
+   ============================================================ */
+
+/*
+ * Aurora drift — TRANSLATE ONLY, never scale.
+ *
+ * These are ~700px boxes carrying a heavy `filter: blur()`. Animating `scale`
+ * changes the layer's rasterised size every frame, so the browser has to
+ * re-render the blur continuously — measured at 14fps while scrolling, with
+ * 68% of frames over budget. Pure translation lets the compositor rasterise
+ * the blur once and simply move the layer, which is nearly free.
+ */
+@keyframes aura-drift-a {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(6%, -8%, 0);
+  }
+}
+
+@keyframes aura-drift-b {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(-7%, 6%, 0);
+  }
+}
+
+@keyframes aura-drift-c {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(4%, 9%, 0);
+  }
+}
+
+@keyframes shimmer-sweep {
+  0% {
+    background-position: 200% center;
+  }
+  100% {
+    background-position: -200% center;
+  }
+}
+
+@keyframes marquee-scroll {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes gentle-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes slow-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pin-pulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.75;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+/*
+ * Above-the-fold entrance.
+ *
+ * MUST be CSS, not a JS/Motion animation. A Motion entrance renders the
+ * element at opacity 0 and only reveals it once React has hydrated — on a
+ * throttled phone that left the hero headline blank for ~4s and made it the
+ * LCP element. A CSS animation starts at first paint, before any JS runs.
+ *
+ * `animation-fill-mode: both` holds the from-state before the delay elapses
+ * and the to-state after, so nothing flashes and nothing is left invisible.
+ */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 28px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.anim-rise {
+  animation: rise-in 0.52s var(--ease-out-soft) both;
+}
+
+.anim-scale-in {
+  animation: scale-in 0.8s var(--ease-out-soft) both;
+}
+
+/* Slow breathing halo — used behind the footer logo. */
+@keyframes soft-glow {
+  0%,
+  100% {
+    opacity: 0.34;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.62;
+    transform: scale(1.1);
+  }
+}
+
+.anim-glow {
+  animation: soft-glow 6.5s var(--ease-in-out-soft) infinite;
+}
+
+@keyframes ken-burns {
+  0%,
+  100% {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+  50% {
+    transform: scale(1.07) translate3d(1%, -1.5%, 0);
+  }
+}
+
+/* will-change promotes each blob to its own layer so the blur is cached. */
+.anim-aura-a {
+  animation: aura-drift-a 22s var(--ease-in-out-soft) infinite;
+  will-change: transform;
+}
+.anim-aura-b {
+  animation: aura-drift-b 27s var(--ease-in-out-soft) infinite;
+  will-change: transform;
+}
+.anim-aura-c {
+  animation: aura-drift-c 31s var(--ease-in-out-soft) infinite;
+  will-change: transform;
+}
+.anim-marquee {
+  animation: marquee-scroll 34s linear infinite;
+}
+.anim-bob {
+  animation: gentle-bob 5s var(--ease-in-out-soft) infinite;
+}
+.anim-spin-slow {
+  animation: slow-spin 40s linear infinite;
+}
+.anim-ken-burns {
+  animation: ken-burns 24s var(--ease-in-out-soft) infinite;
+}
+
+/* Grain overlay — kills gradient banding and adds a print-like quality. */
+.grain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  z-index: 1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ============================================================
+   REDUCED MOTION
+   Ambient loops stop entirely; entrances degrade to a plain fade.
+   Handled here for CSS animation, and via useReducedMotion() in JS.
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .anim-aura-a,
+  .anim-aura-b,
+  .anim-aura-c,
+  .anim-marquee,
+  .anim-bob,
+  .anim-spin-slow,
+  .anim-ken-burns,
+  .anim-glow {
+    animation: none !important;
+  }
+
+  /*
+   * Entrances are neutralised rather than removed — `animation: none` would
+   * drop fill-mode: both and leave these elements at their from-state
+   * (opacity 0). Snap them to the end state instead.
+   */
+  .anim-rise,
+  .anim-scale-in {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
