@@ -9,7 +9,11 @@ import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Reveal, RevealGroup, RevealItem } from '@/components/ui/Reveal';
 import { Button } from '@/components/ui/Button';
 import { TextField } from '@/components/ui/Field';
+import { LEAD_FLAG, readClickId } from '@/lib/analytics';
 import { EASE_OUT } from '@/lib/motion';
+
+/** Route segment this form belongs to — used for the thank-you redirect. */
+const SLUG = 'mommy-makeover';
 
 type Status = 'idle' | 'submitting' | 'success' | 'error';
 type Errors = Partial<Record<string, string>>;
@@ -30,6 +34,7 @@ export function BookingForm(content: BookingContent) {
       phone: String(fd.get('phone') ?? ''),
       email: String(fd.get('email') ?? ''),
       website: String(fd.get('website') ?? ''),
+      ...readClickId(),
     };
 
     const parsed = consultationSchema.safeParse(payload);
@@ -57,7 +62,25 @@ export function BookingForm(content: BookingContent) {
         setFormError(json.error ?? 'Something went wrong. Please call or WhatsApp us.');
         return;
       }
+
       setStatus('success');
+
+      /*
+       * Flag first, then navigate. The thank-you page reads the flag, fires the
+       * conversion once and clears it, so refreshes and shared links cannot
+       * fire a second one.
+       *
+       * A hard navigation, not router.push: a client-side route change is not
+       * a page load, so any GTM trigger the marketing team builds on Page View
+       * or on a URL rule would silently never fire. This guarantees a real page
+       * load and leaves them free to trigger on either.
+       */
+      try {
+        window.sessionStorage.setItem(LEAD_FLAG, '1');
+      } catch {
+        // Storage blocked — the confirmation still shows, only tracking is lost.
+      }
+      window.location.assign(`/${SLUG}/thank-you`);
     } catch {
       setStatus('error');
       setFormError(

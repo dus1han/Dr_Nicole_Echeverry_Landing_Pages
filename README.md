@@ -207,10 +207,27 @@ the moment it deploys.
 
 | Key | When | Why |
 |---|---|---|
+| `NEXT_PUBLIC_GTM_ID` | To switch on analytics | `GTM-XXXXXXX`. Without it the container never renders — no requests, no errors. See [`docs/conversion-tracking.md`](docs/conversion-tracking.md) |
 | `STRICT_CONTENT=1` | Once real reviews and photos are in | Turns the placeholder warning into a build failure, so dummy content can never come back unnoticed |
 | `RESEND_API_KEY`, `ENQUIRY_INBOX` | When the form destination is chosen | Whatever the chosen service needs |
 
 **None are required to build or deploy.** Vercel needs no configuration.
+
+---
+
+## Conversion tracking
+
+Built and tested. A successful submission redirects to `/mommy-makeover/thank-you`, which
+pushes `generate_lead` to the GTM dataLayer **once** — refreshes, back-navigation and
+shared links cannot re-fire it.
+
+No Google Ads or GA4 ID lives in this repo; the marketing team wires tags in GTM against
+that event, so new pixels never need a deploy. Google click IDs (`gclid`, and the iOS
+`wbraid` / `gbraid` variants) are captured on landing and submitted with the enquiry,
+which is what makes offline conversion import possible later.
+
+Full setup guide: [`docs/conversion-tracking.md`](docs/conversion-tracking.md).
+Verify with `node scripts/check-conversion-flow.mjs <url>` — 10 checks, all passing.
 
 ---
 

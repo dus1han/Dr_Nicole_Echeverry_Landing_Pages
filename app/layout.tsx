@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from 'next';
 import { Playfair_Display, Manrope } from 'next/font/google';
 import { site } from '@/content/site';
 import { ScrollProgress } from '@/components/layout/ScrollProgress';
+import { GtmScript, GtmNoScript } from '@/components/analytics/Gtm';
+import { ClickIdCapture } from '@/components/analytics/ClickIdCapture';
 import './globals.css';
 
 /**
@@ -46,6 +48,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" dir="ltr" className={`${playfair.variable} ${manrope.variable}`}>
       <body className="antialiased">
+        {/* Must be the first thing in <body> — GTM's documented placement. */}
+        <GtmNoScript />
+        <GtmScript />
+        <ClickIdCapture />
+
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[110] focus:rounded-[var(--radius-sm)] focus:bg-plum-900 focus:px-5 focus:py-3 focus:font-sans focus:text-sm focus:font-semibold focus:text-white"

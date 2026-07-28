@@ -32,6 +32,17 @@ export const consultationSchema = z.object({
     .max(200),
 
   /**
+   * Google Ads click ID captured on landing, carried through with the enquiry.
+   *
+   * Not used for anything today. It exists so the clinic can later import
+   * offline conversions — telling Google Ads which enquiries became real
+   * consultations — which is the difference between bidding for form fills and
+   * bidding for patients. Cheap to collect now, impossible to backfill later.
+   */
+  gclid: z.string().max(200).optional().default(''),
+  gclidSource: z.string().max(20).optional().default(''),
+
+  /**
    * Honeypot — bots fill hidden fields, humans never see this one.
    *
    * Deliberately permissive: if the schema rejected a non-empty value, the
