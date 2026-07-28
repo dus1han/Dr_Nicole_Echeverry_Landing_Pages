@@ -298,6 +298,45 @@
   }
 }
 
+/*
+ * Hero focal line — a rose sheen travelling through the letters.
+ *
+ * This is the one headline on the page that has to stop the eye, and a static
+ * gradient looked like every other heading. The band moves continuously and
+ * slowly, so it registers as alive rather than as an effect.
+ *
+ * Every stop is contrast-checked for LARGE text (≥3:1 on cream). A brighter,
+ * near-white highlight would read better as a "shine" but drops to ~1.3:1 as it
+ * crosses a glyph, so the sheen is built from mid-tones instead.
+ */
+@keyframes headline-sheen {
+  from {
+    background-position: 0% center;
+  }
+  to {
+    background-position: -200% center;
+  }
+}
+
+.anim-headline {
+  background-image: linear-gradient(
+    100deg,
+    #a8416c 0%,
+    #bc4c77 18%,
+    #d06c92 32%,
+    #e07ba2 40%,
+    #d06c92 48%,
+    #9c4c73 68%,
+    #a8416c 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  padding-bottom: 0.08em; /* gradient-clipped text can shear descenders */
+  animation: headline-sheen 9s linear infinite;
+}
+
 @keyframes marquee-scroll {
   from {
     transform: translate3d(0, 0, 0);
@@ -466,7 +505,8 @@
   .anim-bob,
   .anim-spin-slow,
   .anim-ken-burns,
-  .anim-glow {
+  .anim-glow,
+  .anim-headline {
     animation: none !important;
   }
 

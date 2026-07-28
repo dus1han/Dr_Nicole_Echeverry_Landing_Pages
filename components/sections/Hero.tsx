@@ -46,9 +46,25 @@ export function Hero(content: HeroContent) {
             made "Feel Like Yourself Again" the hero and buried the treatment
             name underneath it.
           */}
-          <h1 className="font-display tracking-[-0.02em]">
+          <h1 className="relative font-display tracking-[-0.02em]">
+            {/*
+              Soft glow sitting behind the focal line. Pulls the eye to that
+              spot before a single word is read, and costs nothing — it is a
+              radial-gradient, not a blur filter.
+            */}
+            {/*
+              No z-index: the glow is absolutely positioned and comes first in
+              the DOM, and the two lines below are `relative`, so they paint on
+              top of it. A negative z-index here would drop the glow behind the
+              section background instead, since the h1 has no stacking context.
+            */}
             <span
-              className="anim-rise block text-[clamp(1.375rem,2.6vw,2rem)] font-medium leading-[1.15] text-plum-700"
+              aria-hidden="true"
+              className="anim-glow pointer-events-none absolute -left-[8%] top-[22%] h-[70%] w-[85%] rounded-full bg-[radial-gradient(closest-side,rgb(232_138_171/0.45),transparent)]"
+            />
+
+            <span
+              className="anim-rise relative block text-[clamp(1.375rem,2.6vw,2rem)] font-medium leading-[1.15] text-plum-700"
               style={{ animationDelay: '0.06s' }}
             >
               {content.headline.leadIn}
@@ -58,12 +74,24 @@ export function Hero(content: HeroContent) {
               Capped at 4.5rem so "Mommy Makeover" holds one line in this
               column — at 5.25rem it broke to "Mommy / Makeover / in Dubai",
               three ragged lines that cost more impact than the extra size won.
+
+              `anim-headline` (not the shared `text-gradient`) gives this line a
+              slow travelling sheen, so the one headline that must stop the eye
+              is not styled identically to every other heading on the page.
+            */}
+            {/*
+              Two nested spans on purpose: `.anim-rise` and `.anim-headline`
+              both set `animation`, so on one element the later rule would
+              silently cancel the other. The outer span owns the entrance, the
+              inner one owns the perpetual sheen.
             */}
             <span
-              className="anim-rise text-gradient mt-2 block text-[clamp(2.5rem,5.4vw,4.5rem)] font-bold leading-[1.02]"
+              className="anim-rise relative mt-2 block"
               style={{ animationDelay: '0.14s' }}
             >
-              {content.headline.focus}
+              <span className="anim-headline block text-[clamp(2.5rem,5.4vw,4.5rem)] font-bold leading-[1.02]">
+                {content.headline.focus}
+              </span>
             </span>
           </h1>
 
