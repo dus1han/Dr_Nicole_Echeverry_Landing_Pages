@@ -59,7 +59,7 @@ the check routine.
 | 9 | Your Journey | `#journey` | ✅ Reviewed |
 | 10 | Patient Reviews | `#reviews` | ✅ Reviewed |
 | 11 | FAQ | `#faq` | ✅ Reviewed |
-| 12 | Your Confidence Deserves Your Attention | `#confidence` | ✅ Reviewed |
+| 12 | Your Confidence Deserves Your Attention | `#confidence` | 🗑️ Removed |
 | 13 | Booking form | `#book` | ✅ Reviewed |
 | 14 | Visit the Clinic | `#location` | 🗑️ Removed |
 | 15 | Footer + persistent CTAs | — | ✅ Reviewed |
@@ -606,6 +606,26 @@ QA capture scripts.
 
 ### Verified
 - Captured at 1440; both CTAs and the gold divider still clear the section edges.
+
+### Later: both CTAs removed, then the whole section
+1. **Both buttons removed** at the client's request — the section became a statement
+   rather than an ask. `primaryCta` / `secondaryCta` were deleted from
+   `ClosingCtaContent` with them.
+2. **The section was then removed entirely.** `closingCta` is now **optional** in
+   `LandingPageContent` and absent from this page's content; the `ConfidenceCta`
+   component is retained for other landing pages, same treatment as `ClinicMap`.
+
+**No conversion path was lost.** The booking form now follows the FAQ directly, and the
+sticky nav plus the mobile Call/WhatsApp/Book bar carry a Book CTA the whole way down.
+
+⚠️ **Side effect worth noting:** this section was the page's deepest pink — the
+`rose-300` anchor introduced specifically to answer the earlier "it feels empty"
+feedback, and one of only three places carrying ambient effects. With it gone the lower
+half of the page is noticeably paler, and the ambient layer now lives only in the hero
+and *Meet Your Surgeon*. If the bottom of the page starts to feel flat, deepening the
+booking section or the footer is the place to fix it.
+
+**Page height: 10,653px → 9,917px.**
 
 ---
 

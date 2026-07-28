@@ -289,7 +289,15 @@ All seven are emitted as `FAQPage` JSON-LD.
 
 ---
 
-## 13 · Your Confidence Deserves Your Attention — [C]
+## 13 · Your Confidence Deserves Your Attention — 🗑️ REMOVED FROM THE PAGE
+
+> Removed at the client's request. The copy below is the client's original and is
+> **no longer rendered** — `closingCta` is absent from `content/mommy-makeover.ts`.
+> Kept here as a record of the source document, and because the `ConfidenceCta`
+> component still exists for other landing pages. Source lines 82–84 are therefore
+> the only part of the client's document not currently on the page.
+
+
 
 > Source lines 82–84 · dark, full-bleed, emotional peak
 
@@ -402,4 +410,6 @@ Wrapped in a gold-hairline frame with a blush vignette overlay and a pulsing gra
 | 88–95 | Footer + booking contact rail + clinic map |
 | 1, 20, 26, 32, 41, 46–50, 53–54, 76–81, 85–87, 96 | Blank lines / spacers |
 
-✅ **100% of substantive source copy is used.**
+**Update:** source lines **82–84** ("Your Confidence Deserves Your Attention" and its two
+paragraphs) are no longer on the page — that section was removed at the client's request.
+Everything else from the source document is still used.

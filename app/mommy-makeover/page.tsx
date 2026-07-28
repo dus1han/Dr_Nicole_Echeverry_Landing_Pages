@@ -13,7 +13,6 @@ import { BeforeAfter } from '@/components/sections/BeforeAfter';
 import { Journey } from '@/components/sections/Journey';
 import { Reviews } from '@/components/sections/Reviews';
 import { Faq } from '@/components/sections/Faq';
-import { ConfidenceCta } from '@/components/sections/ConfidenceCta';
 import { BookingForm } from '@/components/sections/BookingForm';
 
 export const metadata: Metadata = {
@@ -57,7 +56,6 @@ export default function MommyMakeoverPage() {
         <Journey {...content.journey} />
         <Reviews {...content.reviews} />
         <Faq {...content.faq} />
-        <ConfidenceCta {...content.closingCta} />
         <BookingForm {...content.booking} />
       </PageShell>
     </>

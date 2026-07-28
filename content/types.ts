@@ -270,7 +270,12 @@ export type LandingPageContent = {
   journey: JourneyContent;
   reviews: ReviewsContent;
   faq: FaqContent;
-  closingCta: ClosingCtaContent;
+  /**
+   * Optional. The closing statement section was removed from /mommy-makeover;
+   * the `ConfidenceCta` component and its type are kept for pages that want it.
+   * Supply this and render <ConfidenceCta {...content.closingCta} />.
+   */
+  closingCta?: ClosingCtaContent;
   booking: BookingContent;
   /**
    * Optional. The "Visit the Clinic" map section was removed from

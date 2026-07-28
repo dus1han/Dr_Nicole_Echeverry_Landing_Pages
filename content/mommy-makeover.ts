@@ -435,13 +435,11 @@ export const mommyMakeover: LandingPageContent = {
 
   /* ---------------------------------------------------------------- */
 
-  closingCta: {
-    heading: 'Your Confidence Deserves Your Attention',
-    paragraphs: [
-      'Motherhood changes your life in remarkable ways. But that doesn’t mean you have to stop feeling confident in your own body.',
-      'A personalized Mommy Makeover is about restoring balance, helping you feel comfortable in your clothes, and reconnecting with the version of yourself you’ve been missing.',
-    ],
-  },
+  /*
+   * `closingCta` is intentionally absent — the "Your Confidence Deserves Your
+   * Attention" section was removed from this page. The ConfidenceCta component
+   * remains available for other landing pages.
+   */
 
   /* ---------------------------------------------------------------- */
 
