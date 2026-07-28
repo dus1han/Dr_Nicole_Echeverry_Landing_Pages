@@ -38,7 +38,11 @@ export function Hero(content: HeroContent) {
       */}
       <div className="container-page relative z-10 grid items-center gap-12 lg:grid-cols-[1.2fr_0.8fr] lg:gap-14">
         {/* ---------------- Copy ---------------- */}
-        <div className="flex flex-col items-start gap-6">
+        {/*
+          order-2 on mobile: the photograph leads on a phone, the copy follows.
+          On lg the source order applies again, so the copy is on the left.
+        */}
+        <div className="order-2 flex flex-col items-start gap-6 lg:order-1">
           {/*
             The FOCUS line carries the size and the gradient — it is the phrase
             the visitor is searching for. The lead-in sits above it, smaller, as
@@ -135,7 +139,7 @@ export function Hero(content: HeroContent) {
 
         {/* ---------------- Image ---------------- */}
         <div
-          className="anim-scale-in relative mx-auto w-full max-w-lg lg:max-w-none"
+          className="anim-scale-in relative order-1 mx-auto w-full max-w-lg lg:order-2 lg:max-w-none"
           style={{ animationDelay: '0.18s' }}
         >
           <div
@@ -143,7 +147,14 @@ export function Hero(content: HeroContent) {
             className="absolute -inset-6 rounded-[3rem] bg-[image:var(--gradient-aura)] opacity-70 blur-2xl"
           />
 
-          <div className="relative overflow-hidden rounded-[2rem] shadow-[var(--shadow-lift)] ring-1 ring-white/60 lg:rounded-[2.5rem]">
+          {/*
+            Cropped to 5:4 on phones only. At its natural square the photograph
+            ran 355px tall, which pushed "Book Your Consultation" to y=807 on an
+            844px viewport — clipped at the fold, and fully below it on a smaller
+            phone. The crop reclaims ~75px so the image still leads and the
+            primary CTA stays reachable without scrolling.
+          */}
+          <div className="relative aspect-5/4 overflow-hidden rounded-[2rem] shadow-[var(--shadow-lift)] ring-1 ring-white/60 sm:aspect-auto lg:rounded-[2.5rem]">
             <Image
               src={content.image.src}
               alt={content.image.alt}
