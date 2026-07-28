@@ -213,11 +213,14 @@ export type FaqContent = {
   footerCta: Cta;
 };
 
+/**
+ * The closing statement. Deliberately has no CTA of its own — the booking form
+ * follows immediately below, and the sticky nav and mobile bar carry a Book
+ * button throughout the page.
+ */
 export type ClosingCtaContent = {
   heading: string;
   paragraphs: string[];
-  primaryCta: Cta;
-  secondaryCta: Cta;
 };
 
 export type BookingContent = {

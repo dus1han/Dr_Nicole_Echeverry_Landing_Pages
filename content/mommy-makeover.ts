@@ -441,8 +441,6 @@ export const mommyMakeover: LandingPageContent = {
       'Motherhood changes your life in remarkable ways. But that doesn’t mean you have to stop feeling confident in your own body.',
       'A personalized Mommy Makeover is about restoring balance, helping you feel comfortable in your clothes, and reconnecting with the version of yourself you’ve been missing.',
     ],
-    primaryCta: { label: 'Book Your Consultation', href: '#book' },
-    secondaryCta: { label: 'Message us on WhatsApp', href: 'whatsapp' },
   },
 
   /* ---------------------------------------------------------------- */

@@ -1,7 +1,5 @@
 import type { ClosingCtaContent } from '@/content/types';
-import { site, whatsappUrl } from '@/content/site';
 import { RevealGroup, RevealItem } from '@/components/ui/Reveal';
-import { ButtonLink } from '@/components/ui/Button';
 import { AuroraBackground } from '@/components/effects/AuroraBackground';
 import { PetalCanvas } from '@/components/effects/PetalCanvas';
 import { GoldDivider } from '@/components/ui/GoldDivider';
@@ -13,26 +11,20 @@ import { GoldDivider } from '@/components/ui/GoldDivider';
  * the moment of highest emotional weight read as alarming rather than
  * reassuring. Warmth and air do the work instead; the section still separates
  * itself from its neighbours through a deeper blush wash and generous padding.
+ *
+ * No buttons: this is a statement, not an ask. The booking form follows
+ * immediately below it, and the sticky nav and mobile bar carry a Book CTA
+ * throughout. `primaryCta` / `secondaryCta` were removed from
+ * ClosingCtaContent with them, so no dead fields remain.
  */
 export function ConfidenceCta(content: ClosingCtaContent) {
-  const secondaryHref =
-    content.secondaryCta.href === 'whatsapp'
-      ? whatsappUrl(
-          `Hi, I'd like to ask about a Mommy Makeover consultation with ${site.doctor.shortName}.`,
-        )
-      : content.secondaryCta.href;
-
   return (
     <section
       id="confidence"
       // Deepest pink on the page. With no dark bands left, this is what
       // anchors the emotional peak and stops the lower half feeling empty —
       // warmth rather than weight.
-      //
-      // Padding matches the 72px rhythm used by every other section; the
-      // internal gaps below stay a little more generous so it still reads as
-      // a moment rather than another content block.
-      className="grain relative overflow-hidden bg-[linear-gradient(180deg,var(--color-blush-100)_0%,var(--color-blush-200)_50%,var(--color-rose-300)_100%)] section-y"
+      className="grain section-y relative overflow-hidden bg-[linear-gradient(180deg,var(--color-blush-100)_0%,var(--color-blush-200)_50%,var(--color-rose-300)_100%)]"
     >
       <AuroraBackground />
       {/* Lighter than the hero so the hero stays the richest moment on the page. */}
@@ -58,15 +50,6 @@ export function ConfidenceCta(content: ClosingCtaContent) {
               </p>
             </RevealItem>
           ))}
-
-          <RevealItem className="flex flex-wrap items-center justify-center gap-4 pt-4">
-            <ButtonLink href={content.primaryCta.href} size="lg" magnetic>
-              {content.primaryCta.label}
-            </ButtonLink>
-            <ButtonLink href={secondaryHref} variant="secondary" size="lg" withArrow>
-              {content.secondaryCta.label}
-            </ButtonLink>
-          </RevealItem>
         </RevealGroup>
       </div>
     </section>
