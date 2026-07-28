@@ -77,14 +77,19 @@ export type SiteConfig = {
 /* ------------------------------------------------------------------ */
 
 export type HeroContent = {
-  eyebrow: string;
-  /** Rendered as separate lines; the last line receives the gradient. */
-  headline: string[];
+  headline: {
+    /** Small lead-in above the focal line. */
+    leadIn: string;
+    /**
+     * The focal phrase — set large and gradient-clipped, and the single
+     * biggest thing on the page. This is what the visitor should read first,
+     * so it carries the treatment name and the city.
+     */
+    focus: string;
+  };
   attribution: string;
   subheadline: string;
   image: ImageAsset;
-  /** Rendered as the floating glass badges over the hero image. */
-  badges: string[];
   primaryCta: Cta;
   secondaryCta: Cta;
 };

@@ -36,8 +36,16 @@ export const mommyMakeover: LandingPageContent = {
   /* ---------------------------------------------------------------- */
 
   hero: {
-    eyebrow: 'Dubai · Plastic & Reconstructive Surgery',
-    headline: ['Feel Like Yourself Again', 'with a Mommy Makeover in Dubai'],
+    /*
+     * "Mommy Makeover in Dubai" is the focal line — it is the phrase she is
+     * searching for and the one that has to land in the first second. "Feel
+     * Like Yourself Again" sits above it as a smaller emotional lead-in.
+     * (Earlier this was the other way round, which buried the treatment name.)
+     */
+    headline: {
+      leadIn: 'Feel Like Yourself Again',
+      focus: 'Mommy Makeover in Dubai',
+    },
     attribution: 'with Dr. Nicole Echeverry',
     subheadline:
       'World-class body contouring inspired by Colombian aesthetic artistry.',
@@ -45,7 +53,6 @@ export const mommyMakeover: LandingPageContent = {
       src: `${IMG}/hero-dubai.jpg`,
       alt: 'A woman standing on a Dubai balcony at sunrise, looking out over the city skyline',
     },
-    badges: ['Colombian-trained surgeon', 'Tailored to your anatomy'],
     primaryCta: { label: 'Book Your Consultation', href: '#book' },
     secondaryCta: { label: 'See The Results', href: '#results' },
   },

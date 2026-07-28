@@ -1,7 +1,6 @@
 import Image from 'next/image';
 import type { HeroContent } from '@/content/types';
 import { ButtonLink } from '@/components/ui/Button';
-import { Eyebrow } from '@/components/ui/SectionHeading';
 import { AuroraBackground } from '@/components/effects/AuroraBackground';
 import { PetalCanvas } from '@/components/effects/PetalCanvas';
 
@@ -23,44 +22,49 @@ const rise = (delay: number) => ({
 });
 
 export function Hero(content: HeroContent) {
-  const [line1, ...rest] = content.headline;
-
   return (
     // Top padding must clear the fixed header, which is 117px tall before the
-    // announcement marquee collapses on scroll. pt-28 (112px) tucked the
-    // eyebrow underneath it, so the floor here is ~124px, not lower.
+    // announcement marquee collapses on scroll. pt-28 (112px) tucked the first
+    // line underneath it, so the floor here is ~124px, not lower.
     <section className="grain relative overflow-hidden bg-[linear-gradient(180deg,var(--color-blush-50)_0%,var(--color-cream)_55%,var(--color-blush-50)_100%)] pb-7 pt-[7.75rem] lg:pb-11 lg:pt-[8.25rem]">
       <AuroraBackground />
       <PetalCanvas />
 
-      <div className="container-page relative z-10 grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
+      {/*
+        Text column widened from 1.05fr to 1.2fr: at 1.05 the focal line broke
+        into three ragged lines ("Mommy / Makeover / in Dubai"). Giving the copy
+        more width keeps the type large AND lets "Mommy Makeover" hold one line,
+        which is the better trade for a headline that has to land instantly.
+      */}
+      <div className="container-page relative z-10 grid items-center gap-12 lg:grid-cols-[1.2fr_0.8fr] lg:gap-14">
         {/* ---------------- Copy ---------------- */}
-        <div className="flex flex-col items-start gap-7">
-          <div {...rise(0.05)}>
-            <Eyebrow>{content.eyebrow}</Eyebrow>
-          </div>
-
+        <div className="flex flex-col items-start gap-6">
           {/*
-            Line 1 is the emotional hook and carries the size. The remaining
-            lines name the procedure and sit subordinate — at equal size the
-            longer line swamped the hook and pushed the CTAs below the fold.
+            The FOCUS line carries the size and the gradient — it is the phrase
+            the visitor is searching for. The lead-in sits above it, smaller, as
+            an emotional opener. This is the inverse of the first version, which
+            made "Feel Like Yourself Again" the hero and buried the treatment
+            name underneath it.
           */}
-          <h1 className="font-display font-bold tracking-[-0.02em] text-plum-800">
+          <h1 className="font-display tracking-[-0.02em]">
             <span
-              className="anim-rise block text-[clamp(2.5rem,6vw,4.75rem)] leading-[1]"
-              style={{ animationDelay: '0.12s' }}
+              className="anim-rise block text-[clamp(1.375rem,2.6vw,2rem)] font-medium leading-[1.15] text-plum-700"
+              style={{ animationDelay: '0.06s' }}
             >
-              {line1}
+              {content.headline.leadIn}
             </span>
-            {rest.map((line, i) => (
-              <span
-                key={line}
-                className="anim-rise mt-2 block text-gradient text-[clamp(1.5rem,3.4vw,2.75rem)] font-semibold leading-[1.12]"
-                style={{ animationDelay: `${0.2 + i * 0.08}s` }}
-              >
-                {line}
-              </span>
-            ))}
+
+            {/*
+              Capped at 4.5rem so "Mommy Makeover" holds one line in this
+              column — at 5.25rem it broke to "Mommy / Makeover / in Dubai",
+              three ragged lines that cost more impact than the extra size won.
+            */}
+            <span
+              className="anim-rise text-gradient mt-2 block text-[clamp(2.5rem,5.4vw,4.5rem)] font-bold leading-[1.02]"
+              style={{ animationDelay: '0.14s' }}
+            >
+              {content.headline.focus}
+            </span>
           </h1>
 
           <p
@@ -129,20 +133,11 @@ export function Hero(content: HeroContent) {
             />
           </div>
 
-          {/* Floating glass badges */}
-          <div className="anim-bob absolute -left-3 top-[14%] hidden rounded-[var(--radius-pill)] border border-white/60 bg-white/75 px-4 py-2.5 shadow-[var(--shadow-sm)] backdrop-blur-md sm:block">
-            <span className="font-sans text-xs font-semibold tracking-wide text-plum-800">
-              {content.badges[0]}
-            </span>
-          </div>
-          <div
-            className="anim-bob absolute -right-3 bottom-[16%] hidden rounded-[var(--radius-pill)] border border-white/60 bg-white/75 px-4 py-2.5 shadow-[var(--shadow-sm)] backdrop-blur-md sm:block"
-            style={{ animationDelay: '1.6s' }}
-          >
-            <span className="font-sans text-xs font-semibold tracking-wide text-plum-800">
-              {content.badges[1]}
-            </span>
-          </div>
+          {/*
+            No floating badges over the photograph — they covered the image and
+            repeated claims the copy already makes. The `badges` field was
+            removed from HeroContent with them, so nothing dead is left behind.
+          */}
         </div>
       </div>
 
