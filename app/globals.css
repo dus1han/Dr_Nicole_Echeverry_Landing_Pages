@@ -431,13 +431,21 @@
   animation: soft-glow 6.5s var(--ease-in-out-soft) infinite;
 }
 
+/*
+ * Ken Burns drift.
+ *
+ * Anchored to the top and kept shallow (1.035, not 1.07). The hero subject's
+ * head sits close to the top of the frame, and a centre-origin zoom of that
+ * depth cropped it off at the peak of the loop. `transform-origin: top center`
+ * means the zoom pushes into the floor, never the face.
+ */
 @keyframes ken-burns {
   0%,
   100% {
     transform: scale(1) translate3d(0, 0, 0);
   }
   50% {
-    transform: scale(1.07) translate3d(1%, -1.5%, 0);
+    transform: scale(1.035) translate3d(0.6%, 0, 0);
   }
 }
 
@@ -465,6 +473,7 @@
 }
 .anim-ken-burns {
   animation: ken-burns 24s var(--ease-in-out-soft) infinite;
+  transform-origin: top center;
 }
 
 /* Grain overlay — kills gradient banding and adds a print-like quality. */

@@ -50,8 +50,8 @@ export const mommyMakeover: LandingPageContent = {
     subheadline:
       'World-class body contouring inspired by Colombian aesthetic artistry.',
     image: {
-      src: `${IMG}/hero-dubai.jpg`,
-      alt: 'A woman standing on a Dubai balcony at sunrise, looking out over the city skyline',
+      src: `${IMG}/hero.jpg`,
+      alt: 'A woman in neutral activewear standing confidently in a light, calm interior',
     },
     primaryCta: { label: 'Book Your Consultation', href: '#book' },
     secondaryCta: { label: 'See The Results', href: '#results' },

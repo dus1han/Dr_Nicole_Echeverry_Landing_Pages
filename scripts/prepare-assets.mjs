@@ -28,7 +28,6 @@ const OUT_LOGO = join(ROOT, 'public', 'logo');
 
 /** Source photograph → destination name. */
 const PHOTOS = [
-  ['ChatGPT Image Jul 27, 2026, 03_32_08 AM.png', 'hero-dubai.jpg', 1600],
   ['ChatGPT Image Jul 27, 2026, 02_59_12 AM.png', 'procedure-tummy.jpg', 1100],
   ['ChatGPT Image Jul 27, 2026, 03_08_24 AM.png', 'procedure-breast.jpg', 1100],
   ['grok-image-53e50550-1707-4948-89bf-afaaecf66a2a.jpg', 'procedure-lipo.jpg', 1100],
@@ -85,6 +84,40 @@ async function copyPhotos() {
       console.log(`  ✓ ${dest}`);
     }
   }
+}
+
+/**
+ * Hero photograph.
+ *
+ * The source (`her.png`, 1672×941) is a wide 16:9 room shot with the subject
+ * centred around x≈920. The hero frame is square on desktop and 5:4 on phones,
+ * so a plain resize would letterbox her into a sliver of a much larger room.
+ *
+ * Cropped to the tallest possible square centred on her instead: she fills the
+ * frame while the window, plant and sofa still read behind her, which is what
+ * makes it feel like a real clinic rather than a stock cut-out.
+ */
+async function buildHero() {
+  console.log('\n· Hero');
+  const src = join(SRC, 'her.png');
+  if (!(await exists(src))) {
+    console.warn('  ! her.png not found — skipped');
+    return;
+  }
+
+  const { width, height } = await sharp(src).metadata();
+
+  const SUBJECT_CENTRE_X = 920; // measured from the source artwork
+  const size = height; // tallest square that fits
+  const left = Math.max(0, Math.min(width - size, Math.round(SUBJECT_CENTRE_X - size / 2)));
+
+  await sharp(src)
+    .extract({ left, top: 0, width: size, height: size })
+    .resize(1200, 1200)
+    .jpeg({ quality: 86, mozjpeg: true })
+    .toFile(join(OUT_IMG, 'hero.jpg'));
+
+  console.log(`  ✓ hero.jpg (square crop ${size}px from x=${left}, centred on the subject)`);
 }
 
 async function buildLogos() {
@@ -246,6 +279,7 @@ async function main() {
   }
   await ensureDirs();
   await copyPhotos();
+  await buildHero();
   await buildLogos();
   await buildIcons();
   await buildDummyResults();

@@ -164,7 +164,10 @@ export function Hero(content: HeroContent) {
               fetchPriority="high"
               quality={82}
               sizes="(max-width: 1023px) 92vw, 46vw"
-              className="anim-ken-burns h-full w-full object-cover"
+              // object-top: the phone frame is 5:4 against a square image, so
+              // object-cover crops top and bottom equally by default — which
+              // took her head off. Anchoring to the top crops the legs instead.
+              className="anim-ken-burns h-full w-full object-cover object-top"
             />
             <div
               aria-hidden="true"

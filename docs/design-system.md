@@ -418,7 +418,7 @@ Gold-on-plum diagonal corner ribbon reading `SAMPLE`, 11px, `0.14em` tracking, `
 
 | Source file | Destination | Used in |
 |---|---|---|
-| `ChatGPT Image ... 03_32_08 AM.png` | `hero-dubai.png` | Hero — Dubai skyline balcony |
+| `her.png` | `hero.jpg` | Hero — square crop centred on the subject (see below) |
 | `dra-nicole-echeverry-en-cirugia-1.jpg` | `surgeon-operating.jpg` | What Is a Mommy Makeover |
 | `482030689_1402814974390728_...jpg` | `doctor-portrait.jpg` | Meet Dr. Nicole |
 | `ChatGPT Image ... 02_59_12 AM.png` | `procedure-tummy.png` | Procedures — Tummy Tuck |
@@ -431,6 +431,13 @@ Gold-on-plum diagonal corner ribbon reading `SAMPLE`, 11px, `0.14em` tracking, `
 | *generated* | `results/case-{1,2,3}-after.jpg` | Before & After slider — **dummy**, the unmodified source plates |
 
 Generated assets are produced by `scripts/prepare-assets.mjs`, which runs once at setup — the source folder is never modified.
+
+**Hero crop.** `her.png` is a wide 16:9 room shot (1672×941) with the subject centred
+around x≈920. The hero frame is square on desktop and 5:4 on phones, so a plain resize
+would shrink her into a sliver of a much larger room. `buildHero()` extracts the tallest
+possible square centred on her (941px from x=450) — she fills the frame while the window,
+plant and sofa still read behind, which is what keeps it feeling like a real clinic rather
+than a stock cut-out. Adjust `SUBJECT_CENTRE_X` in the script if the source photo changes.
 
 **Note on the logo:** the supplied PNG is pure white on transparent (800×450, "NE/EN" monogram + "NICOLE ECHEVERRY" + "CIRUJANA PLÁSTICA, RECONSTRUCTIVA Y ESTÉTICA"). It is invisible on light backgrounds, so the build generates a `plum-900`-tinted copy from its alpha channel for use in the sticky nav.
 
