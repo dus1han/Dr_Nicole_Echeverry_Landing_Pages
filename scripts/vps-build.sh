@@ -18,13 +18,13 @@
 # committed — no node_modules, no .next, no stray local edits.
 #
 # Environment:
-#   SITE_DIR            defaults to /opt/sites/dr-nicole-mommy-makeover
+#   SITE_DIR            defaults to /opt/sites/dr-nicole-landing-pages
 #   NEXT_PUBLIC_GTM_ID  optional; omitted means a site with no analytics, which
 #                       builds and runs perfectly well
 #
 set -euo pipefail
 
-SITE_DIR="${SITE_DIR:-/opt/sites/dr-nicole-mommy-makeover}"
+SITE_DIR="${SITE_DIR:-/opt/sites/dr-nicole-landing-pages}"
 cd "$SITE_DIR"
 
 # Fresh extraction every time: the tarball is the source of truth, so a file

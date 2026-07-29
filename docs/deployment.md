@@ -10,7 +10,7 @@ server — a second site is only steps 6, 8, 9.
 | 1 | VPS | Install Docker, open ports 80/443 only |
 | 2 | VPS | Create `/opt/sites/` layout |
 | 3 | DNS provider | A record → VPS IP (**before** step 5) |
-| 4 | GitHub | Create a `read:packages` token, log in to GHCR on the VPS |
+| 4 | GitHub | *Private package only* — create a `read:packages` token, log in to GHCR on the VPS |
 | 5 | VPS | Start Caddy, confirm the certificate issues |
 | 6 | VPS | Create the site folder + `.env` with a unique port |
 | 7 | Local | Generate an SSH deploy key, put the public half on the VPS |
@@ -86,7 +86,7 @@ debugging — but not from the internet. One process holds TLS, one process is e
 | **Build on GitHub, not the VPS** | A 2GB VPS serves this app comfortably but struggles to build it. A failed build on the server is downtime; a failed build on a runner is just a red tick. |
 | **Caddy over nginx + certbot** | Automatic certificate issue and renewal, no cron job to forget. Adding a site is three lines. |
 | **Ports on 127.0.0.1** | Gives the per-port model you want without exposing anything. Only Caddy answers on 80/443. |
-| **GHCR over Docker Hub** | Already tied to the repo's permissions, no extra account, no pull rate limits. |
+| **GHCR over Docker Hub** | Already tied to the repo's permissions, no extra account, no pull rate limits. A public package also needs no login on the server. |
 | **`output: 'standalone'`** | ~180MB image instead of ~1GB. This app **cannot** be a static export — `/api/consultation` is a real server route. |
 
 ---
@@ -129,7 +129,7 @@ sudo chown -R $USER:$USER /opt/sites
 │   ├── docker-compose.yml
 │   ├── Caddyfile
 │   └── logs/
-├── dr-nicole-mommy-makeover/
+├── dr-nicole-landing-pages/
 │   ├── docker-compose.yml
 │   └── .env
 └── <next-site>/
@@ -153,10 +153,14 @@ docker compose up -d
 docker compose logs -f     # watch for "certificate obtained successfully"
 ```
 
-### e. Registry login
+### e. Registry login — only if the package is private
 
-The image is private, so the server needs credentials. Create a GitHub **classic** token
-with the single scope `read:packages` — nothing else.
+**A public repository publishes a public package, and a public package pulls without any
+credentials. Skip this step entirely in that case**, and leave `GHCR_USERNAME` /
+`GHCR_PAT` unset; the workflow detects the missing token and pulls anonymously.
+
+If the package is private, create a GitHub **classic** token with the single scope
+`read:packages` — nothing else.
 
 ```bash
 echo 'ghp_xxxxxxxxxxxx' | docker login ghcr.io -u <github-username> --password-stdin
@@ -164,6 +168,10 @@ echo 'ghp_xxxxxxxxxxxx' | docker login ghcr.io -u <github-username> --password-s
 
 Stored in `~/.docker/config.json`. The workflow logs in again on every deploy, so this
 step is really just to verify the token works.
+
+> Package visibility is **not** the same setting as repository visibility, and it does not
+> always follow it. Check it under your profile's **Packages** tab → the package →
+> *Package settings*.
 
 ### f. Deploy key for Actions
 
@@ -187,8 +195,8 @@ files — GitHub has what it needs.
 ## 3 · Per-site setup on the VPS
 
 ```bash
-mkdir -p /opt/sites/dr-nicole-mommy-makeover
-cd /opt/sites/dr-nicole-mommy-makeover
+mkdir -p /opt/sites/dr-nicole-landing-pages
+cd /opt/sites/dr-nicole-landing-pages
 ```
 
 Copy `docker-compose.yml` from the repo root, then create `.env`:
@@ -196,7 +204,7 @@ Copy `docker-compose.yml` from the repo root, then create `.env`:
 ```bash
 cat > .env <<'EOF'
 IMAGE=ghcr.io/dus1han/dr_nicole_echeverry_landing_pages:latest
-CONTAINER_NAME=dr-nicole-mommy-makeover
+CONTAINER_NAME=dr-nicole-landing-pages
 SITE_PORT=3101
 EOF
 ```
@@ -219,21 +227,25 @@ curl -I http://127.0.0.1:3101/mommy-makeover     # expect 200
 
 ### Secrets
 
-| Name | Value for this server |
-|---|---|
-| `VPS_HOST` | `169.58.92.105` |
-| `VPS_USER` | `deploy` |
-| `VPS_SSH_KEY` | contents of `~/.ssh/github_actions_drnicole` — the **private** half, whole file including the `-----BEGIN`/`-----END` lines |
-| `VPS_PORT` | omit — SSH is on 22 |
-| `VPS_SITE_PATH` | `/opt/sites/dr-nicole-mommy-makeover` |
-| `GHCR_USERNAME` | `dus1han` |
-| `GHCR_PAT` | a classic PAT with `read:packages` only |
+| Name | Value | Required |
+|---|---|---|
+| `VPS_HOST` | server IP or hostname | ✅ |
+| `VPS_USER` | `deploy` | ✅ |
+| `VPS_SSH_KEY` | the **private** key for that user — the whole file, including the `-----BEGIN`/`-----END` lines | ✅ |
+| `VPS_SITE_PATH` | `/opt/sites/dr-nicole-landing-pages` | ✅ |
+| `VPS_PORT` | SSH port — omit if 22 | — |
+| `GHCR_USERNAME` | your GitHub username | only if the package is **private** |
+| `GHCR_PAT` | a classic PAT with `read:packages` only | only if the package is **private** |
 
-`deploy` is an unprivileged account in the `docker` group, created specifically for this.
-Docker group membership is close to root in practice, but it is still the difference
-between *can manage containers* and *can do anything*, and it can be revoked on its own
-without disturbing admin access. It uses a **different key** from the admin one, so a leak
-of the GitHub secret costs you the deploy path, not the server.
+**A public repository publishes a public package**, and a public package needs no
+credentials to pull. Leave the two `GHCR_*` secrets unset in that case — the workflow skips
+the registry login rather than failing. Set them only if you make the package private.
+
+`deploy` should be an unprivileged account in the `docker` group, created for this purpose,
+with a **key of its own** — not the key you use for admin access. Docker group membership
+is close to root in practice, but it is still the difference between *can manage
+containers* and *can do anything*, it can be revoked on its own, and a leak of the GitHub
+secret then costs you the deploy path rather than the server.
 
 ### Variables
 
@@ -410,62 +422,58 @@ the dev server will start serving a half-written build. This has produced both p
 
 ## 11 · The live deployment
 
-**Server** `169.58.92.105` · Contabo · Ubuntu 24.04.4 LTS · 6 vCPU · 12GB RAM · 191GB free
+> **This repository is public.** Host addresses, SSH usernames and firewall state are
+> deliberately not recorded here — publishing them is free reconnaissance. The real values
+> live in the GitHub **Actions secrets** and in your own notes. Placeholders below.
 
 | | |
 |---|---|
-| Site directory | `/opt/sites/dr-nicole-mommy-makeover` (owned by `deploy`) |
+| Host | *(Actions secret `VPS_HOST`)* |
+| Site directory | `/opt/sites/dr-nicole-landing-pages`, owned by an unprivileged `deploy` user |
 | Port | **3101** |
-| Container | `dr-nicole-mommy-makeover` |
-| Image *(running)* | `dr-nicole-mommy-makeover:latest`, built on the server |
-| Image *(`.env`)* | `ghcr.io/dus1han/dr_nicole_echeverry_landing_pages:latest` |
-| URL | `http://169.58.92.105:3101/mommy-makeover` |
+| Container | `dr-nicole-landing-pages` |
+| Image | `ghcr.io/<owner>/<repo>:latest` — lowercased, see below |
 | Docker | 29.6.2 · Compose v5.3.1 |
 | GTM | not configured — the site runs without it |
 
-`.env` already points at the GHCR tag, so the first successful Actions run replaces the
-hand-built image with the registry one. The container keeps running the old image until
-that happens.
+**The directory and container name the project, not a page.** One Next.js app serves every
+landing page for this client — `/mommy-makeover` today, more later — from a single
+container on a single port. `SITE_PORT` distinguishes *clients*, not routes. Adding page
+#2 means a new route in this repo and a redeploy, not a new stack.
 
-> **The image name is lowercase and the repository is not.** `docker/metadata-action`
+> **The image name is lowercase and the repository name is not.** `docker/metadata-action`
 > lowercases it, because Docker rejects uppercase in image references. Confirm the exact
-> name at **github.com/dus1han?tab=packages** after the first build — if it differs, fix
-> the one `IMAGE=` line in `.env`.
+> published name under your GitHub **Packages** tab after the first build — if it differs,
+> fix the one `IMAGE=` line in `.env`. A mismatch surfaces as an opaque
+> `docker compose pull` failure that never names the cause.
 
-### Two ways this differs from the target architecture
+### How it differs from the target architecture
 
-**1 · The image is built on the server, not pulled from GHCR.** The GitHub Actions path
-needs the secrets in §4, which require account access. Until those exist, the bootstrap
-route is: `git archive` the tree → `scp` it to `/opt/sites/<site>/site.tar.gz` →
-`bash build.sh`, which extracts, builds and restarts. The server has 6 cores and 12GB, so
-it builds comfortably — the "never build on the VPS" advice in §1 assumes a 2GB droplet.
-
-**2 · The port is bound to `0.0.0.0`, not `127.0.0.1`.** No domain points at this server
-yet, so Caddy cannot complete an ACME challenge and there is no HTTPS to proxy through.
+**The port is bound to `0.0.0.0`, not `127.0.0.1`.** No domain points at the server yet, so
+Caddy cannot complete an ACME challenge and there is no HTTPS to proxy through.
 `BIND_ADDR=0.0.0.0` in `.env` exposes 3101 directly so the page can be previewed.
 
 > ⚠️ **This is HTTP with no certificate.** Traffic — including anything typed into the
 > consultation form — crosses the network in the clear. Fine for review, not for a live
 > ad campaign.
 
-### Closing both gaps
+### Closing the gap
 
 Once a subdomain exists:
 
 1. Add the A record (§5), confirm with `dig +short <subdomain>`
 2. Start Caddy (§2d) with a block for the subdomain proxying to `127.0.0.1:3101`
-3. Delete `BIND_ADDR=0.0.0.0` from `/opt/sites/dr-nicole-mommy-makeover/.env` — it
-   reverts to `127.0.0.1` and the port stops being reachable from the internet
+3. Delete `BIND_ADDR=0.0.0.0` from `/opt/sites/dr-nicole-landing-pages/.env` — it reverts
+   to `127.0.0.1` and the port stops being reachable from the internet
 4. `docker compose up -d` in that directory
-5. Add the GitHub secrets (§4) so pushes deploy themselves
+5. Enable the firewall (§2b) so only 80/443 are open
 
-### Server access
+### Bootstrap build, if Actions is unavailable
 
-Key-based root SSH is installed (`~/.ssh/vps_drnicole` on the build machine):
-
-```bash
-ssh -i ~/.ssh/vps_drnicole root@169.58.92.105
-```
+`scripts/vps-build.sh` builds the image on the server instead: `git archive` the tree →
+`scp` it to `/opt/sites/<site>/site.tar.gz` → run the script, which extracts, builds and
+restarts. The "never build on the VPS" advice in §1 assumes a small droplet; a 6-core box
+with 12GB builds this comfortably.
 
 The firewall is **inactive** (`ufw` not enabled, iptables policy `ACCEPT`), so every port
 is currently reachable. Step 2b closes this and should be done before the site takes real

@@ -196,10 +196,10 @@ Not part of the build or deploy; delete them if you'd rather not ship them.
 
 ## Deployment
 
-**Currently live at `http://169.58.92.105:3101/mommy-makeover`** — HTTP only, on the
-Contabo VPS, built on the server rather than pulled from GHCR. Both departures from the
-architecture below are temporary and are explained, with the steps to close them, in
-[`docs/deployment.md` §11](docs/deployment.md).
+**Live on a VPS, HTTP only** — no domain points at the server yet, so there is no
+certificate. That is the one departure from the architecture below; the steps to close it
+are in [`docs/deployment.md` §11](docs/deployment.md). Host details are kept out of this
+repository, which is public.
 
 Two supported targets.
 

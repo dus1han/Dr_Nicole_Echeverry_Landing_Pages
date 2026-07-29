@@ -38,7 +38,7 @@ Ad click  →  /<slug>?gclid=…
 | `components/analytics/LeadEvent.tsx` | Fires the event once on the thank-you page |
 | `app/<slug>/thank-you/page.tsx` | The confirmation screen, `noindex` |
 | `components/sections/BookingForm.tsx` | Sets the flag, then navigates |
-| `.github/workflows/deploy.yml` | Passes the ID as a build arg; fails if it is missing |
+| `.github/workflows/deploy.yml` | Passes the ID as a build arg; warns, but does not fail, if it is missing |
 
 ---
 
@@ -101,7 +101,7 @@ otherwise invisible — the site looks perfect and simply never reports a conver
 If you build the image by hand on the server:
 
 ```bash
-docker build --build-arg NEXT_PUBLIC_GTM_ID=GTM-XXXXXXX -t dr-nicole-mommy-makeover:latest .
+docker build --build-arg NEXT_PUBLIC_GTM_ID=GTM-XXXXXXX -t dr-nicole-landing-pages:latest .
 ```
 
 Omit the flag and you get the same no-analytics build described above.

@@ -107,10 +107,16 @@ jobs:
             set -euo pipefail
             cd ${{ secrets.VPS_SITE_PATH }}
 
-            # The registry is private, so the server authenticates with a PAT
-            # that has read:packages only.
-            echo "${{ secrets.GHCR_PAT }}" \
-              | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin
+            # A public repository publishes a public package, which needs no
+            # credentials to pull. Only authenticate if a token was supplied —
+            # otherwise an unset secret would turn into a `docker login` with an
+            # empty password and fail a deploy that had no need to log in.
+            if [ -n "${{ secrets.GHCR_PAT }}" ]; then
+              echo "${{ secrets.GHCR_PAT }}" \
+                | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin
+            else
+              echo "No GHCR_PAT set — pulling anonymously (package must be public)."
+            fi
 
             docker compose pull
             docker compose up -d --remove-orphans
