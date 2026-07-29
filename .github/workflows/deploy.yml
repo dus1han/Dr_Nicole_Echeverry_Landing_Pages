@@ -105,7 +105,28 @@ jobs:
           script_stop: true # abort on the first failing command
           script: |
             set -euo pipefail
-            cd ${{ secrets.VPS_SITE_PATH }}
+
+            # Checked explicitly rather than left to `cd`, because a bare `cd`
+            # into a missing directory under `set -e` exits 1 with its message
+            # on stderr — which surfaces in Actions as an exit code and nothing
+            # else. This is the single most likely thing to be wrong on a first
+            # deploy, and after any rename of the site directory.
+            SITE_PATH="${{ secrets.VPS_SITE_PATH }}"
+            if [ ! -d "$SITE_PATH" ]; then
+              echo "::error::VPS_SITE_PATH does not exist on the server: '$SITE_PATH'"
+              echo ""
+              echo "Directories that DO exist under /opt/sites:"
+              ls -1 /opt/sites 2>/dev/null | sed 's|^|  /opt/sites/|' || echo "  (/opt/sites is missing)"
+              echo ""
+              echo "Fix the VPS_SITE_PATH secret to match, then re-run."
+              exit 1
+            fi
+            cd "$SITE_PATH"
+
+            if [ ! -f .env ]; then
+              echo "::error::No .env in $SITE_PATH — compose has no IMAGE, CONTAINER_NAME or SITE_PORT."
+              exit 1
+            fi
 
             # A public repository publishes a public package, which needs no
             # credentials to pull. Only authenticate if a token was supplied —
