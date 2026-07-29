@@ -14,7 +14,7 @@ server — a second site is only steps 6, 8, 9.
 | 5 | VPS | Start Caddy, confirm the certificate issues |
 | 6 | VPS | Create the site folder + `.env` with a unique port |
 | 7 | Local | Generate an SSH deploy key, put the public half on the VPS |
-| 8 | GitHub | Add secrets + the `NEXT_PUBLIC_GTM_ID` variable |
+| 8 | GitHub | Add secrets + the `NEXT_PUBLIC_GTM_ID` variable (**optional** — see below) |
 | 9 | Local | `git push` — Actions builds and deploys |
 
 Detail for each is below. **Step 3 must happen before step 5**, or the certificate
@@ -34,10 +34,15 @@ the JavaScript — they are not read at runtime. Two consequences:
 - Setting it in `.env` on the VPS does **nothing**.
 - Changing it needs a **rebuild** (push, or *Actions → Run workflow*), not a restart.
 
-The workflow **fails immediately** if the variable is missing, because the alternative is
-worse: the build would succeed, the site would work, and it would silently have no
-analytics and never fire a conversion — something you would discover from an empty
-Google Ads report weeks later.
+**A missing ID never blocks a deploy.** The workflow logs a warning and carries on, and
+`Gtm.tsx` renders nothing at all when the variable is unset — no requests, no errors, no
+console noise. Tracking is a marketing concern and should not be able to take the clinic's
+page offline.
+
+The warning matters anyway, because the failure is invisible: the build succeeds, the site
+looks perfect, and it silently never fires a conversion — something you would otherwise
+discover from an empty Google Ads report weeks later. Read the run summary after the first
+deploy.
 
 ---
 
@@ -230,6 +235,12 @@ curl -I http://127.0.0.1:3101/mommy-makeover     # expect 200
 |---|---|
 | `NEXT_PUBLIC_GTM_ID` | `GTM-XXXXXXX` — a **variable**, not a secret; it ships in the client bundle and is not confidential |
 
+**Optional.** Leave it unset and deploys still succeed; the site just runs without
+analytics. Add it later and re-run the workflow — no code change needed.
+
+Set it at **Settings → Secrets and variables → Actions → Variables → New repository
+variable**. It survives every subsequent push; you never re-enter it.
+
 > ### The one thing that catches everyone
 > `NEXT_PUBLIC_*` values are **compiled into the JavaScript at build time**, which is why
 > the workflow passes it as a Docker `build-arg` rather than a container environment
@@ -378,17 +389,68 @@ the dev server will start serving a half-written build. This has produced both p
 
 ## 10 · Verified
 
-Confirmed on this machine before writing:
-
 | Check | Result |
 |---|---|
 | `output: 'standalone'` produces a runnable server | ✅ `.next/standalone/server.js` |
 | Standalone bundle serves pages | ✅ `/mommy-makeover`, `/thank-you`, `/robots.txt` all 200 |
 | Image optimisation works in standalone | ✅ `/_next/image` returned an optimised JPEG |
 | sharp and `@img` binaries traced | ✅ after adding `outputFileTracingIncludes` |
-| Bundle size | 80MB standalone → ~180MB final image |
+| **Docker image builds** | ✅ on the VPS, first attempt, no iteration needed |
+| **Final image size** | ✅ 345MB |
+| **Container reaches `healthy`** | ✅ via the `HEALTHCHECK` in the Dockerfile |
+| **Serves publicly** | ✅ 200 / 257KB fetched from a different machine |
 
-**Not yet verified:** the Docker image build itself. The Docker daemon was not running on
-the machine where this was written, so `Dockerfile` and the workflow are written from the
-verified standalone output but have not been executed. Expect to iterate once on the first
-`docker build`.
+---
+
+## 11 · The live deployment
+
+**Server** `169.58.92.105` · Contabo · Ubuntu 24.04.4 LTS · 6 vCPU · 12GB RAM · 191GB free
+
+| | |
+|---|---|
+| Site directory | `/opt/sites/dr-nicole-mommy-makeover` |
+| Port | **3101** |
+| Container | `dr-nicole-mommy-makeover` |
+| Image | `dr-nicole-mommy-makeover:latest` (built on the server) |
+| URL | `http://169.58.92.105:3101/mommy-makeover` |
+| Docker | 29.6.2 · Compose v5.3.1 |
+| GTM | not configured — the site runs without it |
+
+### Two ways this differs from the target architecture
+
+**1 · The image is built on the server, not pulled from GHCR.** The GitHub Actions path
+needs the secrets in §4, which require account access. Until those exist, the bootstrap
+route is: `git archive` the tree → `scp` it to `/opt/sites/<site>/site.tar.gz` →
+`bash build.sh`, which extracts, builds and restarts. The server has 6 cores and 12GB, so
+it builds comfortably — the "never build on the VPS" advice in §1 assumes a 2GB droplet.
+
+**2 · The port is bound to `0.0.0.0`, not `127.0.0.1`.** No domain points at this server
+yet, so Caddy cannot complete an ACME challenge and there is no HTTPS to proxy through.
+`BIND_ADDR=0.0.0.0` in `.env` exposes 3101 directly so the page can be previewed.
+
+> ⚠️ **This is HTTP with no certificate.** Traffic — including anything typed into the
+> consultation form — crosses the network in the clear. Fine for review, not for a live
+> ad campaign.
+
+### Closing both gaps
+
+Once a subdomain exists:
+
+1. Add the A record (§5), confirm with `dig +short <subdomain>`
+2. Start Caddy (§2d) with a block for the subdomain proxying to `127.0.0.1:3101`
+3. Delete `BIND_ADDR=0.0.0.0` from `/opt/sites/dr-nicole-mommy-makeover/.env` — it
+   reverts to `127.0.0.1` and the port stops being reachable from the internet
+4. `docker compose up -d` in that directory
+5. Add the GitHub secrets (§4) so pushes deploy themselves
+
+### Server access
+
+Key-based root SSH is installed (`~/.ssh/vps_drnicole` on the build machine):
+
+```bash
+ssh -i ~/.ssh/vps_drnicole root@169.58.92.105
+```
+
+The firewall is **inactive** (`ufw` not enabled, iptables policy `ACCEPT`), so every port
+is currently reachable. Step 2b closes this and should be done before the site takes real
+traffic.

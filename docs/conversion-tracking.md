@@ -2,7 +2,7 @@
 
 **This is the pattern for every landing page, not just this one.** The code is portable
 as written — no slug, domain or tracking ID is hardcoded anywhere in it. To put the same
-setup on another project, jump to [§10 Reusing this on another project](#10--reusing-this-on-another-project).
+setup on another project, jump to [§11 Reusing this on another project](#11--reusing-this-on-another-project).
 
 **No Google Ads or GA4 identifier lives in this repository.** The site only announces
 *"a lead was submitted"*; GTM decides who hears about it. Adding Meta Pixel, TikTok or
@@ -57,30 +57,58 @@ Ad click  →  /<slug>?gclid=…
 
 ---
 
-## 2 · Switch it on in Vercel
+## 2 · Switch it on in GitHub
 
-1. Vercel → your project → **Settings → Environment Variables**
-2. Add:
+The ID lives in the **repository**, not in the code and not on the server. Set it once
+and every future deploy picks it up automatically — pushing code never changes or clears
+it.
 
-   | Key | Value | Environments |
-   |---|---|---|
-   | `NEXT_PUBLIC_GTM_ID` | `GTM-XXXXXXX` | Production, Preview, Development |
+1. Go to the repo on GitHub
+2. **Settings** → **Secrets and variables** → **Actions**
+3. Open the **Variables** tab (*not* Secrets — this value ships to the browser anyway,
+   so there is nothing to hide, and Variables are readable in logs which makes them far
+   easier to debug)
+4. **New repository variable**
 
-3. **Redeploy.**
+   | Name | Value |
+   |---|---|
+   | `NEXT_PUBLIC_GTM_ID` | `GTM-XXXXXXX` |
 
-> ⚠️ **The redeploy is not optional.** `NEXT_PUBLIC_*` variables are baked into the
+5. **Add variable**
+6. **Actions** tab → **Build and deploy** → **Run workflow** → **Run workflow**
+
+> ⚠️ **Step 6 is not optional.** `NEXT_PUBLIC_*` variables are compiled into the
 > JavaScript at build time, not read at runtime. Saving the variable changes nothing
-> until a new build runs. Vercel → **Deployments → ⋯ → Redeploy**.
+> until a new build runs. Restarting the container does nothing either — the old value
+> is already inside the image.
 
 **Verify it worked:** open the live page, view source (Ctrl-U), search for `GTM-`.
-You should see your ID. If not, the redeploy hasn't happened.
+You should see your ID. If not, the rebuild hasn't happened.
 
-Until the variable is set the container does not render at all — no requests, no errors.
-The site behaves identically without it.
+### Deploying without it
+
+**A missing GTM ID does not block anything.** The workflow logs a warning and carries on.
+`components/analytics/Gtm.tsx` returns `null` when the variable is unset, so the container
+script never renders — no requests, no errors, no console noise. The site is byte-for-byte
+a normal site that happens to have no analytics.
+
+This is deliberate: tracking is a marketing concern, and a marketing concern should never
+be able to take the clinic's page offline. The warning exists only because the failure is
+otherwise invisible — the site looks perfect and simply never reports a conversion.
+
+### Building with it outside CI
+
+If you build the image by hand on the server:
+
+```bash
+docker build --build-arg NEXT_PUBLIC_GTM_ID=GTM-XXXXXXX -t dr-nicole-mommy-makeover:latest .
+```
+
+Omit the flag and you get the same no-analytics build described above.
 
 ---
 
-## 2 · What the site sends
+## 3 · What the site sends
 
 On a successful submission the visitor is taken to
 `/mommy-makeover/thank-you`, and this is pushed to the dataLayer:
@@ -97,7 +125,7 @@ That is the whole contract. Build every tag against it.
 
 ---
 
-## 3 · Create the conversion action in Google Ads
+## 4 · Create the conversion action in Google Ads
 
 1. Google Ads → **Goals → Conversions → Summary → + New conversion action**
 2. Choose **Website**
@@ -121,7 +149,7 @@ That is the whole contract. Build every tag against it.
 
 ---
 
-## 4 · Create the trigger in GTM
+## 5 · Create the trigger in GTM
 
 **Triggers → New → Trigger Configuration → Custom Event**
 
@@ -134,7 +162,7 @@ Name it `Lead — generate_lead` → **Save**.
 
 ---
 
-## 5 · Create the two tags in GTM
+## 6 · Create the two tags in GTM
 
 ### a. Conversion Linker — do not skip this
 
@@ -152,8 +180,8 @@ work while quietly mis-attributing.
 
 | Field | Value |
 |---|---|
-| Conversion ID | from step 3 |
-| Conversion Label | from step 3 |
+| Conversion ID | from step 4 |
+| Conversion Label | from step 4 |
 
 **Trigger:** `Lead — generate_lead`. Name it `Google Ads — Consultation Lead` → Save.
 
@@ -181,7 +209,7 @@ it. The event is simply more accurate.
 
 ---
 
-## 6 · Test before publishing
+## 7 · Test before publishing
 
 1. In GTM click **Preview** (top right)
 2. Enter `https://dranicolecheverry.com/mommy-makeover` → **Connect**
@@ -203,7 +231,7 @@ confirm the redeploy happened.
 
 ---
 
-## 7 · Publish
+## 8 · Publish
 
 GTM → **Submit** → name the version (e.g. `Google Ads lead conversion`) → **Publish**.
 
@@ -211,17 +239,17 @@ Nothing is live until you publish. Preview mode only affects your own browser.
 
 ---
 
-## 8 · Confirm in Google Ads
+## 9 · Confirm in Google Ads
 
 **Goals → Conversions** — the action's status moves from *"No recent conversions"* to
 *"Recording conversions"*.
 
 This can take **3–24 hours**. Do not judge the setup by this on the first day; Tag
-Assistant in step 6 is the reliable signal.
+Assistant in step 7 is the reliable signal.
 
 ---
 
-## 9 · Automated check
+## 10 · Automated check
 
 ```bash
 node scripts/check-conversion-flow.mjs http://localhost:3000
@@ -248,7 +276,7 @@ the click ID has to be captured at the time.
 
 ---
 
-## 10 · Reusing this on another project
+## 11 · Reusing this on another project
 
 The tracking code is deliberately free of project-specific values. Copying it is a file
 copy plus two props.

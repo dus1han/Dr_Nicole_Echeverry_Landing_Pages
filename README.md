@@ -196,6 +196,11 @@ Not part of the build or deploy; delete them if you'd rather not ship them.
 
 ## Deployment
 
+**Currently live at `http://169.58.92.105:3101/mommy-makeover`** — HTTP only, on the
+Contabo VPS, built on the server rather than pulled from GHCR. Both departures from the
+architecture below are temporary and are explained, with the steps to close them, in
+[`docs/deployment.md` §11](docs/deployment.md).
+
 Two supported targets.
 
 **VPS + Docker + GitHub Actions** — the primary path, and the pattern every other landing
@@ -227,7 +232,10 @@ the moment it deploys.
 | `STRICT_CONTENT=1` | Once real reviews and photos are in | Turns the placeholder warning into a build failure, so dummy content can never come back unnoticed |
 | `RESEND_API_KEY`, `ENQUIRY_INBOX` | When the form destination is chosen | Whatever the chosen service needs |
 
-**None are required to build or deploy.** Vercel needs no configuration.
+**None are required to build or deploy.** A missing `NEXT_PUBLIC_GTM_ID` produces a
+warning in the Actions run, not a failure — set it as a GitHub **repository variable**
+(*Settings → Secrets and variables → Actions → Variables*) whenever the container exists,
+then re-run the workflow to bake it in.
 
 ---
 
