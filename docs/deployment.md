@@ -2,23 +2,27 @@
 
 ## Do these in order
 
-Roughly 45 minutes the first time. Everything except step 9 is one-time for the whole
-server — a second site is only steps 6, 8, 9.
+Roughly 45 minutes the first time. Steps 1–5 and 7 are **one-time for the whole server**;
+a second *project* repeats only 3, 6, 8, 9 — see [§6](#6--adding-another-landing-page-vs-another-project).
 
-| # | Where | Step |
-|---|---|---|
-| 1 | VPS | Install Docker, open ports 80/443 only |
-| 2 | VPS | Create `/opt/sites/` layout |
-| 3 | DNS provider | A record → VPS IP (**before** step 5) |
-| 4 | GitHub | *Private package only* — create a `read:packages` token, log in to GHCR on the VPS |
-| 5 | VPS | Start Caddy, confirm the certificate issues |
-| 6 | VPS | Create the site folder + `.env` with a unique port |
-| 7 | Local | Generate an SSH deploy key, put the public half on the VPS |
-| 8 | GitHub | Add secrets + the `NEXT_PUBLIC_GTM_ID` variable (**optional** — see below) |
-| 9 | Local | `git push` — Actions builds and deploys |
+| # | Where | Step | Per |
+|---|---|---|---|
+| 1 | VPS | Install Docker | server |
+| 2 | VPS | Create the `/opt/sites/` layout | server |
+| 3 | DNS provider | A record → VPS IP (**before** step 5) | project |
+| 4 | GitHub | *Private package only* — `read:packages` token, log in to GHCR on the VPS | server |
+| 5 | VPS | Start Caddy, confirm the certificate issues | server |
+| 6 | VPS | Site folder + `.env` with a unique port | project |
+| 7 | VPS + local | Create the `deploy` user and its SSH key | server |
+| 8 | GitHub | Add secrets; `NEXT_PUBLIC_GTM_ID` variable is **optional** | project |
+| 9 | Local | `git push` — Actions builds and deploys | project |
+| 10 | VPS | Enable the firewall — 22/80/443 only | server |
 
 Detail for each is below. **Step 3 must happen before step 5**, or the certificate
 request fails and Caddy backs off before retrying.
+
+> **Another *page* for a client you already host is none of this.** It is a route in an
+> existing repo and a `git push` — no port, no container, no DNS, no Caddy. See §6.
 
 ---
 
@@ -173,22 +177,39 @@ step is really just to verify the token works.
 > always follow it. Check it under your profile's **Packages** tab → the package →
 > *Package settings*.
 
-### f. Deploy key for Actions
+### f. Deploy user and key for Actions
 
-On your **local machine**:
+Actions gets its own unprivileged account and its own key — **never your admin login**.
+Docker group membership is close to root in practice, but it is still the difference
+between *can manage containers* and *can do anything*, it can be revoked on its own, and a
+leak of the GitHub secret then costs you the deploy path rather than the server.
+
+On the **VPS**, once for the whole server:
+
+```bash
+sudo adduser --disabled-password --gecos "" deploy
+sudo usermod -aG docker deploy
+sudo install -d -m 700 -o deploy -g deploy /home/deploy/.ssh
+```
+
+On your **local machine**, generate a key used for nothing else:
 
 ```bash
 ssh-keygen -t ed25519 -C "github-actions" -f ./deploy_key -N ""
 ```
 
-Put the **public** half on the VPS:
+Append the **public** half to `/home/deploy/.ssh/authorized_keys` (`chmod 600`, owned by
+`deploy`). The **private** half becomes the `VPS_SSH_KEY` secret — the whole file,
+including the `-----BEGIN`/`-----END` lines; a partial paste is the most common cause of a
+deploy failing on the key.
+
+Verify before wiring up Actions, or you will be debugging two things at once:
 
 ```bash
-ssh-copy-id -i ./deploy_key.pub user@your-vps-ip
+ssh -i ./deploy_key deploy@<host> 'whoami; docker ps'
 ```
 
-The **private** half becomes the `VPS_SSH_KEY` GitHub secret. Then delete both local
-files — GitHub has what it needs.
+Then delete both local files — GitHub has what it needs.
 
 ---
 
@@ -287,37 +308,125 @@ dig +short mommymakeover.dranicolecheverry.com
 
 ---
 
-## 6 · Adding another site — the short version
+## 6 · Adding another landing page vs. another project
 
-Everything above is one-time. A new landing page is five steps:
+**These are not the same thing, and confusing them is how you end up with a stack
+per page.** Decide which you are doing before touching anything.
 
-1. **Pick the next free port** — 3102, 3103… and note it in your list.
-2. **On the VPS:**
-   ```bash
-   mkdir -p /opt/sites/<new-site> && cd /opt/sites/<new-site>
-   # copy docker-compose.yml from that repo
-   cat > .env <<'EOF'
-   IMAGE=ghcr.io/<owner>/<repo>:latest
-   CONTAINER_NAME=<new-site>
-   SITE_PORT=3102
-   EOF
-   ```
-3. **Add to `/opt/sites/caddy/Caddyfile`:**
-   ```
-   newsite.example.com {
-       reverse_proxy 127.0.0.1:3102
-       encode gzip zstd
-   }
-   ```
-   then `cd /opt/sites/caddy && docker compose exec caddy caddy reload --config /etc/caddy/Caddyfile`
-   — reload, not restart, so the other sites never drop a request.
-4. **DNS:** A record → same VPS IP.
-5. **In the new repo:** copy `Dockerfile`, `.dockerignore`, `docker-compose.yml` and
-   `.github/workflows/deploy.yml`, set the same GitHub secrets with `VPS_SITE_PATH`
-   pointing at the new folder, and push.
+### Another page for the *same* client → nothing here applies
 
-Sites are fully independent: different repos, different images, separate containers.
-One can be rebuilt or fall over without touching the others.
+`/mommy-makeover`, `/breast-augmentation`, `/rhinoplasty` are **routes in one app**,
+served by **one container on one port**. Adding one is:
+
+1. A new content file and route in this repo — see
+   [`adding-a-landing-page.md`](adding-a-landing-page.md)
+2. `git push`
+
+No new port. No new container. No new DNS record. No Caddy change. The root index picks
+the page up automatically from `site.landingPages`. `SITE_PORT` distinguishes **clients**,
+not routes — which is why the directory is named `dr-nicole-landing-pages` and not after
+any one page.
+
+### A different client or project → the checklist below
+
+Separate repo, separate image, separate container, its own port and hostname. Fully
+independent: one can be rebuilt or fall over without touching the others.
+
+---
+
+### a. Copy these files into the new repo, unchanged
+
+```
+Dockerfile                     multi-stage standalone build
+.dockerignore                  must NOT exclude scripts/ if prebuild uses it
+docker-compose.yml             reads IMAGE / CONTAINER_NAME / SITE_PORT / BIND_ADDR / SITE_URL
+deploy/remote-deploy.sh        what runs on the server
+deploy/Caddyfile.example       reference only; the live one is server-wide
+.github/workflows/deploy.yml   build → GHCR → ssh → pull → restart
+lib/site-url.ts                one runtime SITE_URL instead of a hardcoded host
+```
+
+Nothing in them names this client, this port or this domain.
+
+### b. Claim a port — keep the register current
+
+| Port | Project |
+|---|---|
+| 3101 | `dr-nicole-landing-pages` |
+| 3102 | *free* |
+| 3103 | *free* |
+
+> **Two projects on one port means the second container silently fails to start.**
+> Nothing warns you; the old one just keeps serving. Write the port down here when you
+> claim it.
+
+### c. On the VPS
+
+```bash
+SITE=<new-project>            # e.g. dr-luis-landing-pages
+PORT=3102
+
+sudo mkdir -p /opt/sites/$SITE
+sudo chown -R deploy:deploy /opt/sites/$SITE
+cd /opt/sites/$SITE
+
+# copy docker-compose.yml from the new repo, then:
+sudo -u deploy tee .env >/dev/null <<EOF
+IMAGE=ghcr.io/<owner>/<repo>:latest
+CONTAINER_NAME=$SITE
+SITE_PORT=$PORT
+SITE_URL=https://<hostname>
+EOF
+```
+
+The `deploy` user from §2 is **shared across projects** — one account, one key, many site
+directories. Only `VPS_SITE_PATH` differs per repo.
+
+> `IMAGE` must be **all lowercase**. `docker/metadata-action` lowercases the repository
+> name when it publishes; Docker rejects uppercase in image references. Check the exact
+> name under the GitHub **Packages** tab after the first build.
+
+Omit `BIND_ADDR` unless DNS is not ready yet — see §11.
+
+### d. GitHub secrets on the new repo
+
+Four, all the same as this repo except the last:
+
+| `VPS_HOST` · `VPS_USER` · `VPS_SSH_KEY` | identical to this project |
+|---|---|
+| `VPS_SITE_PATH` | `/opt/sites/<new-project>` |
+
+`GHCR_USERNAME` / `GHCR_PAT` only if the package is private. Optionally the
+`NEXT_PUBLIC_GTM_ID` **variable** — see [`conversion-tracking.md`](conversion-tracking.md),
+which covers reusing one GTM container across several sites.
+
+### e. DNS
+
+One A record → the same VPS IP. §5.
+
+### f. Caddy
+
+Append a block to `/opt/sites/caddy/Caddyfile`:
+
+```
+newsite.example.com {
+    reverse_proxy 127.0.0.1:3102
+    encode gzip zstd
+}
+```
+
+```bash
+cd /opt/sites/caddy
+docker compose exec caddy caddy reload --config /etc/caddy/Caddyfile
+```
+
+**Reload, not restart** — the other sites never drop a request, and Caddy validates the
+config before swapping it in, so a typo fails loudly instead of taking everything down.
+
+### g. Push
+
+The workflow builds, publishes and deploys. Watch the run: every stage names itself, and
+each failure names its cause.
 
 ---
 
@@ -331,6 +440,19 @@ docker compose ps                       # health status
 docker compose restart web              # restart
 docker compose down && docker compose up -d
 ```
+
+### Deploy by hand
+
+`deploy/remote-deploy.sh` is the *same* script Actions pipes over SSH, kept as a file
+precisely so you can run it yourself when a deploy misbehaves — identical steps, full
+output, no CI in the way:
+
+```bash
+ssh deploy@<host> 'SITE_PATH=/opt/sites/<site> bash -s' < deploy/remote-deploy.sh
+```
+
+Being able to reproduce a CI failure locally is the difference between reading a stack
+trace and guessing.
 
 ### Roll back
 
