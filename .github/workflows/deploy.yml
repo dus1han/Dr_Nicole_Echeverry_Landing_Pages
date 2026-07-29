@@ -89,81 +89,56 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+
   deploy:
     name: Deploy to VPS
     needs: build
     runs-on: ubuntu-latest
 
+    # Plain ssh rather than a marketplace action. The action this replaced
+    # downloads a binary at run time and, when its own setup failed, exited 1
+    # having printed nothing at all — no command echo, no stderr, nothing to act
+    # on. Three runs burned on a silent exit code. `ssh` is already installed on
+    # the runner, streams stdout and stderr verbatim, and is one fewer
+    # third-party dependency sitting in the deploy path.
     steps:
+      - uses: actions/checkout@v4
+
       - name: Pull and restart over SSH
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          port: ${{ secrets.VPS_PORT || 22 }}
-          script_stop: true # abort on the first failing command
-          script: |
-            set -euo pipefail
+        env:
+          SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_PORT: ${{ secrets.VPS_PORT || 22 }}
+          SITE_PATH: ${{ secrets.VPS_SITE_PATH }}
+          GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
+          GHCR_PAT: ${{ secrets.GHCR_PAT }}
+        run: |
+          set -euo pipefail
 
-            # Checked explicitly rather than left to `cd`, because a bare `cd`
-            # into a missing directory under `set -e` exits 1 with its message
-            # on stderr — which surfaces in Actions as an exit code and nothing
-            # else. This is the single most likely thing to be wrong on a first
-            # deploy, and after any rename of the site directory.
-            SITE_PATH="${{ secrets.VPS_SITE_PATH }}"
-            if [ ! -d "$SITE_PATH" ]; then
-              echo "::error::VPS_SITE_PATH does not exist on the server: '$SITE_PATH'"
-              echo ""
-              echo "Directories that DO exist under /opt/sites:"
-              ls -1 /opt/sites 2>/dev/null | sed 's|^|  /opt/sites/|' || echo "  (/opt/sites is missing)"
-              echo ""
-              echo "Fix the VPS_SITE_PATH secret to match, then re-run."
+          for v in SSH_KEY VPS_HOST VPS_USER SITE_PATH; do
+            if [ -z "${!v}" ]; then
+              echo "::error::Required secret is empty: ${v/SSH_KEY/VPS_SSH_KEY}"
               exit 1
             fi
-            cd "$SITE_PATH"
+          done
 
-            if [ ! -f .env ]; then
-              echo "::error::No .env in $SITE_PATH — compose has no IMAGE, CONTAINER_NAME or SITE_PORT."
-              exit 1
-            fi
+          mkdir -p ~/.ssh
+          # printf, not echo: the key must keep its trailing newline or OpenSSH
+          # rejects it as malformed.
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          ssh-keyscan -p "$VPS_PORT" "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
 
-            # A public repository publishes a public package, which needs no
-            # credentials to pull. Only authenticate if a token was supplied —
-            # otherwise an unset secret would turn into a `docker login` with an
-            # empty password and fail a deploy that had no need to log in.
-            if [ -n "${{ secrets.GHCR_PAT }}" ]; then
-              echo "${{ secrets.GHCR_PAT }}" \
-                | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin
-            else
-              echo "No GHCR_PAT set — pulling anonymously (package must be public)."
-            fi
-
-            docker compose pull
-            docker compose up -d --remove-orphans
-
-            # Wait for the container to report healthy rather than assuming it.
-            echo "Waiting for health..."
-            for i in $(seq 1 30); do
-              status=$(docker inspect --format='{{.State.Health.Status}}' \
-                $(docker compose ps -q web) 2>/dev/null || echo starting)
-              if [ "$status" = "healthy" ]; then
-                echo "Healthy after ${i}0s"
-                exit 0
-              fi
-              sleep 10
-            done
-
-            echo "Container did not become healthy — recent logs:"
-            docker compose logs --tail=50 web
-            exit 1
-
-      - name: Prune old images
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          port: ${{ secrets.VPS_PORT || 22 }}
-          # Untagged layers accumulate fast and fill a small VPS disk.
-          script: docker image prune -af --filter "until=168h"
+          # The remote script is piped in as stdin, so it never passes through a
+          # shell-quoting layer. Its inputs are prepended as assignments escaped
+          # with printf %q, which is safe for any value.
+          {
+            printf 'SITE_PATH=%q\n'     "$SITE_PATH"
+            printf 'GHCR_USERNAME=%q\n' "$GHCR_USERNAME"
+            printf 'GHCR_PAT=%q\n'      "$GHCR_PAT"
+            cat deploy/remote-deploy.sh
+          } | ssh -i ~/.ssh/id_deploy -p "$VPS_PORT" \
+                  -o StrictHostKeyChecking=accept-new \
+                  -o ConnectTimeout=20 \
+                  "$VPS_USER@$VPS_HOST" 'bash -s'

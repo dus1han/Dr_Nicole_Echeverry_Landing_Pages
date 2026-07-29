@@ -216,6 +216,14 @@ docker-compose.yml             one stack per site
 deploy/Caddyfile.example       reverse proxy + auto-TLS
 deploy/caddy-compose.yml       the shared proxy, set up once
 .github/workflows/deploy.yml   build → push → deploy over SSH
+deploy/remote-deploy.sh        what runs on the server; runnable by hand
+```
+
+`remote-deploy.sh` is piped to the server over stdin rather than embedded in the
+workflow, so it can be run by hand with the same inputs when a deploy misbehaves:
+
+```bash
+ssh deploy@<host> 'SITE_PATH=/opt/sites/<site> bash -s' < deploy/remote-deploy.sh
 ```
 
 **Vercel** — also works with zero configuration if you prefer it. Nothing in the repo is
