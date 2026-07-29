@@ -1,9 +1,19 @@
-# Retrofit prompt — URL, indexing and Google Ads readiness
+# Retrofit prompts — Google Ads readiness
 
-For an **existing** Next.js project that is about to run Google Ads, and is being previewed
-on an IP or staging address before its real domain is live.
+For an **existing** Next.js project about to run Google Ads.
 
-Paste everything between the rules into a session opened in that project.
+Two independent prompts. Paste either into a session opened in that project.
+
+- **[Part 1 — URL and indexing](#part-1--url-and-indexing)** — what the site says its own
+  address is, and keeping the preview out of Google
+- **[Part 2 — the thank-you page](#part-2--the-thank-you-page-and-the-conversion-signal)**
+  — reporting a conversion once, and only when one happened
+
+---
+
+# Part 1 — URL and indexing
+
+For a project being previewed on an IP or staging address before its real domain is live.
 
 The reference implementation is included because the subtle part is not writing it — it is
 knowing *which* of these is a build-time value, *why* AdsBot is an exception, and *which
@@ -191,3 +201,170 @@ The display URL in the ad does not have to match the real path, so the path can 
 **Order before spending:** DNS → TLS → `SITE_URL` set and rebuilt → GTM and the conversion
 action tested with Tag Assistant → *then* point ads at it. Spend that happens before
 conversion tracking works is spend Google cannot learn from, and it cannot be backfilled.
+
+---
+---
+
+# Part 2 — the thank-you page and the conversion signal
+
+For a project whose form currently shows an inline success message, a toast or a modal, and
+which now needs to report conversions to Google Ads.
+
+---
+
+This project needs Google Ads conversion tracking on its enquiry form. Replace whatever
+success handling exists today.
+
+## 1 · A real page, not a modal
+
+On success, navigate to a real `/<slug>/thank-you` route. A modal produces no page load,
+so there is nothing for a URL-based conversion rule to hang on, no shareable confirmation,
+and nothing to screenshot for the client.
+
+Use a **full navigation** (`window.location.assign`), not a client-side push. It guarantees
+a clean document and a single unambiguous page view for the tag to observe, which matters
+when someone later switches the conversion action to a URL rule and expects it to work.
+
+Style it as a centred success card so it reads like the popup it replaces. Include the
+phone number and WhatsApp link — a person who has just enquired is the most likely they
+will ever be to make contact directly.
+
+## 2 · Fire exactly once
+
+The event must fire on a genuine submission and **never** on a refresh, a back-navigation,
+a bookmark or a shared link.
+
+Set a one-time flag on submit; the thank-you page reads it, clears it immediately, and only
+then pushes. Do not use the URL or a query parameter for this — both survive sharing.
+
+This is not fussiness. Google's bidding optimises toward whatever you report, so false
+positives actively spend the client's budget in the wrong direction. **Inflated conversion
+counts are worse than none.**
+
+## 3 · No tracking IDs in the repository
+
+The site announces *"a lead was submitted"*. GTM decides who hears about it. Push:
+
+```js
+{ event: 'generate_lead', form_name: 'consultation_request', form_location: '<slug>' }
+```
+
+That is the entire contract — build every tag against it. Adding GA4, Meta Pixel or TikTok
+later then needs no code change and no deploy. `form_location` is what lets one GTM
+container serve several landing pages and still report which produced the lead.
+
+`NEXT_PUBLIC_GTM_ID` comes from a repository **variable** as a build arg. **A missing value
+must warn, not fail** — tracking is a marketing concern and must never be able to take the
+client's page offline. The container component should render nothing at all when it is
+unset: no requests, no errors, no console noise.
+
+## 4 · Capture click IDs on landing
+
+Read `gclid` — plus `wbraid` and `gbraid`, which Google substitutes on iOS — from the
+landing URL, store for 90 days, and submit with the enquiry.
+
+Nothing consumes it yet. It is there so the clinic can later import **offline
+conversions**: telling Google Ads which enquiries became real patients. That is the
+difference between bidding for form fills and bidding for customers, and **it cannot be
+backfilled** — the click ID has to be captured at the time or it is gone.
+
+## 5 · `noindex` the thank-you page
+
+Without it, strangers land on a "thank you for your enquiry" page from search results —
+confusing in itself, and a source of phantom conversions if anyone ever switches to a URL
+rule.
+
+## Reference implementation
+
+`lib/analytics.ts` — no slug, domain or tracking ID anywhere in it, so it copies between
+projects unchanged:
+
+```ts
+export const LEAD_EVENT = 'generate_lead';
+export const LEAD_FLAG = 'app:lead-submitted';
+export const CLICK_ID_KEY = 'app:click-id';
+export const CLICK_ID_PARAMS = ['gclid', 'wbraid', 'gbraid'] as const;
+
+export function pushDataLayer(payload: Record<string, unknown>) {
+  if (typeof window === 'undefined') return;
+  (window as any).dataLayer = (window as any).dataLayer || [];
+  (window as any).dataLayer.push(payload);
+}
+```
+
+The form, on success — flag first, then navigate:
+
+```tsx
+window.sessionStorage.setItem(LEAD_FLAG, '1');
+window.location.assign(`/${slug}/thank-you`);
+```
+
+`components/analytics/LeadEvent.tsx`, rendered on the thank-you page:
+
+```tsx
+'use client';
+export function LeadEvent({ formLocation }: { formLocation: string }) {
+  useEffect(() => {
+    let submitted = false;
+    try {
+      submitted = window.sessionStorage.getItem(LEAD_FLAG) === '1';
+      if (submitted) window.sessionStorage.removeItem(LEAD_FLAG);
+    } catch {
+      // Storage blocked. Better to miss a conversion than to fire a false one.
+      return;
+    }
+    if (!submitted) return;
+    pushDataLayer({
+      event: LEAD_EVENT,
+      form_name: 'consultation_request',
+      form_location: formLocation,
+    });
+  }, [formLocation]);
+  return null;
+}
+```
+
+The thank-you route:
+
+```ts
+export const metadata: Metadata = {
+  title: 'Thank you',
+  robots: { index: false, follow: false },
+};
+```
+
+## Verify with a script, not by clicking
+
+Write one that drives a real browser and asserts all of it. Run it against the deployed
+URL, not just localhost:
+
+1. `gclid` captured and stored from the landing URL
+2. `wbraid` handled too (iOS traffic)
+3. Submitting redirects to the thank-you page
+4. The click ID reached the API with the enquiry
+5. `generate_lead` pushed — **exactly once**
+6. The event carries `form_name` and `form_location`
+7. The one-time flag was cleared
+8. **A refresh fires nothing**
+9. **A direct visit to the thank-you URL fires nothing**
+10. The thank-you page is `noindex`
+
+Items 8 and 9 are the ones that matter and the ones normally skipped. Re-run this after any
+change to the form or the thank-you page.
+
+## In Google Ads and GTM
+
+- Conversion action: **Submit lead form**, Count = **One** — a person becomes a patient
+  once. This setting alone prevents most double-counting.
+- **Add the Conversion Linker tag on All Pages.** Without it Google Ads cannot read the
+  click ID, so conversions get attributed to "direct" rather than to the ad that paid for
+  them. It is the single most commonly forgotten tag, and everything looks like it is
+  working while quietly mis-attributing.
+- Trigger: Custom Event, event name `generate_lead`.
+- Test in GTM **Preview** before publishing: submit a real test enquiry, confirm the tag
+  fires, **then refresh the thank-you page and confirm nothing fires again.**
+
+## Finally — tell me plainly
+
+Whether submissions currently reach anybody. If the API route only logs, say so: reporting
+conversions for enquiries nobody receives is worse than not tracking at all.
