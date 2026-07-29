@@ -210,6 +210,8 @@ runs on its own loopback port.
 
 Full runbook, including how to add site #2: [`docs/deployment.md`](docs/deployment.md).
 Starting a comparable project from scratch: [`docs/reuse-prompt.md`](docs/reuse-prompt.md).
+Retrofitting the URL/indexing/Ads handling onto an existing project:
+[`docs/ads-url-prompt.md`](docs/ads-url-prompt.md).
 
 ```
 Dockerfile                     multi-stage, standalone, non-root
