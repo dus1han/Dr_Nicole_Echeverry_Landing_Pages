@@ -90,8 +90,17 @@ if [ -n "$SITE_URL" ] && [ "${got%/}" != "${SITE_URL%/}" ]; then
   echo "::warning::Image was built with SITE_URL='${got:-<unset>}' but the variable is now '$SITE_URL'."
   echo "    The origin is baked in at build time. Re-run the workflow to rebuild;"
   echo "    restarting will not pick this up."
+elif [ -z "$got" ]; then
+  # Says it out loud, because the consequence is invisible from the page: with
+  # no origin configured the build is noindex, so a launched site would quietly
+  # never appear in Google.
+  echo "::warning::No SITE_URL — this build is NOINDEX and will not appear in search."
+  echo "    Correct while previewing on an IP. Before launch, set the SITE_URL"
+  echo "    repository variable to the real https:// hostname and re-run."
+elif ! printf '%s' "$got" | grep -q '^https://'; then
+  echo "::warning::SITE_URL is '$got' — not https, so this build is NOINDEX."
 else
-  echo "==> image origin: ${got:-<unset, defaults apply>}"
+  echo "==> image origin: $got (indexable)"
 fi
 
 echo "==> starting"

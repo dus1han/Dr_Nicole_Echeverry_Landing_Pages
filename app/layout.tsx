@@ -4,7 +4,7 @@ import { site } from '@/content/site';
 import { ScrollProgress } from '@/components/layout/ScrollProgress';
 import { GtmScript, GtmNoScript } from '@/components/analytics/Gtm';
 import { ClickIdCapture } from '@/components/analytics/ClickIdCapture';
-import { ORIGIN } from '@/lib/site-url';
+import { ORIGIN, INDEXABLE } from '@/lib/site-url';
 import './globals.css';
 
 /**
@@ -36,7 +36,10 @@ export const metadata: Metadata = {
   },
   description: site.doctor.credentials,
   authors: [{ name: site.doctor.name }],
-  robots: { index: true, follow: true },
+  // Belt and braces with robots.txt: a disallow rule asks crawlers not to fetch
+  // the page, but a URL discovered elsewhere can still be listed without being
+  // fetched. The meta tag is what actually keeps it out of results.
+  robots: { index: INDEXABLE, follow: INDEXABLE },
 };
 
 export const viewport: Viewport = {
