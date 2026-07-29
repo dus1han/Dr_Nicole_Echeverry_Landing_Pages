@@ -196,9 +196,25 @@ Not part of the build or deploy; delete them if you'd rather not ship them.
 
 ## Deployment
 
-Vercel is the recommended host (zero config for Next 15). Set the custom domain to
-`dranicolecheverry.com`; this page serves at `/mommy-makeover`. Every future landing page
-deploys through the same pipeline with no config change.
+Two supported targets.
+
+**VPS + Docker + GitHub Actions** — the primary path, and the pattern every other landing
+page on the same server follows. Push to `main` → GitHub builds the image → pushes to
+GHCR → the VPS pulls and restarts. Caddy fronts all sites with automatic HTTPS; each site
+runs on its own loopback port.
+
+Full runbook, including how to add site #2: [`docs/deployment.md`](docs/deployment.md).
+
+```
+Dockerfile                     multi-stage, standalone, non-root
+docker-compose.yml             one stack per site
+deploy/Caddyfile.example       reverse proxy + auto-TLS
+deploy/caddy-compose.yml       the shared proxy, set up once
+.github/workflows/deploy.yml   build → push → deploy over SSH
+```
+
+**Vercel** — also works with zero configuration if you prefer it. Nothing in the repo is
+VPS-specific except the four files above.
 
 The clinic map is a **keyless Google Maps embed** — no API key, no billing account, works
 the moment it deploys.

@@ -1,0 +1,42 @@
+# One stack per site. Copy this file into /opt/sites/<site>/ on the VPS
+# alongside a .env holding SITE_PORT, IMAGE and CONTAINER_NAME.
+#
+# The published port is bound to 127.0.0.1 on purpose: the container is
+# reachable from the host (so Caddy can proxy to it, and you can curl it while
+# debugging) but NOT from the internet. Only Caddy listens publicly, which
+# means one place holds TLS and one place is exposed.
+
+services:
+  web:
+    image: ${IMAGE}
+    container_name: ${CONTAINER_NAME}
+    restart: unless-stopped
+
+    # host:127.0.0.1:<unique port>  ->  container:3000
+    # Every site on this VPS gets its own SITE_PORT; the container is always
+    # 3000 internally, so nothing inside the image needs to know about it.
+    ports:
+      - '127.0.0.1:${SITE_PORT}:3000'
+
+    environment:
+      NODE_ENV: production
+      # Runtime-only values go here. NEXT_PUBLIC_* must NOT — those are baked
+      # into the bundle at build time and are set as build args instead.
+      TZ: Asia/Dubai
+
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/mommy-makeover').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'

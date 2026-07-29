@@ -1,0 +1,32 @@
+# /opt/sites/caddy/docker-compose.yml
+#
+# Set up once for the whole server, not per site.
+#
+# network_mode: host is deliberate. It lets Caddy bind 80/443 directly AND
+# reach every app on 127.0.0.1:<port> with no extra Docker networks to wire up.
+# On a single-tenant VPS that is the simplest arrangement that works; the
+# alternative (a shared bridge network, proxying to container names) is more
+# portable but adds a concept for no benefit here.
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    container_name: caddy
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # Certificates live here. Losing this volume means re-issuing every
+      # certificate, and Let's Encrypt rate-limits that — keep it.
+      - caddy_data:/data
+      - caddy_config:/config
+      - ./logs:/var/log/caddy
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+volumes:
+  caddy_data:
+  caddy_config:

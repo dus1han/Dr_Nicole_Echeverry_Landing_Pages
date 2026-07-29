@@ -1,0 +1,26 @@
+# Anything listed here is never sent to the Docker daemon — smaller build
+# context, faster builds, and no chance of a local .env leaking into an image.
+
+node_modules
+.next
+.git
+.github
+.shots
+.env*
+!.env.example
+*.tsbuildinfo
+.DS_Store
+.vercel
+
+# Docs and deployment config are not needed inside the image.
+*.md
+docs
+deploy
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# NOTE: `scripts/` is deliberately NOT excluded. `npm run build` runs
+# `prebuild` → `node scripts/check-content.mjs`, so ignoring that folder makes
+# the image build fail with a confusing "module not found". The whole folder is
+# a few KB; leaving it in is cheaper than the debugging.

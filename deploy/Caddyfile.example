@@ -1,0 +1,47 @@
+# /opt/sites/caddy/Caddyfile
+#
+# ONE Caddy instance fronts every site on the VPS. It is the only thing
+# listening on 80/443; each app sits privately on 127.0.0.1:<port>.
+#
+# Caddy obtains and renews Let's Encrypt certificates automatically. There is
+# no certbot, no cron job, and no renewal to forget — the only requirement is
+# that the domain's A record already points at this server before Caddy starts,
+# because the certificate challenge is what proves you control it.
+
+{
+    # Let's Encrypt uses this for expiry warnings. Use a real address.
+    email admin@dranicolecheverry.com
+}
+
+# --- Site 1 -----------------------------------------------------------------
+mommymakeover.dranicolecheverry.com {
+    reverse_proxy 127.0.0.1:3101
+
+    encode gzip zstd
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options    "nosniff"
+        Referrer-Policy           "strict-origin-when-cross-origin"
+        -Server
+    }
+
+    log {
+        output file /var/log/caddy/mommymakeover.log {
+            roll_size 10mb
+            roll_keep 5
+        }
+    }
+}
+
+# --- Site 2 — copy the block, change the domain and the port ----------------
+# breastaugmentation.dranicolecheverry.com {
+#     reverse_proxy 127.0.0.1:3102
+#     encode gzip zstd
+# }
+
+# --- Site 3 — a different client entirely, same server ----------------------
+# buccalfat.drluisreyes.com {
+#     reverse_proxy 127.0.0.1:3103
+#     encode gzip zstd
+# }
