@@ -27,6 +27,30 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Set the GTM ID ONCE as a repository variable and every future build
+      # picks it up automatically — pushing code never changes or clears it.
+      #
+      # This guard exists because the failure mode is silent: the value is
+      # compiled into the bundle, so a build with it missing produces a working
+      # site that simply has no analytics and never fires a conversion. Nothing
+      # errors, nothing looks wrong, and you find out from an empty Google Ads
+      # report weeks later. Fail loudly here instead.
+      - name: Verify analytics configuration
+        run: |
+          if [ -z "${{ vars.NEXT_PUBLIC_GTM_ID }}" ]; then
+            echo "::error::NEXT_PUBLIC_GTM_ID is not set."
+            echo ""
+            echo "It is baked into the JavaScript at build time, so this build"
+            echo "would deploy a site with no Google Tag Manager and no"
+            echo "conversion tracking — silently."
+            echo ""
+            echo "Set it once at:"
+            echo "  Settings → Secrets and variables → Actions → Variables"
+            echo "  Name: NEXT_PUBLIC_GTM_ID   Value: GTM-XXXXXXX"
+            exit 1
+          fi
+          echo "✓ GTM container: ${{ vars.NEXT_PUBLIC_GTM_ID }}"
+
       - uses: docker/setup-buildx-action@v3
 
       - name: Log in to GHCR

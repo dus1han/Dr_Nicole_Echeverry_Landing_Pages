@@ -1,5 +1,46 @@
 # Deployment — VPS · Docker · GitHub Actions
 
+## Do these in order
+
+Roughly 45 minutes the first time. Everything except step 9 is one-time for the whole
+server — a second site is only steps 6, 8, 9.
+
+| # | Where | Step |
+|---|---|---|
+| 1 | VPS | Install Docker, open ports 80/443 only |
+| 2 | VPS | Create `/opt/sites/` layout |
+| 3 | DNS provider | A record → VPS IP (**before** step 5) |
+| 4 | GitHub | Create a `read:packages` token, log in to GHCR on the VPS |
+| 5 | VPS | Start Caddy, confirm the certificate issues |
+| 6 | VPS | Create the site folder + `.env` with a unique port |
+| 7 | Local | Generate an SSH deploy key, put the public half on the VPS |
+| 8 | GitHub | Add secrets + the `NEXT_PUBLIC_GTM_ID` variable |
+| 9 | Local | `git push` — Actions builds and deploys |
+
+Detail for each is below. **Step 3 must happen before step 5**, or the certificate
+request fails and Caddy backs off before retrying.
+
+---
+
+## About the GTM ID — it does not change when you push
+
+Set `NEXT_PUBLIC_GTM_ID` once as a **repository variable** in GitHub. Every build from
+then on reads the same value automatically. Pushing code does not touch it, clear it, or
+require you to re-enter it. You only revisit it if the container itself changes.
+
+It is passed as a Docker **build arg** because `NEXT_PUBLIC_*` values are compiled into
+the JavaScript — they are not read at runtime. Two consequences:
+
+- Setting it in `.env` on the VPS does **nothing**.
+- Changing it needs a **rebuild** (push, or *Actions → Run workflow*), not a restart.
+
+The workflow **fails immediately** if the variable is missing, because the alternative is
+worse: the build would succeed, the site would work, and it would silently have no
+analytics and never fire a conversion — something you would discover from an empty
+Google Ads report weeks later.
+
+---
+
 **This document is the pattern for every landing page on this server, not just this one.**
 Sites 2, 3 and 4 follow the same steps; only the port, the domain and the repository
 change. Section 6 is the short version for adding another.
