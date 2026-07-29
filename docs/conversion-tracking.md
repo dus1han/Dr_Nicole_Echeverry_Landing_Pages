@@ -1,11 +1,44 @@
-# Conversion Tracking — setup guide
+# Conversion Tracking — GTM + Google Ads
 
-Everything on the site side is built. This is what the marketing team does to make
-Google Ads count a conversion.
+**This is the pattern for every landing page, not just this one.** The code is portable
+as written — no slug, domain or tracking ID is hardcoded anywhere in it. To put the same
+setup on another project, jump to [§10 Reusing this on another project](#10--reusing-this-on-another-project).
 
 **No Google Ads or GA4 identifier lives in this repository.** The site only announces
 *"a lead was submitted"*; GTM decides who hears about it. Adding Meta Pixel, TikTok or
 GA4 later needs no code change and no deploy.
+
+### How it works in one picture
+
+```
+Ad click  →  /<slug>?gclid=…
+                │  ClickIdCapture stores the click ID (90 days)
+                ▼
+           form submit
+                │  POST /api/consultation
+                │  on success: sessionStorage flag, then a real navigation
+                ▼
+        /<slug>/thank-you
+                │  LeadEvent reads the flag, clears it, and pushes:
+                │     { event: 'generate_lead', form_name, form_location }
+                ▼
+        GTM trigger: Custom Event = generate_lead
+                │
+                ▼
+        Google Ads conversion  (matched to the click via Conversion Linker)
+```
+
+### The files involved
+
+| File | Role |
+|---|---|
+| `lib/analytics.ts` | dataLayer helper, storage keys, click-ID capture/read |
+| `components/analytics/Gtm.tsx` | Container script + `<noscript>`. Renders nothing without an ID |
+| `components/analytics/ClickIdCapture.tsx` | Stores `gclid` / `wbraid` / `gbraid` on landing |
+| `components/analytics/LeadEvent.tsx` | Fires the event once on the thank-you page |
+| `app/<slug>/thank-you/page.tsx` | The confirmation screen, `noindex` |
+| `components/sections/BookingForm.tsx` | Sets the flag, then navigates |
+| `.github/workflows/deploy.yml` | Passes the ID as a build arg; fails if it is missing |
 
 ---
 
@@ -212,6 +245,87 @@ Nothing uses it yet. It is there so the clinic can later import **offline conver
 telling Google Ads which enquiries became real consultations. That is the difference
 between bidding for form fills and bidding for patients, and it cannot be backfilled —
 the click ID has to be captured at the time.
+
+---
+
+## 10 · Reusing this on another project
+
+The tracking code is deliberately free of project-specific values. Copying it is a file
+copy plus two props.
+
+### a. Copy these files unchanged
+
+```
+lib/analytics.ts
+components/analytics/Gtm.tsx
+components/analytics/ClickIdCapture.tsx
+components/analytics/LeadEvent.tsx
+scripts/check-conversion-flow.mjs
+```
+
+Nothing in them mentions a slug, a domain or a tracking ID.
+
+> One thing to check: `lib/analytics.ts` namespaces its storage keys with `nme:`
+> (`nme:click-id`, `nme:lead-submitted`). If two of your sites can ever be open in the
+> same browser **on the same domain**, give each its own prefix. Different domains are
+> already isolated by the browser.
+
+### b. Wire them into the new app
+
+**`app/layout.tsx`** — inside `<body>`, first:
+
+```tsx
+<GtmNoScript />
+<GtmScript />
+<ClickIdCapture />
+```
+
+**The form**, on a successful submit — flag, then a *real* navigation:
+
+```tsx
+window.sessionStorage.setItem(LEAD_FLAG, '1');
+window.location.assign(`/${slug}/thank-you`);
+```
+
+**The thank-you page** — `noindex`, and:
+
+```tsx
+<LeadEvent formLocation={content.slug} />
+```
+
+`formLocation` is what lets one GTM container serve several landing pages and still
+report which one produced the lead. Use the slug, or any stable label.
+
+### c. Configuration
+
+| Where | What |
+|---|---|
+| GitHub → Actions → **Variables** | `NEXT_PUBLIC_GTM_ID` = `GTM-XXXXXXX` |
+| Dockerfile | already passes it as `ARG NEXT_PUBLIC_GTM_ID` |
+| Workflow | already fails the build if it is unset |
+
+Set the variable **once per repository**. Every later push reuses it automatically —
+pushing code never changes or clears it.
+
+### d. In GTM
+
+You can reuse **one container across all the sites** — same `NEXT_PUBLIC_GTM_ID`
+everywhere — since every site emits the same `generate_lead` event and distinguishes
+itself with `form_location`. To report per-site in Google Ads, add a Data Layer Variable
+on `form_location` and put a trigger condition on it.
+
+Use a **separate container per client** when the clients are different businesses with
+different Google Ads accounts, or when different people need access. Same tags either
+way.
+
+### e. Verify
+
+```bash
+node scripts/check-conversion-flow.mjs https://newsite.example.com
+```
+
+10 checks. It reads only `#book-form`, the three input names, and the thank-you URL, so
+it works against any site built from this template without modification.
 
 ---
 

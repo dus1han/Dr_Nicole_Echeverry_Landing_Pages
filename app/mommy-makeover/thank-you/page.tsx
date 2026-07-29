@@ -33,7 +33,7 @@ export default function ThankYouPage() {
   return (
     <main className="grain relative grid min-h-screen place-items-center overflow-hidden bg-[linear-gradient(180deg,var(--color-blush-100)_0%,var(--color-blush-50)_55%,var(--color-cream)_100%)] px-6 py-16">
       <AuroraBackground />
-      <LeadEvent />
+      <LeadEvent formLocation={mommyMakeover.slug} />
 
       <div className="relative z-10 w-full max-w-xl text-center">
         <Link

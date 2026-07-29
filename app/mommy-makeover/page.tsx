@@ -56,7 +56,7 @@ export default function MommyMakeoverPage() {
         <Journey {...content.journey} />
         <Reviews {...content.reviews} />
         <Faq {...content.faq} />
-        <BookingForm {...content.booking} />
+        <BookingForm {...content.booking} slug={content.slug} />
       </PageShell>
     </>
   );

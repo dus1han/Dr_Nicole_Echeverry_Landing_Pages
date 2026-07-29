@@ -16,7 +16,7 @@ import { LEAD_EVENT, LEAD_FLAG, pushDataLayer } from '@/lib/analytics';
  * If GTM is not configured, `pushDataLayer` simply appends to an array nobody
  * reads. Nothing breaks.
  */
-export function LeadEvent() {
+export function LeadEvent({ formLocation }: { formLocation: string }) {
   useEffect(() => {
     let submitted = false;
     try {
@@ -29,12 +29,14 @@ export function LeadEvent() {
 
     if (!submitted) return;
 
+    // form_location lets one GTM container serve many landing pages and still
+    // report which one produced the lead.
     pushDataLayer({
       event: LEAD_EVENT,
       form_name: 'consultation_request',
-      form_location: 'mommy-makeover',
+      form_location: formLocation,
     });
-  }, []);
+  }, [formLocation]);
 
   return null;
 }

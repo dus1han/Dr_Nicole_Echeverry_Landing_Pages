@@ -12,13 +12,15 @@ import { TextField } from '@/components/ui/Field';
 import { LEAD_FLAG, readClickId } from '@/lib/analytics';
 import { EASE_OUT } from '@/lib/motion';
 
-/** Route segment this form belongs to — used for the thank-you redirect. */
-const SLUG = 'mommy-makeover';
-
 type Status = 'idle' | 'submitting' | 'success' | 'error';
 type Errors = Partial<Record<string, string>>;
 
-export function BookingForm(content: BookingContent) {
+/**
+ * `slug` comes from the page rather than being hardcoded, so this component
+ * works unchanged on every landing page — it only needs to know where its own
+ * thank-you page lives.
+ */
+export function BookingForm({ slug, ...content }: BookingContent & { slug: string }) {
   const reduced = useReducedMotion();
   const [status, setStatus] = useState<Status>('idle');
   const [errors, setErrors] = useState<Errors>({});
@@ -80,7 +82,7 @@ export function BookingForm(content: BookingContent) {
       } catch {
         // Storage blocked — the confirmation still shows, only tracking is lost.
       }
-      window.location.assign(`/${SLUG}/thank-you`);
+      window.location.assign(`/${slug}/thank-you`);
     } catch {
       setStatus('error');
       setFormError(
