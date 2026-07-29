@@ -1,7 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { site } from '@/content/site';
-
-const ORIGIN = 'https://dranicolecheverry.com';
+import { ORIGIN } from '@/lib/site-url';
 
 /** Auto-enumerates every live landing page from content/site.ts. */
 export default function sitemap(): MetadataRoute.Sitemap {

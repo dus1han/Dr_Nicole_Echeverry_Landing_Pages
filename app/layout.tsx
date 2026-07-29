@@ -4,6 +4,7 @@ import { site } from '@/content/site';
 import { ScrollProgress } from '@/components/layout/ScrollProgress';
 import { GtmScript, GtmNoScript } from '@/components/analytics/Gtm';
 import { ClickIdCapture } from '@/components/analytics/ClickIdCapture';
+import { ORIGIN } from '@/lib/site-url';
 import './globals.css';
 
 /**
@@ -28,7 +29,7 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://dranicolecheverry.com'),
+  metadataBase: new URL(ORIGIN),
   title: {
     default: `${site.doctor.name} — ${site.doctor.credentials}, Dubai`,
     template: `%s`,

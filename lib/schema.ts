@@ -1,7 +1,6 @@
 import type { LandingPageContent } from '@/content/types';
 import { site } from '@/content/site';
-
-const ORIGIN = 'https://dranicolecheverry.com';
+import { ORIGIN } from '@/lib/site-url';
 
 /**
  * JSON-LD for a landing page.

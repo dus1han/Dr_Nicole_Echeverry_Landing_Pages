@@ -31,6 +31,12 @@ services:
       # into the bundle at build time and are set as build args instead.
       TZ: Asia/Dubai
 
+      # The public origin, used by canonical URLs, sitemap.xml, robots.txt and
+      # the JSON-LD. Set SITE_URL in .env the moment the real hostname exists —
+      # until then these point at a domain that does not serve this site.
+      # Read at runtime, so changing it needs a restart, not a rebuild.
+      SITE_URL: ${SITE_URL:-https://dranicolecheverry.com}
+
     healthcheck:
       test:
         - CMD
