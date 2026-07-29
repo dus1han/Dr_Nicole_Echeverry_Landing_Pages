@@ -17,6 +17,7 @@ set -uo pipefail
 SITE_PATH="${SITE_PATH:-}"
 GHCR_USERNAME="${GHCR_USERNAME:-}"
 GHCR_PAT="${GHCR_PAT:-}"
+SITE_URL="${SITE_URL:-}"
 
 fail() { echo "::error::$*"; exit 1; }
 
@@ -37,6 +38,26 @@ fi
 
 cd "$SITE_PATH" || fail "cannot enter $SITE_PATH"
 [ -f .env ] || fail "no .env in $SITE_PATH — compose has no IMAGE, CONTAINER_NAME or SITE_PORT."
+
+# A stale SITE_URL in .env is worse than none: it reads as authoritative while
+# having no effect whatsoever, because the origin is baked in at build time (see
+# lib/site-url.ts). Strip it so there is exactly one place the hostname lives —
+# the SITE_URL repository variable.
+if grep -q '^SITE_URL=' .env 2>/dev/null; then
+  tmp=$(mktemp "$PWD/.env.XXXXXX")
+  grep -v '^SITE_URL=' .env > "$tmp"
+  chmod 644 "$tmp"
+  mv "$tmp" .env
+  echo "==> removed inert SITE_URL from .env (it is a build arg, not a runtime value)"
+fi
+
+# Report what the image was actually built with, so a wrong hostname shows up
+# here rather than in Google Search Console weeks later.
+img=$(grep '^IMAGE=' .env | cut -d= -f2-)
+baked_origin() {
+  docker image inspect "$img" --format '{{json .Config.Env}}' 2>/dev/null \
+    | tr ',' '\n' | grep -o 'SITE_URL=[^"]*' | head -1 | cut -d= -f2-
+}
 
 echo "==> $SITE_PATH"
 grep -v '^#' .env | grep -v '^$' | sed 's/^/    /'
@@ -59,6 +80,19 @@ fi
 # --- pull and restart ------------------------------------------------------
 echo "==> pulling"
 docker compose pull || fail "docker compose pull failed. If the package is private, set GHCR_PAT + GHCR_USERNAME. If the image name is wrong, fix IMAGE= in .env."
+
+# Compare what the freshly pulled image was built with against the variable this
+# deploy was given. They disagree when the SITE_URL variable was changed without
+# rebuilding — the deploy succeeds, the site serves, and every canonical URL and
+# sitemap entry still points at the old host. Silent, and expensive to discover.
+got=$(baked_origin)
+if [ -n "$SITE_URL" ] && [ "${got%/}" != "${SITE_URL%/}" ]; then
+  echo "::warning::Image was built with SITE_URL='${got:-<unset>}' but the variable is now '$SITE_URL'."
+  echo "    The origin is baked in at build time. Re-run the workflow to rebuild;"
+  echo "    restarting will not pick this up."
+else
+  echo "==> image origin: ${got:-<unset, defaults apply>}"
+fi
 
 echo "==> starting"
 docker compose up -d --remove-orphans || fail "docker compose up failed."

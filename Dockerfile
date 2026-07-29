@@ -31,6 +31,13 @@ COPY . .
 ARG NEXT_PUBLIC_GTM_ID=""
 ENV NEXT_PUBLIC_GTM_ID=$NEXT_PUBLIC_GTM_ID
 
+# SITE_URL is a build arg for the same reason, despite not being NEXT_PUBLIC_*.
+# sitemap.xml, robots.txt and every page's canonical/OG tags are statically
+# prerendered — that is why the site is fast — so the origin is baked into the
+# output. Setting this at `docker run` changes nothing; it has to be here.
+ARG SITE_URL=""
+ENV SITE_URL=$SITE_URL
+
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 

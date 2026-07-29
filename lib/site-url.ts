@@ -6,10 +6,16 @@
  * wrong host, canonical tags point somewhere that 404s, and structured data is
  * rejected — none of which shows up when you look at the page.
  *
- * Read at RUNTIME, not build time. It is deliberately not `NEXT_PUBLIC_*` —
- * everything that consumes it renders on the server, so pointing the site at a
- * new domain is an environment change plus a container restart, not a rebuild
- * and redeploy. That matters when DNS lands at an awkward moment.
+ * Baked in at BUILD time, and passed as a Docker build arg accordingly.
+ *
+ * Not because of `NEXT_PUBLIC_*` — this never reaches the browser — but because
+ * every consumer is statically prerendered. `sitemap.xml`, `robots.txt` and the
+ * canonical/OG tags are generated once during `next build`, which is what makes
+ * the site fast. Setting `SITE_URL` on the running container therefore changes
+ * nothing at all, and changing the hostname means a rebuild, not a restart.
+ *
+ * Verified the hard way: setting it in the container's environment and
+ * restarting left `sitemap.xml` still advertising the old host.
  *
  * No trailing slash, or every generated URL gets a double one.
  */

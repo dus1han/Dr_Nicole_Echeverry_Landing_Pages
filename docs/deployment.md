@@ -26,6 +26,36 @@ request fails and Caddy backs off before retrying.
 
 ---
 
+## The origin is a build-time value
+
+`SITE_URL` is the site's public address — `https://mommymakeover.example.com`. It feeds
+`sitemap.xml`, `robots.txt`, the canonical tags, the OG tags and the JSON-LD.
+
+Set it **once** as a repository **variable** (not a secret — it is the site's own public
+address):
+
+**Settings → Secrets and variables → Actions → Variables → `SITE_URL`**
+
+| Name | Value |
+|---|---|
+| `SITE_URL` | `https://mommymakeover.example.com` — no trailing slash |
+
+> ### Setting this on the server does nothing
+> `sitemap.xml`, `robots.txt` and every page's metadata are **statically prerendered
+> during `next build`** — that is what makes the site fast. The origin is compiled into
+> the output. Putting `SITE_URL` in the VPS `.env` looks authoritative and has no effect
+> whatsoever; the deploy script now deletes it from `.env` if it finds it, and prints what
+> the image was actually built with.
+>
+> Changing the hostname is therefore a **rebuild** — push, or *Actions → Run workflow* —
+> not a restart.
+
+Leave it unset and the site falls back to the default in `lib/site-url.ts`. Everything
+works; the sitemap simply advertises a host that may not serve the page, which Google
+acts on and nobody notices from looking at the site.
+
+---
+
 ## About the GTM ID — it does not change when you push
 
 Set `NEXT_PUBLIC_GTM_ID` once as a **repository variable** in GitHub. Every build from
@@ -339,11 +369,11 @@ independent: one can be rebuilt or fall over without touching the others.
 ```
 Dockerfile                     multi-stage standalone build
 .dockerignore                  must NOT exclude scripts/ if prebuild uses it
-docker-compose.yml             reads IMAGE / CONTAINER_NAME / SITE_PORT / BIND_ADDR / SITE_URL
+docker-compose.yml             reads IMAGE / CONTAINER_NAME / SITE_PORT / BIND_ADDR
 deploy/remote-deploy.sh        what runs on the server
 deploy/Caddyfile.example       reference only; the live one is server-wide
 .github/workflows/deploy.yml   build → GHCR → ssh → pull → restart
-lib/site-url.ts                one runtime SITE_URL instead of a hardcoded host
+lib/site-url.ts                one SITE_URL build arg instead of a hardcoded host
 ```
 
 Nothing in them names this client, this port or this domain.
@@ -376,9 +406,11 @@ sudo -u deploy tee .env >/dev/null <<EOF
 IMAGE=ghcr.io/<owner>/<repo>:latest
 CONTAINER_NAME=$SITE
 SITE_PORT=$PORT
-SITE_URL=https://<hostname>
 EOF
 ```
+
+`.env` holds only what is genuinely per-installation. The hostname is **not** here — see
+[the origin is a build-time value](#the-origin-is-a-build-time-value) below.
 
 The `deploy` user from §2 is **shared across projects** — one account, one key, many site
 directories. Only `VPS_SITE_PATH` differs per repo.
@@ -389,9 +421,13 @@ directories. Only `VPS_SITE_PATH` differs per repo.
 
 Omit `BIND_ADDR` unless DNS is not ready yet — see §11.
 
-### d. GitHub secrets on the new repo
+### d. GitHub configuration on the new repo
 
-Four, all the same as this repo except the last:
+**Variables:** `SITE_URL` — the new site's public address. Build arg; see
+[the origin is a build-time value](#the-origin-is-a-build-time-value).
+Optionally `NEXT_PUBLIC_GTM_ID`.
+
+**Secrets** — four, all the same as this repo except the last:
 
 | `VPS_HOST` · `VPS_USER` · `VPS_SSH_KEY` | identical to this project |
 |---|---|
@@ -448,7 +484,7 @@ docker compose down && docker compose up -d
 |---|---|
 | `docker-compose.yml` | **overwritten from the repo every deploy** |
 | the image | pulled fresh from GHCR |
-| `.env` | **never touched** — it holds this server's port and hostname |
+| `.env` | preserved, except that an inert `SITE_URL=` line is stripped |
 
 Shipping the compose file matters more than it looks. Left as server state, it keeps
 whatever copy was placed there on day one, and every later change — a new environment
