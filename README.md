@@ -209,6 +209,7 @@ GHCR → the VPS pulls and restarts. Caddy fronts all sites with automatic HTTPS
 runs on its own loopback port.
 
 Full runbook, including how to add site #2: [`docs/deployment.md`](docs/deployment.md).
+Starting a comparable project from scratch: [`docs/reuse-prompt.md`](docs/reuse-prompt.md).
 
 ```
 Dockerfile                     multi-stage, standalone, non-root
