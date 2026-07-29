@@ -370,7 +370,8 @@ sudo mkdir -p /opt/sites/$SITE
 sudo chown -R deploy:deploy /opt/sites/$SITE
 cd /opt/sites/$SITE
 
-# copy docker-compose.yml from the new repo, then:
+# Only .env is created by hand. docker-compose.yml is shipped by every deploy,
+# so changes to it in the repo actually reach the server — see §7.
 sudo -u deploy tee .env >/dev/null <<EOF
 IMAGE=ghcr.io/<owner>/<repo>:latest
 CONTAINER_NAME=$SITE
@@ -440,6 +441,23 @@ docker compose ps                       # health status
 docker compose restart web              # restart
 docker compose down && docker compose up -d
 ```
+
+### What a deploy actually replaces
+
+| | |
+|---|---|
+| `docker-compose.yml` | **overwritten from the repo every deploy** |
+| the image | pulled fresh from GHCR |
+| `.env` | **never touched** — it holds this server's port and hostname |
+
+Shipping the compose file matters more than it looks. Left as server state, it keeps
+whatever copy was placed there on day one, and every later change — a new environment
+variable, a changed port binding, a healthcheck tweak — is silently ignored while the
+deploy still reports success. Pulling a new image and restarting genuinely did work; the
+change simply never arrived.
+
+Anything that must differ per installation belongs in `.env`, which is why that file is
+deliberately excluded.
 
 ### Deploy by hand
 

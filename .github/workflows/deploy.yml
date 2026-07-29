@@ -130,6 +130,22 @@ jobs:
           chmod 600 ~/.ssh/id_deploy
           ssh-keyscan -p "$VPS_PORT" "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
 
+          # Ship the compose file with every deploy.
+          #
+          # Without this the server keeps whatever copy was placed there by hand
+          # on day one, and every later change to docker-compose.yml — a new
+          # environment variable, a changed port binding, a healthcheck tweak —
+          # is silently ignored. The deploy still goes green, because pulling a
+          # new image and restarting genuinely succeeds; the change simply never
+          # arrives. That is a bad failure to own, so the file is treated as
+          # deployable artefact rather than server state.
+          #
+          # .env is NOT shipped: it holds this server's port and hostname, which
+          # are deliberately per-installation and not in the repository.
+          scp -i ~/.ssh/id_deploy -P "$VPS_PORT" \
+              -o StrictHostKeyChecking=accept-new \
+              docker-compose.yml "$VPS_USER@$VPS_HOST:$SITE_PATH/docker-compose.yml"
+
           # The remote script is piped in as stdin, so it never passes through a
           # shell-quoting layer. Its inputs are prepended as assignments escaped
           # with printf %q, which is safe for any value.
