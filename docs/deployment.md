@@ -219,15 +219,21 @@ curl -I http://127.0.0.1:3101/mommy-makeover     # expect 200
 
 ### Secrets
 
-| Name | Value |
+| Name | Value for this server |
 |---|---|
-| `VPS_HOST` | server IP or hostname |
-| `VPS_USER` | SSH user (not root) |
-| `VPS_SSH_KEY` | the **private** key from 2f, whole file including header/footer lines |
-| `VPS_PORT` | SSH port — omit if 22 |
+| `VPS_HOST` | `169.58.92.105` |
+| `VPS_USER` | `deploy` |
+| `VPS_SSH_KEY` | contents of `~/.ssh/github_actions_drnicole` — the **private** half, whole file including the `-----BEGIN`/`-----END` lines |
+| `VPS_PORT` | omit — SSH is on 22 |
 | `VPS_SITE_PATH` | `/opt/sites/dr-nicole-mommy-makeover` |
-| `GHCR_USERNAME` | your GitHub username |
-| `GHCR_PAT` | the `read:packages` token from 2e |
+| `GHCR_USERNAME` | `dus1han` |
+| `GHCR_PAT` | a classic PAT with `read:packages` only |
+
+`deploy` is an unprivileged account in the `docker` group, created specifically for this.
+Docker group membership is close to root in practice, but it is still the difference
+between *can manage containers* and *can do anything*, and it can be revoked on its own
+without disturbing admin access. It uses a **different key** from the admin one, so a leak
+of the GitHub secret costs you the deploy path, not the server.
 
 ### Variables
 
@@ -408,13 +414,23 @@ the dev server will start serving a half-written build. This has produced both p
 
 | | |
 |---|---|
-| Site directory | `/opt/sites/dr-nicole-mommy-makeover` |
+| Site directory | `/opt/sites/dr-nicole-mommy-makeover` (owned by `deploy`) |
 | Port | **3101** |
 | Container | `dr-nicole-mommy-makeover` |
-| Image | `dr-nicole-mommy-makeover:latest` (built on the server) |
+| Image *(running)* | `dr-nicole-mommy-makeover:latest`, built on the server |
+| Image *(`.env`)* | `ghcr.io/dus1han/dr_nicole_echeverry_landing_pages:latest` |
 | URL | `http://169.58.92.105:3101/mommy-makeover` |
 | Docker | 29.6.2 · Compose v5.3.1 |
 | GTM | not configured — the site runs without it |
+
+`.env` already points at the GHCR tag, so the first successful Actions run replaces the
+hand-built image with the registry one. The container keeps running the old image until
+that happens.
+
+> **The image name is lowercase and the repository is not.** `docker/metadata-action`
+> lowercases it, because Docker rejects uppercase in image references. Confirm the exact
+> name at **github.com/dus1han?tab=packages** after the first build — if it differs, fix
+> the one `IMAGE=` line in `.env`.
 
 ### Two ways this differs from the target architecture
 
