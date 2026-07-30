@@ -138,7 +138,6 @@ export type CandidacyContent = {
   body: string;
   leadIn: string;
   criteria: string[];
-  closing: string;
   cta: Cta;
   image: ImageAsset;
 };

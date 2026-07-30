@@ -159,8 +159,6 @@ export const mommyMakeover: LandingPageContent = {
       'Feel your body no longer reflects how you feel inside.',
       'Are in good overall health and looking for a comprehensive body restoration procedure.',
     ],
-    closing:
-      'Not sure whether this is right for you? A consultation will tell you honestly — including if the answer is not yet.',
     cta: { label: 'Request an Honest Assessment', href: '#book' },
     image: {
       src: `${IMG}/procedure-lipo.jpg`,

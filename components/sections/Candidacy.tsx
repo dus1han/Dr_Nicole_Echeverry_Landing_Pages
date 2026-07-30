@@ -75,27 +75,19 @@ export function Candidacy(content: CandidacyContent) {
         </div>
 
         {/*
-          Full-width closing banner.
+          The closing line was removed at the client's request, which left the
+          banner card holding nothing but a button — a wide bordered box with a
+          single control in it reads as an unfinished layout.
 
-          This used to sit at the bottom of the left column, which left a large
-          dead area under the image on the right. Spanning both columns fills
-          the width and gives the CTA far more presence — quote on the left,
-          button on the right, stacked on mobile.
+          So the card goes with it and the CTA becomes a centred button under
+          the grid. That is the shape the Procedures and Before & After sections
+          already end on, so this section now closes the way the rest of the
+          page does rather than in a treatment of its own.
         */}
-        <Reveal className="mt-12">
-          <div className="flex flex-col gap-7 rounded-[var(--radius-lg)] border border-sage-200 bg-white/70 p-8 shadow-[var(--shadow-sm)] backdrop-blur-sm sm:p-10 lg:flex-row lg:items-center lg:justify-between lg:gap-12">
-            <p className="max-w-[54ch] font-display text-[clamp(1.25rem,2.2vw,1.75rem)] italic leading-snug text-plum-800">
-              {content.closing}
-            </p>
-            <ButtonLink
-              href={content.cta.href}
-              size="lg"
-              magnetic
-              className="shrink-0 self-start lg:self-auto"
-            >
-              {content.cta.label}
-            </ButtonLink>
-          </div>
+        <Reveal className="mt-12 flex justify-center">
+          <ButtonLink href={content.cta.href} size="lg" magnetic>
+            {content.cta.label}
+          </ButtonLink>
         </Reveal>
       </div>
     </section>
