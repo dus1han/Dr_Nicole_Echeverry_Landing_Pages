@@ -160,7 +160,13 @@ function ReviewModal({ review, onClose }: { review: Review; onClose: () => void 
         aria-modal="true"
         aria-labelledby={labelId}
         tabIndex={-1}
-        className="relative max-h-[85vh] w-full max-w-xl overflow-y-auto rounded-[var(--radius-lg)] border border-blush-200 bg-white p-7 shadow-[var(--shadow-card)] outline-none sm:p-9"
+        /*
+          overflow-x-hidden is not redundant. Setting only `overflow-y: auto`
+          leaves the other axis `visible`, and CSS resolves a visible axis to
+          `auto` when its partner is not — so the decorative quote mark, which
+          sits a few pixels outside the panel, produced a horizontal scrollbar.
+        */
+        className="relative max-h-[85vh] w-full max-w-xl overflow-y-auto overflow-x-hidden overscroll-contain rounded-[var(--radius-lg)] border border-blush-200 bg-white p-7 shadow-[var(--shadow-card)] outline-none sm:p-9"
         initial={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.97, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.97, y: 10 }}
@@ -175,7 +181,8 @@ function ReviewModal({ review, onClose }: { review: Review; onClose: () => void 
           <X className="h-5 w-5" aria-hidden="true" />
         </button>
 
-        <Quote className="absolute -right-1 top-14 h-20 w-20 text-gold-400/15" aria-hidden="true" />
+        {/* Kept inside the panel rather than clipped by the rule above. */}
+        <Quote className="absolute right-3 top-14 h-20 w-20 text-gold-400/15" aria-hidden="true" />
 
         {typeof review.rating === 'number' && (
           <div className="mb-4">
@@ -190,7 +197,7 @@ function ReviewModal({ review, onClose }: { review: Review; onClose: () => void 
           {review.title ?? `${review.name}’s review`}
         </h3>
 
-        <p className="relative mt-5 whitespace-pre-line text-[0.9375rem] leading-[1.78] text-ink/85">
+        <p className="relative mt-5 whitespace-pre-line break-words text-[0.9375rem] leading-[1.78] text-ink/85">
           “{review.quote}”
         </p>
 
