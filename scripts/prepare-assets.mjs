@@ -22,6 +22,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..');
 const SRC = join(ROOT, '..', 'Mommy makeover');
 const SRC_LOGO = join(SRC, 'Doctor photos & logo');
+const SRC_RESULTS = join(SRC, 'before after');
 const OUT_IMG = join(ROOT, 'public', 'images', 'mommy-makeover');
 const OUT_RESULTS = join(OUT_IMG, 'results');
 const OUT_LOGO = join(ROOT, 'public', 'logo');
@@ -40,20 +41,25 @@ const PORTRAITS = [
 ];
 
 /**
- * Dummy result cases — [source plate, case slug, crop position, zoom].
+ * Real before/after cases, supplied by the clinic — [source file, case slug].
  *
- * Only three body photographs were supplied, so six cases are produced by
- * cropping each source two different ways (different framing and zoom). They
- * read as distinct cases at gallery size without pretending to be six real
- * patients. Placeholders only — see docs/open-questions.md.
+ * Each source is a single composite: before on the left, after on the right,
+ * already watermarked with the clinic's branding.
+ *
+ * They are used WHOLE and never split down the middle. The obvious shortcut is
+ * to cut each in half and feed the existing two-image card, but the seam is not
+ * where you would assume — measured across these six it lands anywhere from
+ * x=321 to x=404 on a 700px canvas. A fixed 50% cut would slice through a
+ * patient's body on most of them, and on a medical results gallery that is not
+ * a cosmetic defect.
  */
 const RESULT_CASES = [
-  ['procedure-tummy.jpg', 'case-1', 'centre', 1.0],
-  ['procedure-breast.jpg', 'case-2', 'centre', 1.0],
-  ['procedure-lipo.jpg', 'case-3', 'centre', 1.0],
-  ['procedure-tummy.jpg', 'case-4', 'top', 1.35],
-  ['procedure-lipo.jpg', 'case-5', 'bottom', 1.25],
-  ['procedure-breast.jpg', 'case-6', 'top', 1.3],
+  ['Untitled design (18).png', 'case-1'],
+  ['Untitled design (19).png', 'case-2'],
+  ['Untitled design (20).png', 'case-3'],
+  ['Untitled design (21).png', 'case-4'],
+  ['Untitled design (22).png', 'case-5'],
+  ['Untitled design (23).png', 'case-6'],
 ];
 
 const exists = async (p) => access(p).then(() => true).catch(() => false);
@@ -230,45 +236,36 @@ async function buildIcons() {
   }
 }
 
-async function buildDummyResults() {
-  console.log('\n· Before/after — DUMMY CONTENT');
-  const W = 800;
-  const H = 1000;
+async function buildResults() {
+  console.log('\n· Before/after — clinic-supplied composites');
 
-  for (const [plate, slug, position, zoom] of RESULT_CASES) {
-    const from = join(OUT_IMG, plate);
+  let built = 0;
+  for (const [file, slug] of RESULT_CASES) {
+    const from = join(SRC_RESULTS, file);
     if (!(await exists(from))) {
-      console.warn(`  ! ${plate} not found — skipped`);
+      console.warn(`  ! ${file} not found — skipped`);
       continue;
     }
 
-    // Zoom by cropping to a larger frame, then scaling back down.
-    const frame = (img) =>
-      img.resize(Math.round(W * zoom), Math.round(H * zoom), {
-        fit: 'cover',
-        position,
-      });
+    const meta = await sharp(from).metadata();
 
-    // "After" — the unmodified plate.
-    await frame(sharp(from))
-      .resize(W, H)
-      .jpeg({ quality: 85, mozjpeg: true })
-      .toFile(join(OUT_RESULTS, `${slug}-after.jpg`));
+    // No resize. The sources are 700×380 and the card renders narrower than
+    // that on every breakpoint, so scaling up would invent detail and scaling
+    // down would throw away the only copy of a real patient photograph that
+    // exists in this repo. Re-encode only.
+    await sharp(from)
+      .jpeg({ quality: 86, mozjpeg: true, chromaSubsampling: '4:4:4' })
+      .toFile(join(OUT_RESULTS, `${slug}.jpg`));
 
-    // "Before" — softened and desaturated so the pair shows a genuine visual
-    // difference. Purely a placeholder; depicts no real patient.
-    await frame(sharp(from))
-      .resize(W, H)
-      .modulate({ saturation: 0.62, brightness: 0.96 })
-      .blur(1.6)
-      .linear(0.94, 8)
-      .jpeg({ quality: 83, mozjpeg: true })
-      .toFile(join(OUT_RESULTS, `${slug}-before.jpg`));
-
-    console.log(`  ✓ ${slug}-before.jpg + ${slug}-after.jpg`);
+    console.log(`  ✓ ${slug}.jpg (${meta.width}×${meta.height})`);
+    built += 1;
   }
-  console.log('\n  ⚠ These are placeholders. Replace with real, consented');
-  console.log('    photographs and set isPlaceholder: false in the content file.');
+
+  if (built < RESULT_CASES.length) {
+    console.warn(`\n  ! only ${built}/${RESULT_CASES.length} cases built`);
+  }
+  console.log('\n  Real patient photographs. Consent must be on file before launch —');
+  console.log('  see docs/open-questions.md.');
 }
 
 async function main() {
@@ -282,7 +279,7 @@ async function main() {
   await buildHero();
   await buildLogos();
   await buildIcons();
-  await buildDummyResults();
+  await buildResults();
   console.log('\nDone.\n');
 }
 

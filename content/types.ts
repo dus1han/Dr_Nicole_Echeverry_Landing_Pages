@@ -168,10 +168,19 @@ export type PillarIcon = 'artistry' | 'personalised' | 'harmony' | 'care';
 
 export type ResultCase = {
   id: string;
-  caption: string;
-  detail: string;
-  before: ImageAsset;
-  after: ImageAsset;
+  /**
+   * A single composite: before on the left, after on the right. The clinic
+   * supplies them already paired and watermarked, and they are shown whole —
+   * see the note in scripts/prepare-assets.mjs for why they are not split.
+   */
+  image: ImageAsset;
+  /**
+   * Optional until the clinic supplies per-case detail. Inventing a procedure
+   * or a recovery time under a real patient's photograph is not a placeholder,
+   * it is a false claim, so these render only when present.
+   */
+  caption?: string;
+  detail?: string;
 };
 
 export type ResultsContent = Placeholderable & {

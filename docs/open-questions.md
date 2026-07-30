@@ -12,8 +12,25 @@ Client confirmed: use the logo spelling. Corroborated by her own website, Doctif
 Applies to all display copy, titles, meta, OG cards, structured data, alt text.
 **Not applied** to `info@dranicolecheverry.com`, `dranicolecheverry.com`, or the Facebook/Instagram URLs — those are live endpoints and stay byte-for-byte as supplied.
 
-### Patient reviews and before/after → **dummy content for now**
-Client approved. Six sample reviews and three before/after pairs are written and specified in [`content-map.md`](content-map.md) §9 and §11.
+### Before/after → **real photographs supplied** ✅
+Six clinic-supplied composites (before left, after right, already watermarked) replaced the
+generated placeholders. `results.isPlaceholder` is now `false`, so the sample ribbons and the
+content-gate warning for this section are gone.
+
+They are used **whole and never split down the middle**. The seam is not at the midpoint —
+measured across the six it lands between x=321 and x=404 on a 700px canvas — so a fixed 50%
+cut would slice through a patient's body. See the note in `scripts/prepare-assets.mjs`.
+
+Two things still outstanding on these:
+
+| | |
+|---|---|
+| 🔴 **Consent on file** | Real, identifiable patients. Written consent for web and paid-advertising use must exist before this page takes traffic. |
+| 🟡 **Per-case detail** | `caption` and `detail` are deliberately empty. The old values ("Breast lift", "6 months post-op") were invented for the dummy gallery; under a real patient's photograph the same words become a clinical claim about a specific person. Supply the real procedure and timeline per case and they render automatically. |
+
+### Patient reviews → **dummy content for now**
+Client approved. Six sample reviews are written and specified in
+[`content-map.md`](content-map.md) §9.
 
 **Guards so dummy content can't quietly ship:**
 | Guard | Status |
@@ -29,7 +46,7 @@ Client approved. Six sample reviews and three before/after pairs are written and
 > automatic protection; everything else depends on someone replacing the content before
 > the page is advertised.
 
-Before/after plates are generated from the supplied body photography (the "before" is a softened derivative of the "after"), so the drag-reveal demonstrates properly. **No real patient is depicted.**
+That warning now applies to the **reviews only** — the before/after imagery is genuine.
 
 ### Clinic location on a map
 Added as section 15, "Visit the Clinic" — keyless Google Maps embed (no API key or billing account), brand-framed with a gold hairline and blush vignette, lazy-mounted, with a static fallback card if the iframe is blocked. Clinic name resolved from the share link: **Kasaesthetic Clinic**. Address still needed — see below.

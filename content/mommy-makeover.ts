@@ -233,53 +233,27 @@ export const mommyMakeover: LandingPageContent = {
     // DUMMY CONTENT — plates generated from the supplied body photography.
     // No real patient is depicted. Replace with consented photographs and set
     // this to false. See docs/open-questions.md.
-    isPlaceholder: true,
+    /*
+     * Real, clinic-supplied photographs — no longer placeholders, so the sample
+     * ribbons no longer render.
+     *
+     * `caption` and `detail` are deliberately omitted. The previous values
+     * ("Breast lift", "6 months post-op") were invented to make the dummy
+     * gallery look plausible. Under a real patient's photograph the same words
+     * stop being placeholder text and become a clinical claim about a specific
+     * person, so they are gone until the clinic supplies the real ones.
+     */
+    isPlaceholder: false,
     eyebrow: 'Real Results',
     heading: 'Before & After',
     lead: 'Every result belongs to a real woman with a real story. Dr. Nicole shares her full gallery personally during your consultation.',
     cases: [
-      {
-        id: 'case-1',
-        caption: 'Tummy tuck + 360° liposuction',
-        detail: '6 months post-op',
-        before: { src: `${IMG}/results/case-1-before.jpg`, alt: 'Before treatment' },
-        after: { src: `${IMG}/results/case-1-after.jpg`, alt: 'After treatment' },
-      },
-      {
-        id: 'case-2',
-        caption: 'Breast lift with augmentation',
-        detail: '4 months post-op',
-        before: { src: `${IMG}/results/case-2-before.jpg`, alt: 'Before treatment' },
-        after: { src: `${IMG}/results/case-2-after.jpg`, alt: 'After treatment' },
-      },
-      {
-        id: 'case-3',
-        caption: 'Full Mommy Makeover',
-        detail: '9 months post-op',
-        before: { src: `${IMG}/results/case-3-before.jpg`, alt: 'Before treatment' },
-        after: { src: `${IMG}/results/case-3-after.jpg`, alt: 'After treatment' },
-      },
-      {
-        id: 'case-4',
-        caption: 'Tummy tuck with muscle repair',
-        detail: '5 months post-op',
-        before: { src: `${IMG}/results/case-4-before.jpg`, alt: 'Before treatment' },
-        after: { src: `${IMG}/results/case-4-after.jpg`, alt: 'After treatment' },
-      },
-      {
-        id: 'case-5',
-        caption: '360° liposuction',
-        detail: '7 months post-op',
-        before: { src: `${IMG}/results/case-5-before.jpg`, alt: 'Before treatment' },
-        after: { src: `${IMG}/results/case-5-after.jpg`, alt: 'After treatment' },
-      },
-      {
-        id: 'case-6',
-        caption: 'Breast lift',
-        detail: '6 months post-op',
-        before: { src: `${IMG}/results/case-6-before.jpg`, alt: 'Before treatment' },
-        after: { src: `${IMG}/results/case-6-after.jpg`, alt: 'After treatment' },
-      },
+      { id: 'case-1', image: { src: `${IMG}/results/case-1.jpg`, alt: 'Before and after a Mommy Makeover' } },
+      { id: 'case-2', image: { src: `${IMG}/results/case-2.jpg`, alt: 'Before and after a Mommy Makeover' } },
+      { id: 'case-3', image: { src: `${IMG}/results/case-3.jpg`, alt: 'Before and after a Mommy Makeover' } },
+      { id: 'case-4', image: { src: `${IMG}/results/case-4.jpg`, alt: 'Before and after a Mommy Makeover' } },
+      { id: 'case-5', image: { src: `${IMG}/results/case-5.jpg`, alt: 'Before and after a Mommy Makeover' } },
+      { id: 'case-6', image: { src: `${IMG}/results/case-6.jpg`, alt: 'Before and after a Mommy Makeover' } },
     ],
     /*
      * RETAINED BUT NOT RENDERED. The client asked for this to be removed from
