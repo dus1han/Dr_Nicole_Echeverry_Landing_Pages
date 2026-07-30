@@ -130,7 +130,13 @@ export function MeetDoctor(content: DoctorContent) {
           {content.credentials && (
             <Reveal className="pt-1">
               <div className="border-y border-plum-900/12 py-6">
-                <ul className="flex flex-wrap items-center gap-x-6 gap-y-5 sm:gap-x-8">
+                {/*
+                  Centred, not left-aligned with the copy above it. Five marks
+                  of differing widths left-aligned end the row on a ragged edge
+                  well short of the column, which reads as a layout accident
+                  rather than a set.
+                */}
+                <ul className="flex flex-wrap items-center justify-center gap-x-6 gap-y-5 sm:gap-x-8">
                   {content.credentials.items.map((mark) => (
                     <li key={mark.src}>
                       {/*
