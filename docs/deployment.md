@@ -383,8 +383,9 @@ Nothing in them names this client, this port or this domain.
 | Port | Project |
 |---|---|
 | 3101 | `dr-nicole-landing-pages` |
-| 3102 | *free* |
+| 3102 | `dr-luis-landing-pages` |
 | 3103 | *free* |
+| 3104 | *free* |
 
 > **Two projects on one port means the second container silently fails to start.**
 > Nothing warns you; the old one just keeps serving. Write the port down here when you
