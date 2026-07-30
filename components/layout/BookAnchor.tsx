@@ -5,13 +5,12 @@ import { useEffect } from 'react';
 /**
  * Makes every "Book" link land in the right place for the viewport.
  *
- * Desktop: scroll to the booking SECTION, so the heading and the assurances
- * beside the form are read first — they do real persuasive work.
+ * Desktop: scroll to the booking SECTION, so the heading is read first and the
+ * form arrives in context rather than as a bare card.
  *
- * Mobile: scroll straight to the FORM. The layout stacks there, so landing on
- * the section would put the heading and three assurance lines between the tap
- * and the first input — the visitor has already decided; don't make her scroll
- * again to act on it.
+ * Mobile: scroll straight to the FORM, so the heading does not sit between the
+ * tap and the first input — the visitor has already decided; don't make her
+ * scroll again to act on it.
  *
  * Delegated from the document, so it covers every `#book` link on the page
  * (nav, hero, section CTAs, the mobile bar) with no per-link wiring.

@@ -2,11 +2,11 @@
 
 import { useState, type FormEvent } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
-import { Loader2, ShieldCheck, Check } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import type { BookingContent } from '@/content/types';
 import { consultationSchema } from '@/lib/consultation-schema';
 import { SectionHeading } from '@/components/ui/SectionHeading';
-import { Reveal, RevealGroup, RevealItem } from '@/components/ui/Reveal';
+import { Reveal } from '@/components/ui/Reveal';
 import { Button } from '@/components/ui/Button';
 import { TextField } from '@/components/ui/Field';
 import { LEAD_FLAG, readClickId } from '@/lib/analytics';
@@ -99,40 +99,25 @@ export function BookingForm({ slug, ...content }: BookingContent & { slug: strin
       {/* Aurora removed for scroll performance — see WhatIsIt.tsx. */}
 
       {/*
-        items-stretch, not items-center: both columns take the full row height
-        and the taller one sets it, so the copy and the form card start and
-        finish on the same lines instead of the copy overhanging the card.
-      */}
-      <div className="container-page relative z-10 grid items-stretch gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
-        {/*
-          The contact rail that used to sit here (phone / WhatsApp / email /
-          clinic rows) was removed at the client's request — every one of those
-          is already in the footer and the floating CTA bar. Three short
-          assurances take its place so the column still balances the form
-          rather than leaving the heading floating in white space.
-        */}
-        <div className="flex flex-col gap-7 lg:justify-between">
-          <SectionHeading
-            eyebrow={content.eyebrow}
-            heading={content.heading}
-            lead={content.lead}
-            headingClassName="text-[clamp(1.875rem,3.4vw,2.75rem)]"
-          />
+        One centred column. The supporting copy, the assurances and the privacy
+        line were all removed at the client's request, which left the two-column
+        split with nothing in its left half — so the form became the section
+        rather than sitting beside an empty space.
 
-          <RevealGroup className="flex flex-col gap-3.5">
-            {content.assurances.map((item) => (
-              <RevealItem key={item} className="flex items-start gap-3">
-                <span
-                  aria-hidden="true"
-                  className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-rose-500/12 ring-1 ring-rose-400/35"
-                >
-                  <Check className="h-3.5 w-3.5 text-rose-600" />
-                </span>
-                <span className="text-[0.9375rem] leading-relaxed text-ink/80">{item}</span>
-              </RevealItem>
-            ))}
-          </RevealGroup>
-        </div>
+        max-w-xl, not the full container: a three-field form stretched to the
+        page width reads as harder work than it is, and long input lines are
+        measurably slower to scan.
+
+        The width sits on an inner wrapper rather than alongside `container-page`
+        — both set max-width, and which won would depend on stylesheet order.
+      */}
+      <div className="container-page relative z-10">
+        <div className="mx-auto flex max-w-xl flex-col gap-8">
+        <SectionHeading
+          heading={content.heading}
+          align="center"
+          headingClassName="text-[clamp(1.875rem,3.4vw,2.75rem)]"
+        />
 
         {/*
           id="book-form" is the mobile scroll target. On phones the "Book"
@@ -145,10 +130,14 @@ export function BookingForm({ slug, ...content }: BookingContent & { slug: strin
           for the sticky header, and the two stack. A larger margin here left
           ~100px of dead space above the first field after a mobile tap.
         */}
-        <div id="book-form" className="scroll-mt-4 lg:h-full">
-          <Reveal className="lg:h-full">
-            <div className="relative rounded-[var(--radius-lg)] bg-[image:var(--gradient-brand)] p-px shadow-[var(--shadow-card)] lg:h-full">
-              <div className="rounded-[calc(var(--radius-lg)-1px)] bg-white p-7 sm:p-9 lg:flex lg:h-full lg:flex-col lg:justify-center">
+        {/*
+          The h-full stretching that used to be on these three elements is gone
+          with the column it was matching — the card now sizes to its contents.
+        */}
+        <div id="book-form" className="scroll-mt-4">
+          <Reveal>
+            <div className="relative rounded-[var(--radius-lg)] bg-[image:var(--gradient-brand)] p-px shadow-[var(--shadow-card)]">
+              <div className="rounded-[calc(var(--radius-lg)-1px)] bg-white p-7 sm:p-9">
               {status === 'success' ? (
                 <motion.div
                   className="flex min-h-80 flex-col items-center justify-center gap-5 text-center"
@@ -247,16 +236,12 @@ export function BookingForm({ slug, ...content }: BookingContent & { slug: strin
                   <p className="text-center font-sans text-xs leading-relaxed text-muted">
                     {content.consentNote}
                   </p>
-
-                  <p className="flex items-center justify-center gap-2 font-sans text-xs text-muted">
-                    <ShieldCheck className="h-3.5 w-3.5 text-gold-500" aria-hidden="true" />
-                    {content.privacyNote}
-                  </p>
                 </form>
               )}
               </div>
             </div>
           </Reveal>
+        </div>
         </div>
       </div>
     </section>

@@ -443,23 +443,19 @@ export const mommyMakeover: LandingPageContent = {
 
   /* ---------------------------------------------------------------- */
 
+  /*
+   * Stripped to a heading and the form at the client's request: the supporting
+   * copy, the three assurances and the privacy line are all gone. The section
+   * is now a single centred column.
+   */
   booking: {
-    eyebrow: 'Book Your Consultation',
-    heading: 'Your consultation is a conversation, not a commitment.',
-    lead: 'Leave your details and Dr. Nicole’s team will contact you to arrange a private appointment — in person or online.',
-    submitLabel: 'Request My Consultation',
+    heading: 'Book Your Consultation',
+    submitLabel: 'Book My Consultation',
     successTitle: 'Thank you.',
     successBody:
       'Dr. Nicole’s team will contact you within one working day to arrange your private consultation.',
     consentNote:
       'By requesting a consultation you agree to be contacted about your enquiry.',
-    privacyNote: 'Your details are confidential and never shared.',
-    // Fill the space left by the removed contact rail and balance the form.
-    assurances: [
-      'A private, unhurried conversation — never a sales call',
-      'In person in Dubai, or online if you are travelling',
-      'A reply within one working day',
-    ],
   },
 
   /*

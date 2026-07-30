@@ -224,17 +224,12 @@ export type ClosingCtaContent = {
 };
 
 export type BookingContent = {
-  eyebrow: string;
   heading: string;
-  lead: string;
   submitLabel: string;
   successTitle: string;
   successBody: string;
   /** Inline consent line shown beneath the submit button. */
   consentNote: string;
-  privacyNote: string;
-  /** Short reassurance points shown beside the form on desktop. */
-  assurances: string[];
 };
 
 export type ClinicMapContent = {
