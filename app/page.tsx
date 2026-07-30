@@ -6,15 +6,14 @@ import { site } from '@/content/site';
 import { AuroraBackground } from '@/components/effects/AuroraBackground';
 
 /**
- * Its own title rather than the layout's fallback.
+ * Its own title rather than the layout's fallback, which is the full credentials
+ * string and too long for a tab.
  *
- * The fallback has to stay generic enough for any page that forgets to set one,
- * so using it here would mean this page and that hypothetical page share a
- * title. It also matches the campaign pages' `Subject | Doctor` shape, which is
- * what makes a row of open tabs readable.
+ * Just the name: this is the directory, not a subject, so there is nothing to
+ * put before the pipe. The campaign pages supply their own `Subject | Doctor`.
  */
 export const metadata: Metadata = {
-  title: `${site.doctor.name} | Plastic Surgery`,
+  title: site.doctor.name,
 };
 
 /**

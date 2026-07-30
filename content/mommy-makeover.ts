@@ -12,7 +12,7 @@ export const mommyMakeover: LandingPageContent = {
   slug: 'mommy-makeover',
 
   meta: {
-    title: 'Mommy Makeover in Dubai | Dr. Nicole Echeverry — Plastic Surgeon',
+    title: 'Mommy Makeover in Dubai | Dr. Nicole Echeverry',
     description:
       'Feel like yourself again with a personalised Mommy Makeover in Dubai by Dr. Nicole Echeverry — world-class body contouring inspired by Colombian aesthetic artistry. Book a private consultation.',
     ogHeadline: 'Feel Like Yourself Again',
