@@ -1,8 +1,21 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 import { site } from '@/content/site';
 import { AuroraBackground } from '@/components/effects/AuroraBackground';
+
+/**
+ * Its own title rather than the layout's fallback.
+ *
+ * The fallback has to stay generic enough for any page that forgets to set one,
+ * so using it here would mean this page and that hypothetical page share a
+ * title. It also matches the campaign pages' `Subject | Doctor` shape, which is
+ * what makes a row of open tabs readable.
+ */
+export const metadata: Metadata = {
+  title: `${site.doctor.name} | Plastic Surgery`,
+};
 
 /**
  * Root index.
