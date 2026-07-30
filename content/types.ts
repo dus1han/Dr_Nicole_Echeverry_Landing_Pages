@@ -129,7 +129,6 @@ export type ProceduresContent = {
   eyebrow: string;
   heading: string;
   items: Procedure[];
-  footerNote: string;
   cta: Cta;
 };
 

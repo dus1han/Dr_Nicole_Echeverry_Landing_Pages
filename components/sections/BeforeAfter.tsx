@@ -81,10 +81,12 @@ export function BeforeAfter(content: ResultsContent) {
           ))}
         </RevealGroup>
 
+        {/*
+          The results disclaimer was removed at the client's request. The text is
+          retained in the page content (`results.disclaimer`) so it can be put
+          back by restoring one paragraph — see docs/open-questions.md.
+        */}
         <Reveal className="mt-10 flex flex-col items-center gap-5 text-center">
-          <p className="max-w-xl font-sans text-xs leading-relaxed text-muted">
-            {content.disclaimer}
-          </p>
           <ButtonLink href={content.cta.href} variant="secondary" size="lg" withArrow>
             {content.cta.label}
           </ButtonLink>

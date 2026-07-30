@@ -141,7 +141,6 @@ export const mommyMakeover: LandingPageContent = {
         },
       },
     ],
-    footerNote: 'Every plan is built around you, never around a package.',
     cta: { label: 'Book Your Consultation', href: '#book' },
   },
 
@@ -285,6 +284,10 @@ export const mommyMakeover: LandingPageContent = {
       },
     ],
     /*
+     * RETAINED BUT NOT RENDERED. The client asked for this to be removed from
+     * the page; the wording is kept here so reinstating it is one paragraph in
+     * BeforeAfter.tsx rather than a rewrite.
+     *
      * Client-supplied wording. One correction: the original said "your own
      * FACIAL anatomy" — this is a body page (tummy tuck, breast, liposuction),
      * so it reads "your own anatomy". The facial wording looks carried over

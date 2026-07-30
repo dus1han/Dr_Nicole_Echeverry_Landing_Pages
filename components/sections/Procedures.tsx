@@ -82,10 +82,8 @@ export function Procedures(content: ProceduresContent) {
 
         <GoldDivider className="mt-12" />
 
+        {/* The closing line above this CTA was removed at the client's request. */}
         <Reveal className="mt-7 flex flex-col items-center gap-5 text-center">
-          <p className="max-w-md font-display text-[clamp(1.25rem,2vw,1.625rem)] italic leading-snug text-plum-700">
-            {content.footerNote}
-          </p>
           <ButtonLink href={content.cta.href} size="lg" magnetic>
             {content.cta.label}
           </ButtonLink>
