@@ -310,54 +310,59 @@ export const mommyMakeover: LandingPageContent = {
   /* ---------------------------------------------------------------- */
 
   reviews: {
-    // DUMMY CONTENT — approved by the client for now. These are samples that
-    // model the tone real reviews should have. Excluded from Review /
-    // AggregateRating structured data while this flag is true.
-    isPlaceholder: true,
+    /*
+     * REAL, client-supplied reviews. `isPlaceholder: false` turns off the dev
+     * warning and turns on the "Verified patient" badge.
+     *
+     * Reproduced as supplied. The originals carry a few spelling and grammar
+     * slips ("awsome", "with my eyes close") and they are kept — a testimonial
+     * that has been tidied up is no longer the words the patient wrote, and on
+     * a medical page that distinction is worth more than the polish.
+     *
+     * `rating` is absent throughout because no ratings were supplied. Five
+     * stars is the likely answer and that is not a good enough reason to
+     * publish it under a real person's name; the stars simply do not render.
+     * Supply the real ratings and they come back with no code change.
+     *
+     * `descriptor` is likewise absent — these arrived as usernames with no
+     * location or context.
+     */
+    isPlaceholder: false,
     eyebrow: 'In Their Words',
     heading: 'Patient Reviews',
     items: [
       {
+        title: 'I Love my Body! My body came out beautiful, my skin was fixed',
         quote:
-          'I didn’t want to look like someone else. I wanted to look like me before three pregnancies. Dr. Nicole was the first surgeon who actually understood the difference.',
-        name: 'Layla H.',
-        descriptor: 'Mother of three · Dubai',
-        rating: 5,
+          'My experience with Dr. Echeverry was absolutely amazing! I had liposculpture with her and her husband Dr. Reyes. The work was phenomenal. Everything healed extremely quickly. Dr. Echeverry was so sweet, she truly is a Barbie body sculptor. Not only did she give me my dream body, but she even fixed my acne with some prescription acne medication. My body came out beautiful, my skin was fixed, thanks to Dr. Echeverry.',
+        name: 'Laluna2016',
+      },
+      {
+        title: 'Completely natural results — now I can wear all the t-shirts I like',
+        quote:
+          'What a satisfactory experience doctor Nicole is not just a great and fantastic surgeon is also a fantastic person. I got such beautiful results in my breast, completely natural now I can wear all the T-shirts I like. I recommend her 100% even with my eyes close.',
+        name: 'Gentle634576',
+      },
+      {
+        title: 'Nicole is the Barbie Surgeon!',
+        quote:
+          'Nicole will give you results that are just as beautiful as she is! She works hand in hand with her husband and they are the perfect team! I am so glad I came to them. I now have family in Colombia! She applied a female touch to the work I wanted done. Thank you Nicole!',
+        name: 'The Cam Show',
       },
       {
         quote:
-          'What surprised me most was how much time she gave me. No rushing, no pressure — she even told me which things she wouldn’t recommend for my body.',
-        name: 'Sarah M.',
-        descriptor: 'Mother of two · Dubai Marina',
-        rating: 5,
+          'I did with the dr a full facelift. My results was awsome. I am so happy with all the procedures. I am so beautiful now. Trust me, this is the best place to do your surgery. You have to come to Colombia to do it.',
+        name: 'Luz Pedreros',
       },
       {
         quote:
-          'I put this off for six years because I was scared of the recovery. Her team called to check on me almost every day. I was never once left wondering if something was normal.',
-        name: 'Priya R.',
-        descriptor: 'Mother of one · Jumeirah',
-        rating: 5,
+          'The chemistry of feeling great! From the consultation to today, I had a professional and passionate team, working in love to best results. Can’t be more grateful for their service and best to serve and accomplish my expectations.',
+        name: 'Eroga',
       },
       {
         quote:
-          'My husband says I stand differently now. I think that’s the part nobody tells you about — it isn’t just the body, it’s how you carry it.',
-        name: 'Noor A.',
-        descriptor: 'Mother of two · Dubai',
-        rating: 5,
-      },
-      {
-        quote:
-          'I flew in from Riyadh for the consultation and stayed for the surgery. Worth every hour of the trip. The results look like nothing was ever done.',
-        name: 'Fatima K.',
-        descriptor: 'Mother of four · Riyadh',
-        rating: 5,
-      },
-      {
-        quote:
-          'I’d seen surgeons who talked about my body like a project. Dr. Nicole talked about it like it belonged to a person. That’s why I chose her.',
-        name: 'Elena V.',
-        descriptor: 'Mother of two · Downtown Dubai',
-        rating: 5,
+          'This woman is amazing, smart, and knows exactly how a surgical procedure should go. Dedicated, patient, answered all my questions even though I was so scared. I had previously deformed breasts and this doctor gave me my breasts back… including my confidence! I cannot thank her enough!!!!!',
+        name: 'Celebrated90713',
       },
     ],
   },

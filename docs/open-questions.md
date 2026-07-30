@@ -28,9 +28,28 @@ Two things still outstanding on these:
 | 🔴 **Consent on file** | Real, identifiable patients. Written consent for web and paid-advertising use must exist before this page takes traffic. |
 | 🟡 **Per-case detail** | `caption` and `detail` are deliberately empty. The old values ("Breast lift", "6 months post-op") were invented for the dummy gallery; under a real patient's photograph the same words become a clinical claim about a specific person. Supply the real procedure and timeline per case and they render automatically. |
 
-### Patient reviews → **dummy content for now**
-Client approved. Six sample reviews are written and specified in
-[`content-map.md`](content-map.md) §9.
+### Patient reviews → **real reviews supplied** ✅
+Six client-supplied reviews replaced the samples. `reviews.isPlaceholder` is now `false`.
+
+Reproduced as supplied, including their spelling and grammar slips. A tidied-up
+testimonial is no longer the words the patient wrote, and on a medical page that
+distinction is worth more than the polish. Say the word if you want them copyedited.
+
+Four things to decide on these:
+
+| | |
+|---|---|
+| 🟡 **No star ratings** | None were supplied, so the stars do not render. Five stars is the likely answer and that is not a good enough reason to publish it under a real person's name. Supply the real ratings and they reappear with no code change. |
+| 🟡 **"Verified patient" badge now shows** | It renders on every non-placeholder review. It is a factual claim — confirm the clinic can stand behind it, or say so and I will remove it. |
+| 🟡 **One review is for a facelift** | *"I did with the dr a full facelift"* — genuine, but on a Mommy Makeover page it is off-message, and a visitor scanning for body-contouring results may find it confusing. Your call whether to keep it here or save it for a facial page. |
+| 🟡 **Several reference Colombia** | *"You have to come to Colombia to do it"*, *"I now have family in Colombia"*. True to the surgeon's history, but this page sells a Dubai clinic and the ads will target Dubai. Worth deciding deliberately rather than by omission. |
+
+> **Do not mark these up as first-party `Review` structured data** if they were collected on a
+> third-party platform — Google's guidelines prohibit it. No review structured data is emitted
+> at all today, so nothing needs changing; this is a note for whoever is tempted to add it.
+
+No `descriptor` (e.g. "Mother of two · Dubai") was supplied, so that line is omitted rather
+than invented.
 
 **Guards so dummy content can't quietly ship:**
 | Guard | Status |
@@ -46,7 +65,10 @@ Client approved. Six sample reviews are written and specified in
 > automatic protection; everything else depends on someone replacing the content before
 > the page is advertised.
 
-That warning now applies to the **reviews only** — the before/after imagery is genuine.
+Both the reviews and the before/after imagery are now genuine. The remaining placeholder on
+the page is the **trust bar statistics** (`trust.isPlaceholder`) — years of experience,
+procedures performed, countries trained in, patient satisfaction — which are still invented
+and are the last thing the content gate flags.
 
 ### Clinic location on a map
 Added as section 15, "Visit the Clinic" — keyless Google Maps embed (no API key or billing account), brand-framed with a gold hairline and blush vignette, lazy-mounted, with a static fallback card if the iframe is blocked. Clinic name resolved from the share link: **Kasaesthetic Clinic**. Address still needed — see below.

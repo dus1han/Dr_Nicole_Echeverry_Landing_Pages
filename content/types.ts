@@ -202,8 +202,16 @@ export type JourneyContent = {
 export type Review = {
   quote: string;
   name: string;
-  descriptor: string;
-  rating: number;
+  /** Headline the patient gave the review, where they gave one. */
+  title?: string;
+  /** Context such as "Mother of two · Dubai", where it is known. */
+  descriptor?: string;
+  /**
+   * Optional, and omitted rather than assumed. A star rating the patient did
+   * not actually give is a fabricated claim about a real person — the fact that
+   * five stars is the likely answer is not a reason to publish it.
+   */
+  rating?: number;
 };
 
 export type ReviewsContent = Placeholderable & {

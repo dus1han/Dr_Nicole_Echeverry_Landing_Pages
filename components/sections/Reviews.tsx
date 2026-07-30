@@ -25,18 +25,27 @@ function ReviewCard({
         className="absolute -right-2 -top-2 h-20 w-20 text-gold-400/18"
         aria-hidden="true"
       />
-      <div className="flex gap-1" aria-label={`${review.rating} out of 5 stars`}>
-        {Array.from({ length: 5 }, (_, i) => (
-          <Star
-            key={i}
-            className={cn(
-              'h-4 w-4',
-              i < review.rating ? 'fill-gold-500 text-gold-500' : 'text-blush-200',
-            )}
-            aria-hidden="true"
-          />
-        ))}
-      </div>
+      {/* Stars render only for reviews that actually carry a rating. */}
+      {typeof review.rating === 'number' && (
+        <div className="flex gap-1" aria-label={`${review.rating} out of 5 stars`}>
+          {Array.from({ length: 5 }, (_, i) => (
+            <Star
+              key={i}
+              className={cn(
+                'h-4 w-4',
+                i < review.rating! ? 'fill-gold-500 text-gold-500' : 'text-blush-200',
+              )}
+              aria-hidden="true"
+            />
+          ))}
+        </div>
+      )}
+
+      {review.title && (
+        <p className="relative font-display text-[1.0625rem] font-semibold leading-snug text-plum-800">
+          {review.title}
+        </p>
+      )}
 
       <p className="relative flex-1 text-[0.9375rem] leading-[1.78] text-ink/85">
         “{review.quote}”
@@ -44,7 +53,9 @@ function ReviewCard({
 
       <div className="relative border-t border-blush-200 pt-5">
         <p className="font-display text-base font-semibold text-plum-800">{review.name}</p>
-        <p className="mt-0.5 font-sans text-[0.8125rem] text-muted">{review.descriptor}</p>
+        {review.descriptor && (
+          <p className="mt-0.5 font-sans text-[0.8125rem] text-muted">{review.descriptor}</p>
+        )}
         {/*
           Suppressed on placeholders — a "Verified patient" badge on a review
           marked SAMPLE contradicts itself, and the whole point of the ribbon
