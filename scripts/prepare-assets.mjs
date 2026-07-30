@@ -86,9 +86,30 @@ const CREDENTIAL_LOGOS = [
   ['Logo_universidad_del_tolima_version_web.png', 'universidad-del-tolima'],
 ];
 
-/** 2× the rendered box, so the marks stay crisp on a retina screen. */
-const CRED_W = 240;
-const CRED_H = 144;
+/**
+ * 2× the rendered box, so the marks stay crisp on a retina screen.
+ *
+ * A shared canvas means one width/height in the markup and therefore no layout
+ * shift, but it also pads every mark out to the same rendered width. Keep it
+ * only slightly wider than the widest artwork (the Sinú mark, at 1.39:1) —
+ * a roomier canvas is dead space that pushes five logos onto two rows.
+ */
+const CRED_W = 200;
+const CRED_H = 120;
+
+/**
+ * Every mark is redrawn as a single-tone silhouette in this colour.
+ *
+ * Not a stylistic preference — three of the five sources have white baked into
+ * the file, so on anything other than a white card they show as white
+ * rectangles. Deriving an alpha channel from luminance removes the background
+ * for all five at once and, as a side effect, resolves the four clashing brand
+ * palettes into one band.
+ *
+ * plum-900: dark enough to read on the blush wash, muted enough not to compete
+ * with the copy it sits under.
+ */
+const CRED_TINT = { r: 0x58, g: 0x40, b: 0x49 };
 
 const exists = async (p) => access(p).then(() => true).catch(() => false);
 
@@ -314,18 +335,43 @@ async function buildCredentialLogos() {
       .toBuffer();
 
     const trimmed = await sharp(flattened).trim({ threshold: 12 }).toBuffer();
-    const { width, height } = await sharp(trimmed).metadata();
 
-    await sharp(trimmed)
+    /*
+     * Luminance becomes alpha: white background → fully transparent, the ink of
+     * the mark → fully opaque, and the greys in between keep their weight so
+     * fine lettering does not turn into a solid blob.
+     *
+     * `normalise` first because the JPEG source has an off-white background
+     * that compression left at roughly 250 rather than 255 — without it that
+     * background stays very faintly visible as a rectangle, which is the exact
+     * problem this is meant to solve.
+     */
+    const { data, info } = await sharp(trimmed)
+      .greyscale()
+      .normalise()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+
+    const rgba = Buffer.alloc(info.width * info.height * 4);
+    for (let i = 0; i < info.width * info.height; i += 1) {
+      rgba[i * 4] = CRED_TINT.r;
+      rgba[i * 4 + 1] = CRED_TINT.g;
+      rgba[i * 4 + 2] = CRED_TINT.b;
+      rgba[i * 4 + 3] = 255 - data[i];
+    }
+
+    await sharp(rgba, { raw: { width: info.width, height: info.height, channels: 4 } })
       .resize(CRED_W, CRED_H, {
         fit: 'contain',
-        background: '#ffffff',
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
         withoutEnlargement: false,
       })
       .png({ compressionLevel: 9 })
       .toFile(join(OUT_CREDS, `${slug}.png`));
 
-    console.log(`  ✓ ${slug}.png  (trimmed to ${width}×${height} → ${CRED_W}×${CRED_H})`);
+    console.log(
+      `  ✓ ${slug}.png  (trimmed to ${info.width}×${info.height} → ${CRED_W}×${CRED_H}, tinted)`,
+    );
   }
 }
 

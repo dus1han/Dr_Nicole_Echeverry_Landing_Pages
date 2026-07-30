@@ -111,12 +111,55 @@ export function MeetDoctor(content: DoctorContent) {
           </Reveal>
 
           {/*
-            A real signature belongs here — a gold rule stands in until a scan
-            is supplied (docs/open-questions.md §14).
+            Credential ribbon — directly under the bio, above the CTA.
+
+            It sits inside the copy column rather than spanning the section,
+            because the sentence it substantiates is here: "international
+            training" is otherwise a claim the reader takes on faith.
+
+            Hairline above and below, no card and no label. The marks are
+            recognised on sight by the people who care about them, and a
+            boxed-off panel with a heading made the section read as having two
+            endings.
+
+            This replaces the short gold rule that stood in for a signature —
+            the rule and the ribbon's top hairline sat a few pixels apart and
+            read as clutter. The signature is still outstanding; see
+            docs/open-questions.md.
           */}
-          <Reveal className="pt-1">
-            <span className="block h-px w-40 bg-[linear-gradient(90deg,var(--color-gold-500),transparent)]" />
-          </Reveal>
+          {content.credentials && (
+            <Reveal className="pt-1">
+              <div className="border-y border-plum-900/12 py-6">
+                <ul className="flex flex-wrap items-center gap-x-6 gap-y-5 sm:gap-x-8">
+                  {content.credentials.items.map((mark) => (
+                    <li key={mark.src}>
+                      {/*
+                        Baked to a single tone at build time rather than tinted
+                        here — CSS cannot recolour a raster image without filter
+                        gymnastics that break as soon as a logo is not already
+                        monochrome.
+                      */}
+                      {/*
+                        Same hover feel as before — a slow fade to full strength
+                        on the mark under the cursor. The previous version went
+                        greyscale-to-colour, which no longer applies now that the
+                        marks are a single baked tone.
+                      */}
+                      <Image
+                        src={mark.src}
+                        alt={mark.name}
+                        title={mark.name}
+                        width={200}
+                        height={120}
+                        sizes="110px"
+                        className="h-10 w-auto opacity-80 transition-opacity duration-500 hover:opacity-100 sm:h-11"
+                      />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </Reveal>
+          )}
 
           <Reveal>
             <ButtonLink href={content.cta.href} size="lg" magnetic>
@@ -126,66 +169,6 @@ export function MeetDoctor(content: DoctorContent) {
         </div>
       </div>
 
-      {/*
-        Credential ribbon.
-
-        Full width beneath the grid rather than inside the text column: five
-        marks squeezed into a half-width column would be too small to recognise,
-        and recognition is the entire point of showing them.
-
-        It sits directly after the bio because that is where the claim it
-        substantiates is made — "international training" is otherwise something
-        the reader has to take on faith.
-      */}
-      {content.credentials && (
-        <div className="container-page relative z-10 mt-14 lg:mt-18">
-          <Reveal>
-            {/*
-              Solid white, not a translucent wash. Three of the five marks have
-              white baked into the source and are padded onto white to share a
-              canvas — over a translucent card each one showed as a brighter
-              rectangle against the blush behind it. An opaque card makes those
-              backgrounds vanish, and drops a backdrop-blur that was costing
-              compositor work for no visible gain.
-            */}
-            <div className="rounded-[var(--radius-lg)] border border-blush-200 bg-white px-6 py-7 shadow-[var(--shadow-sm)] sm:px-10">
-              {/*
-                plum-700, not gold — a muted gold on this blush wash measures
-                about 2.3:1 and fails AA. Same fix as every other eyebrow on
-                the page.
-              */}
-              <p className="text-center font-sans text-[11px] font-bold uppercase tracking-[0.18em] text-plum-700">
-                {content.credentials.label}
-              </p>
-
-              <ul className="mt-6 flex flex-wrap items-center justify-center gap-x-10 gap-y-7 sm:gap-x-14">
-                {content.credentials.items.map((mark) => (
-                  <li key={mark.src}>
-                    {/*
-                      Desaturated at rest, full colour on hover.
-
-                      These five marks are red, teal, cyan and orange. Shown at
-                      full strength together they fight each other and the calm
-                      palette this page was built around; muted, they read as
-                      one band. Opacity stays high enough that they are never
-                      ambiguous — this is a credibility signal, not decoration.
-                    */}
-                    <Image
-                      src={mark.src}
-                      alt={mark.name}
-                      title={mark.name}
-                      width={240}
-                      height={144}
-                      sizes="120px"
-                      className="h-16 w-auto grayscale transition-all duration-500 hover:grayscale-0 sm:h-[4.5rem]"
-                    />
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </Reveal>
-        </div>
-      )}
     </section>
   );
 }
