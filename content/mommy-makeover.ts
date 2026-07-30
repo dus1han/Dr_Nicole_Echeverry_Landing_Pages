@@ -186,6 +186,32 @@ export const mommyMakeover: LandingPageContent = {
       alt: 'Dr. Nicole Echeverry seated, wearing a white tailored suit',
     },
     cta: { label: 'Book a Consultation with Dr. Nicole', href: '#book' },
+
+    /*
+     * Substantiates "international training" in the bio directly above, which
+     * is otherwise a claim the reader has to take on faith.
+     *
+     * Names are alt text and tooltips only. Setting five institution names as
+     * visible copy would compete with the bio for attention and give the band
+     * five different typefaces' worth of visual noise; the marks are recognised
+     * on sight by the audience that cares.
+     */
+    credentials: {
+      label: 'Training & Affiliations',
+      items: [
+        { name: 'American Society of Plastic Surgeons', src: '/logo/credentials/asps.png' },
+        { name: 'International Society of Aesthetic Plastic Surgery', src: '/logo/credentials/isaps.png' },
+        {
+          name: 'Arab Association of Surgical and Medical Aesthetics',
+          src: '/logo/credentials/aasma.png',
+        },
+        {
+          name: 'Universidad del Sinú — Elías Bechara Zainúm',
+          src: '/logo/credentials/universidad-del-sinu.png',
+        },
+        { name: 'Universidad del Tolima', src: '/logo/credentials/universidad-del-tolima.png' },
+      ],
+    },
   },
 
   /* ---------------------------------------------------------------- */

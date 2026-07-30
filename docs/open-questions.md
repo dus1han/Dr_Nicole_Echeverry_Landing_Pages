@@ -75,6 +75,20 @@ Added as section 15, "Visit the Clinic" — keyless Google Maps embed (no API ke
 
 ---
 
+### Training & affiliation logos → **supplied** ✅
+Five marks — ASPS, ISAPS, AASMA, Universidad del Sinú, Universidad del Tolima — render as a
+ribbon directly beneath the bio, where the "international training" claim is made.
+
+Shown desaturated, going to full colour on hover. The five sit in four unrelated brand
+palettes (red, teal, cyan, orange) and at full strength they fight both each other and the
+calm palette the page was built around.
+
+| | |
+|---|---|
+| 🟡 **Usage rights** | Professional societies publish logo guidelines, and some require member marks to appear in their official colours and forbid alteration. Greyscale-with-colour-on-hover is common practice and generally accepted, but confirm ASPS and ISAPS permit it — and that the clinic's membership in each is current. Displaying a society mark without active membership is a misrepresentation, not a design choice. |
+
+---
+
 ## 🔴 Must resolve before launch
 
 ### 1. Clinic street address — 🟡 downgraded, no longer blocking

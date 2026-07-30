@@ -23,6 +23,8 @@ const ROOT = join(HERE, '..');
 const SRC = join(ROOT, '..', 'Mommy makeover');
 const SRC_LOGO = join(SRC, 'Doctor photos & logo');
 const SRC_RESULTS = join(SRC, 'before after');
+const SRC_CREDS = join(SRC, 'Logos for description');
+const OUT_CREDS = join(ROOT, 'public', 'logo', 'credentials');
 const OUT_IMG = join(ROOT, 'public', 'images', 'mommy-makeover');
 const OUT_RESULTS = join(OUT_IMG, 'results');
 const OUT_LOGO = join(ROOT, 'public', 'logo');
@@ -62,10 +64,36 @@ const RESULT_CASES = [
   ['Untitled design (23).png', 'case-6'],
 ];
 
+/**
+ * Training and affiliation marks — [source file, slug].
+ *
+ * They arrive as five unrelated exports: 277×366 to 1080×1080, some with
+ * transparency, some on baked-in white, and in four different brand colours.
+ * Dropped onto a page as-is they read as clip-art.
+ *
+ * Each is trimmed of its surrounding whitespace and then padded to an IDENTICAL
+ * canvas. Trimming first is what makes them look consistent — the whitespace
+ * around each source is arbitrary, so scaling the raw files to a common height
+ * makes the tightly-cropped ones tower over the generously-padded ones. The
+ * shared canvas afterwards means one fixed width/height in the markup and no
+ * layout shift.
+ */
+const CREDENTIAL_LOGOS = [
+  ['ASPS-Logo (1).png', 'asps'],
+  ['images.png', 'isaps'],
+  ['ezgif.com-webp-to-png-converter (10).png', 'aasma'],
+  ['617948713_1222577283308881_8873968276905512861_n.jpg', 'universidad-del-sinu'],
+  ['Logo_universidad_del_tolima_version_web.png', 'universidad-del-tolima'],
+];
+
+/** 2× the rendered box, so the marks stay crisp on a retina screen. */
+const CRED_W = 240;
+const CRED_H = 144;
+
 const exists = async (p) => access(p).then(() => true).catch(() => false);
 
 async function ensureDirs() {
-  for (const d of [OUT_IMG, OUT_RESULTS, OUT_LOGO]) {
+  for (const d of [OUT_IMG, OUT_RESULTS, OUT_LOGO, OUT_CREDS]) {
     await mkdir(d, { recursive: true });
   }
 }
@@ -268,6 +296,39 @@ async function buildResults() {
   console.log('  see docs/open-questions.md.');
 }
 
+async function buildCredentialLogos() {
+  console.log('\n· Training & affiliation marks');
+
+  for (const [file, slug] of CREDENTIAL_LOGOS) {
+    const from = join(SRC_CREDS, file);
+    if (!(await exists(from))) {
+      console.warn(`  ! ${file} not found — skipped`);
+      continue;
+    }
+
+    // Flatten before trimming: `trim` keys off the corner pixel, and a
+    // transparent corner gives it nothing to match against.
+    const flattened = await sharp(from)
+      .flatten({ background: '#ffffff' })
+      .png()
+      .toBuffer();
+
+    const trimmed = await sharp(flattened).trim({ threshold: 12 }).toBuffer();
+    const { width, height } = await sharp(trimmed).metadata();
+
+    await sharp(trimmed)
+      .resize(CRED_W, CRED_H, {
+        fit: 'contain',
+        background: '#ffffff',
+        withoutEnlargement: false,
+      })
+      .png({ compressionLevel: 9 })
+      .toFile(join(OUT_CREDS, `${slug}.png`));
+
+    console.log(`  ✓ ${slug}.png  (trimmed to ${width}×${height} → ${CRED_W}×${CRED_H})`);
+  }
+}
+
 async function main() {
   console.log('Preparing assets for /mommy-makeover…');
   if (!(await exists(SRC))) {
@@ -280,6 +341,7 @@ async function main() {
   await buildLogos();
   await buildIcons();
   await buildResults();
+  await buildCredentialLogos();
   console.log('\nDone.\n');
 }
 

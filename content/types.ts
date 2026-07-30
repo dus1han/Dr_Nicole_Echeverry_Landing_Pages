@@ -142,6 +142,13 @@ export type CandidacyContent = {
   image: ImageAsset;
 };
 
+/** A training institution or professional body, shown as a logo. */
+export type CredentialMark = {
+  /** Full name — used as the alt text and the tooltip, never rendered as copy. */
+  name: string;
+  src: string;
+};
+
 export type DoctorContent = {
   eyebrow: string;
   heading: string;
@@ -151,6 +158,11 @@ export type DoctorContent = {
   bio: string;
   image: ImageAsset;
   cta: Cta;
+  /** Optional logo ribbon beneath the section. Omit it and nothing renders. */
+  credentials?: {
+    label: string;
+    items: CredentialMark[];
+  };
 };
 
 export type WhyTrustContent = {

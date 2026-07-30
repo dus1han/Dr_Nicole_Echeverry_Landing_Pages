@@ -125,6 +125,67 @@ export function MeetDoctor(content: DoctorContent) {
           </Reveal>
         </div>
       </div>
+
+      {/*
+        Credential ribbon.
+
+        Full width beneath the grid rather than inside the text column: five
+        marks squeezed into a half-width column would be too small to recognise,
+        and recognition is the entire point of showing them.
+
+        It sits directly after the bio because that is where the claim it
+        substantiates is made — "international training" is otherwise something
+        the reader has to take on faith.
+      */}
+      {content.credentials && (
+        <div className="container-page relative z-10 mt-14 lg:mt-18">
+          <Reveal>
+            {/*
+              Solid white, not a translucent wash. Three of the five marks have
+              white baked into the source and are padded onto white to share a
+              canvas — over a translucent card each one showed as a brighter
+              rectangle against the blush behind it. An opaque card makes those
+              backgrounds vanish, and drops a backdrop-blur that was costing
+              compositor work for no visible gain.
+            */}
+            <div className="rounded-[var(--radius-lg)] border border-blush-200 bg-white px-6 py-7 shadow-[var(--shadow-sm)] sm:px-10">
+              {/*
+                plum-700, not gold — a muted gold on this blush wash measures
+                about 2.3:1 and fails AA. Same fix as every other eyebrow on
+                the page.
+              */}
+              <p className="text-center font-sans text-[11px] font-bold uppercase tracking-[0.18em] text-plum-700">
+                {content.credentials.label}
+              </p>
+
+              <ul className="mt-6 flex flex-wrap items-center justify-center gap-x-10 gap-y-7 sm:gap-x-14">
+                {content.credentials.items.map((mark) => (
+                  <li key={mark.src}>
+                    {/*
+                      Desaturated at rest, full colour on hover.
+
+                      These five marks are red, teal, cyan and orange. Shown at
+                      full strength together they fight each other and the calm
+                      palette this page was built around; muted, they read as
+                      one band. Opacity stays high enough that they are never
+                      ambiguous — this is a credibility signal, not decoration.
+                    */}
+                    <Image
+                      src={mark.src}
+                      alt={mark.name}
+                      title={mark.name}
+                      width={240}
+                      height={144}
+                      sizes="120px"
+                      className="h-16 w-auto grayscale transition-all duration-500 hover:grayscale-0 sm:h-[4.5rem]"
+                    />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </Reveal>
+        </div>
+      )}
     </section>
   );
 }
