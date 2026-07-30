@@ -44,11 +44,16 @@ export function WhyTrust(content: WhyTrustContent) {
                   </span>
 
                   {/*
-                    min-h of two lines: the titles wrap to one or two lines
-                    depending on length, which left the descriptions starting at
-                    different heights across the row.
+                    min-h of two lines, but only from `sm` — the breakpoint where
+                    the grid actually becomes multi-column. It exists so titles of
+                    different lengths don't leave the descriptions starting at
+                    different heights across a row.
+
+                    Below `sm` there is no row to align to: one card per line, and
+                    the reserved second line just became a gap under every
+                    single-line title.
                   */}
-                  <h3 className="min-h-[2.6em] font-display text-xl font-semibold leading-snug text-plum-800">
+                  <h3 className="font-display text-xl font-semibold leading-snug text-plum-800 sm:min-h-[2.6em]">
                     {pillar.title}
                   </h3>
 
