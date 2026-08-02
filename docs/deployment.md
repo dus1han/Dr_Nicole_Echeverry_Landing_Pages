@@ -173,9 +173,21 @@ sudo chown -R $USER:$USER /opt/sites
 
 ### d. Caddy
 
-Copy `deploy/caddy-compose.yml` from this repo to `/opt/sites/caddy/docker-compose.yml`
-and `deploy/Caddyfile.example` to `/opt/sites/caddy/Caddyfile`, then edit the domain and
-email.
+> ### ⚠ Caddy already exists on this server, and its Caddyfile is SHARED
+> `/opt/sites/caddy/` is set up and running as of 2 Aug 2026, fronting every site on the
+> box. **Do not follow the first-time instructions below on this server** — they are for a
+> fresh one.
+>
+> `/opt/sites/caddy/Caddyfile` holds a global `{ email … }` block plus one block per site,
+> for **different clients**. **Append to it; never overwrite it.** Writing the file with
+> `>` instead of `>>`, or copying `Caddyfile.example` over it, takes every other client's
+> site down. Back it up first — `cp Caddyfile Caddyfile.bak.$(date +%F-%H%M%S)`.
+>
+> Adding a site is [§6f](#f-caddy). Validate, then **reload, never restart**.
+
+First-time setup on a *new* server: copy `deploy/caddy-compose.yml` from this repo to
+`/opt/sites/caddy/docker-compose.yml` and `deploy/Caddyfile.example` to
+`/opt/sites/caddy/Caddyfile`, then edit the domain and email.
 
 **Point DNS at the server before starting Caddy** (section 5). Caddy proves domain
 ownership to Let's Encrypt over HTTP, so if the A record is not live yet the certificate
@@ -380,12 +392,14 @@ Nothing in them names this client, this port or this domain.
 
 ### b. Claim a port — keep the register current
 
-| Port | Project |
-|---|---|
-| 3101 | `dr-nicole-landing-pages` |
-| 3102 | `dr-luis-landing-pages` |
-| 3103 | *free* |
-| 3104 | *free* |
+| Port | Project | Hostname |
+|---|---|---|
+| 3101 | `dr-nicole-landing-pages` | `surgery.dranicolecheverry.com` |
+| 3102 | `dr-luis-landing-pages` | `surgery.luisfernandoreyesmd.com` |
+| 3103 | *free* | |
+| 3104 | *free* | |
+
+Both are bound to **127.0.0.1** and reachable only through Caddy.
 
 > **Two projects on one port means the second container silently fails to start.**
 > Nothing warns you; the old one just keeps serving. Write the port down here when you
@@ -444,22 +458,50 @@ One A record → the same VPS IP. §5.
 
 ### f. Caddy
 
-Append a block to `/opt/sites/caddy/Caddyfile`:
-
-```
-newsite.example.com {
-    reverse_proxy 127.0.0.1:3102
-    encode gzip zstd
-}
-```
+**Append** to `/opt/sites/caddy/Caddyfile` — it is shared with every other client on the
+box. Back it up first, then match the shape of the blocks already in it:
 
 ```bash
 cd /opt/sites/caddy
-docker compose exec caddy caddy reload --config /etc/caddy/Caddyfile
+cp Caddyfile "Caddyfile.bak.$(date +%F-%H%M%S)"
+
+cat >> Caddyfile <<'EOF'
+
+newsite.example.com {
+    reverse_proxy 127.0.0.1:3103
+
+    encode gzip zstd
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options    "nosniff"
+        Referrer-Policy           "strict-origin-when-cross-origin"
+        -Server
+    }
+
+    log {
+        output file /var/log/caddy/newsite.log {
+            roll_size 10mb
+            roll_keep 5
+        }
+    }
+}
+EOF
 ```
 
-**Reload, not restart** — the other sites never drop a request, and Caddy validates the
-config before swapping it in, so a typo fails loudly instead of taking everything down.
+Validate before reloading, and **reload rather than restart**:
+
+```bash
+docker compose exec -T caddy caddy validate --adapter caddyfile --config /etc/caddy/Caddyfile
+docker compose exec -T caddy caddy reload   --adapter caddyfile --config /etc/caddy/Caddyfile
+```
+
+A restart drops in-flight requests on every *other* site on the server. A reload validates
+first and swaps atomically, so a typo fails loudly and changes nothing.
+
+**DNS must resolve before you reload.** Caddy proves ownership over the connection; if the
+A record is not live it fails the challenge and backs off before retrying, so the
+certificate does not appear when you fix DNS a minute later.
 
 ### g. Push
 
@@ -485,7 +527,8 @@ docker compose down && docker compose up -d
 |---|---|
 | `docker-compose.yml` | **overwritten from the repo every deploy** |
 | the image | pulled fresh from GHCR |
-| `.env` | preserved, except that an inert `SITE_URL=` line is stripped |
+| `.env` | preserved, except that an inert `SITE_URL=` line is stripped, and `BIND_ADDR` is removed once `SITE_URL` is a live HTTPS host |
+| the Caddyfile | **never touched** — it is shared with other clients and edited by hand |
 
 Shipping the compose file matters more than it looks. Left as server state, it keeps
 whatever copy was placed there on day one, and every later change — a new environment
@@ -610,6 +653,10 @@ the dev server will start serving a half-written build. This has produced both p
 | Port | **3101** |
 | Container | `dr-nicole-landing-pages` |
 | Image | `ghcr.io/<owner>/<repo>:latest` — lowercased, see below |
+| Public hostname | `surgery.dranicolecheverry.com` |
+| Fronted by | Caddy on 80/443, `network_mode: host`, shared with other clients |
+| Binding | **`127.0.0.1:3101`** — not reachable from the internet |
+| TLS | Let's Encrypt, issued 2 Aug 2026 via `tls-alpn-01`, auto-renewing |
 | Docker | 29.6.2 · Compose v5.3.1 |
 | GTM | not configured — the site runs without it |
 
@@ -624,26 +671,29 @@ container on a single port. `SITE_PORT` distinguishes *clients*, not routes. Add
 > fix the one `IMAGE=` line in `.env`. A mismatch surfaces as an opaque
 > `docker compose pull` failure that never names the cause.
 
-### How it differs from the target architecture
+### It now matches the target architecture
 
-**The port is bound to `0.0.0.0`, not `127.0.0.1`.** No domain points at the server yet, so
-Caddy cannot complete an ACME challenge and there is no HTTPS to proxy through.
-`BIND_ADDR=0.0.0.0` in `.env` exposes 3101 directly so the page can be previewed.
+Caddy fronts it, the port is on loopback, and TLS is automatic. The preview arrangement
+that ran until 2 Aug 2026 — `BIND_ADDR=0.0.0.0` exposing 3101 over plain HTTP — is gone,
+and `deploy/remote-deploy.sh` now strips `BIND_ADDR` whenever `SITE_URL` is a live HTTPS
+host, so it cannot quietly come back.
 
-> ⚠️ **This is HTTP with no certificate.** Traffic — including anything typed into the
-> consultation form — crosses the network in the clear. Fine for review, not for a live
-> ad campaign.
+Measured from a machine outside the server after the change:
 
-### Closing the gap
+| Check | Result |
+|---|---|
+| `https://surgery.dranicolecheverry.com/mommy-makeover` | 200 |
+| `http://` → `https://` | 308 |
+| Certificate | `CN=surgery.dranicolecheverry.com`, Let's Encrypt, valid to 31 Oct 2026 |
+| HSTS · nosniff · Referrer-Policy | all present |
+| `http://169.58.92.105:3101` | no answer |
+| The other client's site | still 200 |
 
-Once a subdomain exists:
+### Still outstanding
 
-1. Add the A record (§5), confirm with `dig +short <subdomain>`
-2. Start Caddy (§2d) with a block for the subdomain proxying to `127.0.0.1:3101`
-3. Delete `BIND_ADDR=0.0.0.0` from `/opt/sites/dr-nicole-landing-pages/.env` — it reverts
-   to `127.0.0.1` and the port stops being reachable from the internet
-4. `docker compose up -d` in that directory
-5. Enable the firewall (§2b) so only 80/443 are open
+**`ufw` is inactive.** Nothing listens publicly except Caddy on 80/443 and sshd on 22, so
+the exposure is small — but a future container published on `0.0.0.0` would be reachable
+with nothing to stop it. §2b closes it.
 
 ### Bootstrap build, if Actions is unavailable
 
@@ -651,7 +701,3 @@ Once a subdomain exists:
 `scp` it to `/opt/sites/<site>/site.tar.gz` → run the script, which extracts, builds and
 restarts. The "never build on the VPS" advice in §1 assumes a small droplet; a 6-core box
 with 12GB builds this comfortably.
-
-The firewall is **inactive** (`ufw` not enabled, iptables policy `ACCEPT`), so every port
-is currently reachable. Step 2b closes this and should be done before the site takes real
-traffic.

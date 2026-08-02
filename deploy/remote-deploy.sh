@@ -31,8 +31,16 @@ echo "==> host $(hostname), user $(whoami)"
 [ -n "$SITE_PATH" ] || fail "VPS_SITE_PATH is empty — set it in the repository secrets."
 
 if [ ! -d "$SITE_PATH" ]; then
-  echo "Directories that DO exist under /opt/sites:"
-  ls -1 /opt/sites 2>/dev/null | sed 's|^|  /opt/sites/|' || echo "  (/opt/sites is missing)"
+  # Tested explicitly rather than with `ls … | sed … || echo`. In that form the
+  # `||` reads as a fallback but can never run: the exit status of a pipeline is
+  # the status of its LAST command, and `sed` succeeds even when `ls` failed and
+  # fed it nothing. The message would silently never appear.
+  if [ -d /opt/sites ]; then
+    echo "Directories that DO exist under /opt/sites:"
+    ls -1 /opt/sites | sed 's|^|  /opt/sites/|'
+  else
+    echo "  (/opt/sites does not exist on this server)"
+  fi
   fail "VPS_SITE_PATH does not exist on the server: '$SITE_PATH'"
 fi
 
@@ -49,6 +57,27 @@ if grep -q '^SITE_URL=' .env 2>/dev/null; then
   chmod 644 "$tmp"
   mv "$tmp" .env
   echo "==> removed inert SITE_URL from .env (it is a build arg, not a runtime value)"
+fi
+
+# --- keep the port private once a hostname exists ---------------------------
+# BIND_ADDR=0.0.0.0 publishes the app's port straight to the internet. That is
+# correct exactly once — while previewing before DNS exists and Caddy therefore
+# cannot obtain a certificate.
+#
+# The moment SITE_URL is a real HTTPS hostname, Caddy is fronting the site and
+# the raw port must stop answering, so the override is removed here rather than
+# left to be noticed. compose already defaults BIND_ADDR to 127.0.0.1, so
+# deleting the line is the whole fix.
+#
+# Derived rather than configured separately, for the same reason indexing is:
+# a second switch meaning "we have gone live" is one more thing to forget, and
+# forgetting this one leaves an uncertificated port open to the world.
+if printf '%s' "$SITE_URL" | grep -q '^https://' && grep -q '^BIND_ADDR=' .env; then
+  tmp=$(mktemp "$PWD/.env.XXXXXX")
+  grep -v '^BIND_ADDR=' .env > "$tmp"
+  chmod 644 "$tmp"
+  mv "$tmp" .env
+  echo "==> removed BIND_ADDR — $SITE_URL is live, so the port goes back behind Caddy"
 fi
 
 # Report what the image was actually built with, so a wrong hostname shows up

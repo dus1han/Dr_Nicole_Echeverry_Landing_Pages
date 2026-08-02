@@ -196,10 +196,12 @@ Not part of the build or deploy; delete them if you'd rather not ship them.
 
 ## Deployment
 
-**Live on a VPS, HTTP only** — no domain points at the server yet, so there is no
-certificate. That is the one departure from the architecture below; the steps to close it
-are in [`docs/deployment.md` §11](docs/deployment.md). Host details are kept out of this
-repository, which is public.
+**Live at `https://surgery.dranicolecheverry.com`** — behind Caddy with an automatic
+Let's Encrypt certificate, the app itself bound to loopback and not reachable directly.
+Details in [`docs/deployment.md` §11](docs/deployment.md).
+
+> The VPS is **shared with other clients**, and `/opt/sites/caddy/Caddyfile` is shared with
+> them too. Append to it; overwriting it takes their sites down.
 
 Two supported targets.
 
@@ -239,6 +241,7 @@ the moment it deploys.
 
 | Key | When | Why |
 |---|---|---|
+| `SITE_URL` | Set — `https://surgery.dranicolecheverry.com` | The public origin, used by `sitemap.xml`, `robots.txt`, canonical and OG tags. A **build arg**: changing it needs a rebuild, not a restart. Unset, or anything that is not an HTTPS hostname, marks the build `noindex` |
 | `NEXT_PUBLIC_GTM_ID` | To switch on analytics | `GTM-XXXXXXX`. Without it the container never renders — no requests, no errors. See [`docs/conversion-tracking.md`](docs/conversion-tracking.md) |
 | `STRICT_CONTENT=1` | Once real reviews and photos are in | Turns the placeholder warning into a build failure, so dummy content can never come back unnoticed |
 | `RESEND_API_KEY`, `ENQUIRY_INBOX` | When the form destination is chosen | Whatever the chosen service needs |

@@ -135,6 +135,28 @@ jobs:
           chmod 600 ~/.ssh/id_deploy
           ssh-keyscan -p "$VPS_PORT" "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
 
+          # Preflight before scp.
+          #
+          # scp reports a missing destination directory as
+          #   scp: dest open "***/docker-compose.yml": No such file or directory
+          # — and the path is masked, because VPS_SITE_PATH is a secret. The one
+          # piece of information you need is the one thing redacted. Ask over ssh
+          # first, where the answer can be phrased usefully.
+          if ! ssh -i ~/.ssh/id_deploy -p "$VPS_PORT" \
+                   -o StrictHostKeyChecking=accept-new -o ConnectTimeout=20 \
+                   "$VPS_USER@$VPS_HOST" "test -d '$SITE_PATH'"; then
+            echo "::error::VPS_SITE_PATH does not exist on the server."
+            echo ""
+            echo "Directories that DO exist under /opt/sites:"
+            ssh -i ~/.ssh/id_deploy -p "$VPS_PORT" \
+                -o StrictHostKeyChecking=accept-new \
+                "$VPS_USER@$VPS_HOST" \
+                'if [ -d /opt/sites ]; then ls -1 /opt/sites | sed "s|^|  /opt/sites/|"; else echo "  (/opt/sites does not exist)"; fi'
+            echo ""
+            echo "Fix the VPS_SITE_PATH secret to match, then re-run."
+            exit 1
+          fi
+
           # Ship the compose file with every deploy.
           #
           # Without this the server keeps whatever copy was placed there by hand

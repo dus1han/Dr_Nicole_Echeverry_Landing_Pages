@@ -49,6 +49,19 @@ ENV NODE_ENV=production \
     PORT=3000 \
     HOSTNAME=0.0.0.0
 
+# Re-declared, because ARG does not cross stage boundaries.
+#
+# These are consumed in the builder and compiled into the output; nothing at
+# runtime reads them. They are repeated here purely so the values are visible in
+# `docker image inspect`, which is what the deploy script reads to warn about a
+# stale origin. Without this the final image carries no SITE_URL at all, so that
+# check compares against an empty string forever and can never fire — the exact
+# silent failure it was written to catch.
+ARG SITE_URL=""
+ARG NEXT_PUBLIC_GTM_ID=""
+ENV SITE_URL=$SITE_URL \
+    NEXT_PUBLIC_GTM_ID=$NEXT_PUBLIC_GTM_ID
+
 # Never run the app as root.
 RUN addgroup -g 1001 -S nodejs \
  && adduser -S nextjs -u 1001
