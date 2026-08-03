@@ -260,6 +260,10 @@ the click ID reaching the API, the event firing exactly once with context, the f
 clearing, that neither a refresh nor a direct visit fires anything, and that the
 thank-you page is `noindex`. 10 checks.
 
+> ⚠️ **This submits a real enquiry.** Since delivery was wired up, running it against the
+> live site emails everyone in `ENQUIRY_TO`. Point it at `http://localhost:3000` for
+> routine checks, and warn the clinic first if you must run it against production.
+
 Run it after any change to the form or the thank-you page.
 
 ---
