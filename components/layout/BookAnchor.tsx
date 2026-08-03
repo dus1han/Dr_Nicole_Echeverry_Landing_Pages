@@ -35,8 +35,26 @@ export function BookAnchor() {
       event.stopPropagation();
 
       const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      /*
+       * Jump instantly when the target is far away.
+       *
+       * The booking form sits near the bottom of a ~14,500px page, so from the
+       * hero a smooth scroll animates for about 1.6 SECONDS. Browsers cancel a
+       * programmatic smooth scroll the moment the user touches the screen — and
+       * a second of the page flying past is precisely when someone taps again,
+       * which cancels it and leaves them stranded mid-page. That is the
+       * "had to press it twice" report: the first tap was never finishing.
+       *
+       * An instant scroll cannot be interrupted, because there is no animation
+       * to interrupt. Short hops keep the smooth behaviour, where it both looks
+       * better and completes before a finger can land.
+       */
+      const distance = Math.abs(destination.getBoundingClientRect().top);
+      const farAway = distance > window.innerHeight * 2;
+
       destination.scrollIntoView({
-        behavior: reduced ? 'auto' : 'smooth',
+        behavior: reduced || farAway ? 'auto' : 'smooth',
         block: 'start',
       });
 
