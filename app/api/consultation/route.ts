@@ -1,19 +1,16 @@
 import { NextResponse } from 'next/server';
 import { consultationSchema } from '@/lib/consultation-schema';
+import { sendEnquiry, mailerConfigured } from '@/lib/mailer';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 /**
- * Consultation enquiries.
+ * Consultation enquiries — validated, rate-limited, then emailed.
  *
- * ⚠ NO DESTINATION IS WIRED UP YET — this validates, rate-limits and logs the
- * enquiry, then returns success. The client has not yet chosen where
- * submissions should go (inbox via Resend / Google Sheet / CRM).
- * See docs/open-questions.md §4. To finish it, replace `deliver()` below.
- *
- * Until then the page's WhatsApp and phone paths are the live conversion
- * routes, and they work today.
+ * Delivery is configured at runtime (see lib/mailer.ts), so the destination
+ * addresses and the sending credentials live in the server's `.env` rather than
+ * in this repository, which is public.
  */
 
 const WINDOW_MS = 10 * 60 * 1000;
@@ -42,24 +39,16 @@ function rateLimited(ip: string): boolean {
   return recent.length > MAX_PER_WINDOW;
 }
 
-async function deliver(data: Record<string, unknown>) {
-  // TODO: wire to the client's chosen destination. Example (Resend):
-  //
-  //   await fetch('https://api.resend.com/emails', {
-  //     method: 'POST',
-  //     headers: {
-  //       Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-  //       'Content-Type': 'application/json',
-  //     },
-  //     body: JSON.stringify({
-  //       from: 'Website <enquiries@dranicolecheverry.com>',
-  //       to: process.env.ENQUIRY_INBOX,
-  //       subject: `New consultation enquiry — ${data.name}`,
-  //       text: JSON.stringify(data, null, 2),
-  //     }),
-  //   });
-
-  console.info('[consultation] new enquiry (not yet delivered anywhere):', data);
+/**
+ * Never let an enquiry exist only inside a failed network call.
+ *
+ * Printed before delivery is attempted, so if SMTP is down the details survive
+ * in `docker compose logs web` and someone can still phone the patient back.
+ * A lost lead is worse than a noisy log.
+ */
+function logEnquiry(prefix: string, enquiry: Record<string, unknown>) {
+  const { gclid, ...rest } = enquiry;
+  console.info(prefix, { ...rest, gclid: gclid ? '(captured)' : '' });
 }
 
 export async function POST(request: Request) {
@@ -99,12 +88,36 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true });
   }
 
-  const { website: _honeypot, ...enquiry } = parsed.data;
+  const { website: _honeypot, ...rest } = parsed.data;
+  const enquiry = { ...rest, receivedAt: new Date().toISOString() };
+
+  logEnquiry('[consultation] enquiry received:', enquiry);
+
+  if (!mailerConfigured) {
+    /*
+     * Local development, or a server missing SMTP_USER / SMTP_PASS /
+     * ENQUIRY_TO. Say so loudly and at warn level: the visitor sees a success
+     * screen and a conversion fires, so from every other angle this looks like
+     * it worked. The enquiry is in the log above either way.
+     */
+    console.warn(
+      '[consultation] SMTP NOT CONFIGURED — nothing was emailed. ' +
+        'Set SMTP_USER, SMTP_PASS and ENQUIRY_TO to deliver enquiries.',
+    );
+    return NextResponse.json({ ok: true });
+  }
 
   try {
-    await deliver({ ...enquiry, receivedAt: new Date().toISOString() });
+    await sendEnquiry(enquiry);
+    console.info('[consultation] delivered');
   } catch (err) {
-    console.error('[consultation] delivery failed:', err);
+    console.error('[consultation] DELIVERY FAILED — enquiry is in the log above:', err);
+    /*
+     * Deliberately an error rather than a quiet success. If the clinic will not
+     * receive this, the visitor needs to know now, while the phone and WhatsApp
+     * buttons are still in front of her — a false "thank you" loses the patient
+     * and the enquiry together.
+     */
     return NextResponse.json(
       {
         ok: false,

@@ -357,9 +357,48 @@ it works against any site built from this template without modification.
 
 ---
 
+## 12 · Where enquiries go
+
+A successful submission is emailed before the visitor reaches the thank-you page.
+
+| | |
+|---|---|
+| Subject | `[<Page>] New consultation request — <name>` |
+| Reply-To | the enquirer, so the team answers by hitting reply |
+| Body | name, phone, email, page, timestamp, and the Google click ID when present |
+
+Configured **at runtime**, in the server's `.env` — not in this repository, which is
+public, and not at build time. Rotating the password or adding a recipient is an `.env`
+edit and `docker compose up -d`, with no rebuild:
+
+| Key | |
+|---|---|
+| `SMTP_USER` | mailbox to authenticate as |
+| `SMTP_PASS` | **app password**, never the account password |
+| `ENQUIRY_TO` | comma-separated recipients |
+| `SMTP_HOST` / `SMTP_PORT` | optional; default to Gmail on 465 |
+
+### Two decisions worth knowing
+
+**The page name in the subject is resolved server-side.** The browser sends a slug,
+constrained by the schema to `[a-z0-9-]`; the server maps it to a display title via
+`site.landingPages`. Putting caller-supplied text straight into a subject line is how a bot
+writes its own headline into the clinic's inbox — and, with a newline, its own `Bcc`.
+
+**A delivery failure returns an error, not a quiet success.** The enquiry is logged in full
+before sending is attempted, so it is recoverable from `docker compose logs web` — but the
+visitor is told to call or WhatsApp instead. A false "thank you" loses the patient *and*
+the enquiry, and fires a conversion for a lead nobody will ever receive.
+
+If SMTP is not configured at all, the route logs a `SMTP NOT CONFIGURED` warning and still
+returns success — that is for local development, where every other path would otherwise
+break. On the server it means someone removed the credentials.
+
+---
+
 ## Still outstanding
 
 | | |
 |---|---|
-| 🔴 **Lead delivery** | `deliver()` in `app/api/consultation/route.ts` still only logs. Conversions will be reported for enquiries nobody receives until this is wired to an inbox. |
+| ✅ **Lead delivery** | Wired. Enquiries are emailed over SMTP — see [§12](#12--where-enquiries-go). |
 | 🟡 **Consent Mode v2** | Required for EEA visitors. Without it their conversions may not be counted. Needs a consent banner feeding GTM's consent settings. |

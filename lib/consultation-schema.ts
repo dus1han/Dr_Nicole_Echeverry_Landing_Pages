@@ -32,6 +32,22 @@ export const consultationSchema = z.object({
     .max(200),
 
   /**
+   * Which landing page the enquiry came from — it names the subject line, and
+   * distinguishes leads once this app serves several campaigns.
+   *
+   * Constrained to a slug shape rather than accepted as free text. The server
+   * maps it to a display name before it reaches the subject; a value that
+   * cannot contain a newline cannot smuggle an extra mail header along with it.
+   */
+  slug: z
+    .string()
+    .trim()
+    .max(64)
+    .regex(/^[a-z0-9-]*$/, 'Unexpected page identifier.')
+    .optional()
+    .default(''),
+
+  /**
    * Google Ads click ID captured on landing, carried through with the enquiry.
    *
    * Not used for anything today. It exists so the clinic can later import

@@ -36,6 +36,17 @@ services:
       # time, so setting it here would look authoritative and do nothing. It is
       # a Docker build arg, fed by the SITE_URL repository variable.
 
+      # Enquiry delivery. Genuinely runtime — /api/consultation is a real server
+      # route — so rotating the password or changing a recipient is an .env edit
+      # and a restart, with no rebuild and nothing secret in the image.
+      #
+      # These live ONLY in the server's .env. This repository is public.
+      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
+      SMTP_PORT: ${SMTP_PORT:-465}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      ENQUIRY_TO: ${ENQUIRY_TO:-}
+
     healthcheck:
       test:
         - CMD

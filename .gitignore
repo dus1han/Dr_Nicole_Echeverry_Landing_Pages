@@ -3,6 +3,11 @@
 .shots/
 *.tsbuildinfo
 next-env.d.ts
-.env*.local
+# Every env file, not just *.local. This repo is public and the enquiry mailer
+# reads SMTP credentials from the environment — one `.env` committed by habit
+# would publish the clinic's mailbox password.
+.env
+.env.*
+!.env.example
 .DS_Store
 .vercel

@@ -36,6 +36,9 @@ export function BookingForm({ slug, ...content }: BookingContent & { slug: strin
       phone: String(fd.get('phone') ?? ''),
       email: String(fd.get('email') ?? ''),
       website: String(fd.get('website') ?? ''),
+      // Names the enquiry email's subject, once the server has mapped it to a
+      // display title. Also what distinguishes leads between campaign pages.
+      slug,
       ...readClickId(),
     };
 
