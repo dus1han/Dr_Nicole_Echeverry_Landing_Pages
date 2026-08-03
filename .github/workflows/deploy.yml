@@ -41,20 +41,17 @@ jobs:
       # below puts that on the run summary where someone will see it.
       - name: Check analytics configuration
         run: |
-          if [ -z "${{ vars.NEXT_PUBLIC_GTM_ID }}" ]; then
-            echo "::warning::NEXT_PUBLIC_GTM_ID is not set — deploying without Google Tag Manager."
-            echo ""
-            echo "The site will work normally but will have NO conversion tracking."
-            echo ""
-            echo "To enable it, set the variable once at:"
-            echo "  Settings → Secrets and variables → Actions → Variables → New repository variable"
-            echo "  Name: NEXT_PUBLIC_GTM_ID   Value: GTM-XXXXXXX"
-            echo ""
-            echo "Then re-run this workflow — the ID is baked in at build time,"
-            echo "so setting the variable alone changes nothing until a rebuild."
+          # The container ID normally comes from content/site.ts. This variable
+          # exists only to override it — pointing a staging build at a different
+          # container, say — so an empty value is the expected case and says
+          # nothing about whether tracking works.
+          if [ -n "${{ vars.NEXT_PUBLIC_GTM_ID }}" ]; then
+            echo "::warning::NEXT_PUBLIC_GTM_ID is set and OVERRIDES content/site.ts."
+            echo "Building against container ${{ vars.NEXT_PUBLIC_GTM_ID }}, not the one in the repo."
           else
-            echo "✓ GTM container: ${{ vars.NEXT_PUBLIC_GTM_ID }}"
+            echo "✓ Using the GTM container from content/site.ts (no override set)."
           fi
+          grep -o "gtmId: '[^']*'" content/site.ts || echo "  (no gtmId found in content/site.ts)"
 
       - uses: docker/setup-buildx-action@v3
 

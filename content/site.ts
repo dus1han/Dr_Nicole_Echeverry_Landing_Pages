@@ -61,6 +61,11 @@ export const site: SiteConfig = {
     copyright: `© ${new Date().getFullYear()} Dr. Nicole Echeverry | Designed and Developed by HolistiQ Digital`,
   },
 
+  analytics: {
+    // Dr. Nicole's own container. Supplied by the client, 3 Aug 2026.
+    gtmId: 'GTM-WF7NSMXG',
+  },
+
   landingPages: [{ slug: 'mommy-makeover', title: 'Mommy Makeover', live: true }],
 };
 

@@ -3,18 +3,25 @@ import Script from 'next/script';
 /**
  * Google Tag Manager container.
  *
- * The ID comes from NEXT_PUBLIC_GTM_ID. If it is unset — local development, or
- * before the client has created a container — both components render nothing,
- * so no network request is made and no console noise appears. Nothing else in
- * the codebase needs to know whether analytics is switched on.
+ * The ID comes from the `id` prop, falling back to NEXT_PUBLIC_GTM_ID. Passing
+ * it in keeps the container ID with the client's other settings, where a
+ * derived project replaces it rather than inheriting it; the env var still
+ * wins when set, so a staging build can point somewhere else. Copying this file
+ * into another project and passing nothing still works.
  *
- * No Google Ads or GA4 identifiers live in this repo by design: they are
- * configured inside GTM, so a new pixel never requires a deploy.
+ * With neither, both components render nothing — no network request, no console
+ * noise. Nothing else in the codebase needs to know whether analytics is on.
+ *
+ * No Google Ads or GA4 identifiers live in this repo by design: those are
+ * configured inside GTM, so a new pixel never requires a deploy. The container
+ * ID is different — it is public by nature, visible in the source of every site
+ * that uses GTM.
  */
 
-const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID;
+const resolveId = (id?: string) => process.env.NEXT_PUBLIC_GTM_ID || id || '';
 
-export function GtmScript() {
+export function GtmScript({ id }: { id?: string }) {
+  const GTM_ID = resolveId(id);
   if (!GTM_ID) return null;
 
   return (
@@ -32,7 +39,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
  * The <noscript> half of the container. Must sit immediately after <body> —
  * without it, visitors with JavaScript disabled are invisible to analytics.
  */
-export function GtmNoScript() {
+export function GtmNoScript({ id }: { id?: string }) {
+  const GTM_ID = resolveId(id);
   if (!GTM_ID) return null;
 
   return (

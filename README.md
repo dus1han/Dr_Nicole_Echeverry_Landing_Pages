@@ -244,7 +244,7 @@ the moment it deploys.
 | Key | When | Why |
 |---|---|---|
 | `SITE_URL` | Set — `https://surgery.dranicolecheverry.com` | The public origin, used by `sitemap.xml`, `robots.txt`, canonical and OG tags. A **build arg**: changing it needs a rebuild, not a restart. Unset, or anything that is not an HTTPS hostname, marks the build `noindex` |
-| `NEXT_PUBLIC_GTM_ID` | To switch on analytics | `GTM-XXXXXXX`. Without it the container never renders — no requests, no errors. See [`docs/conversion-tracking.md`](docs/conversion-tracking.md) |
+| `NEXT_PUBLIC_GTM_ID` | Only to **override** the container in `content/site.ts` | Normally unset. The live container ID lives in `analytics.gtmId`; this exists so a staging build can point elsewhere. See [`docs/conversion-tracking.md` §2](docs/conversion-tracking.md) |
 | `STRICT_CONTENT=1` | Once real reviews and photos are in | Turns the placeholder warning into a build failure, so dummy content can never come back unnoticed |
 | `SMTP_USER`, `SMTP_PASS`, `ENQUIRY_TO` | Set on the server | Enquiry delivery over SMTP. **Runtime**, so a change is an `.env` edit and a restart. Kept out of this repo — see [`docs/conversion-tracking.md` §12](docs/conversion-tracking.md) |
 

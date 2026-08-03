@@ -68,6 +68,24 @@ export type SiteConfig = {
     disclaimer: string;
     copyright: string;
   };
+  analytics: {
+    /**
+     * Google Tag Manager container, e.g. `GTM-XXXXXXX`.
+     *
+     * Lives in the CLIENT's content file, not in `components/analytics/Gtm.tsx`
+     * — a project derived from this one replaces its content and would
+     * otherwise silently keep loading this clinic's container and mixing its
+     * traffic into their reports.
+     *
+     * Safe to commit: it is a public loader ID, visible in the page source of
+     * every site that uses GTM. Google Ads conversion IDs and labels are a
+     * different matter and stay inside GTM, so a new pixel never needs a deploy.
+     *
+     * `NEXT_PUBLIC_GTM_ID` overrides this when set, which is how a staging
+     * build can point at a different container.
+     */
+    gtmId: string;
+  };
   /** Every landing page in the project. Drives the footer list and sitemap. */
   landingPages: Array<{ slug: string; title: string; live: boolean }>;
 };

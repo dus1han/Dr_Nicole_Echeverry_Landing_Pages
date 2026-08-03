@@ -53,8 +53,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" dir="ltr" className={`${playfair.variable} ${manrope.variable}`}>
       <body className="antialiased">
         {/* Must be the first thing in <body> — GTM's documented placement. */}
-        <GtmNoScript />
-        <GtmScript />
+        <GtmNoScript id={site.analytics.gtmId} />
+        <GtmScript id={site.analytics.gtmId} />
         <ClickIdCapture />
 
         <a

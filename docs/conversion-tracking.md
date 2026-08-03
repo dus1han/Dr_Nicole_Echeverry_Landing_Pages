@@ -57,54 +57,50 @@ Ad click  →  /<slug>?gclid=…
 
 ---
 
-## 2 · Switch it on in GitHub
+## 2 · Where the container ID lives
 
-The ID lives in the **repository**, not in the code and not on the server. Set it once
-and every future deploy picks it up automatically — pushing code never changes or clears
-it.
+**`content/site.ts` → `analytics.gtmId`.** For this project it is already set:
 
-1. Go to the repo on GitHub
-2. **Settings** → **Secrets and variables** → **Actions**
-3. Open the **Variables** tab (*not* Secrets — this value ships to the browser anyway,
-   so there is nothing to hide, and Variables are readable in logs which makes them far
-   easier to debug)
-4. **New repository variable**
+```ts
+analytics: {
+  gtmId: 'GTM-WF7NSMXG',
+},
+```
 
-   | Name | Value |
-   |---|---|
-   | `NEXT_PUBLIC_GTM_ID` | `GTM-XXXXXXX` |
+It sits with the client's other settings rather than in
+`components/analytics/Gtm.tsx`, and that placement is the point: a project derived from
+this one replaces its content files, so it cannot silently keep loading *this* clinic's
+container and mixing its traffic into someone else's reports.
 
-5. **Add variable**
-6. **Actions** tab → **Build and deploy** → **Run workflow** → **Run workflow**
+**Committing it is fine.** A GTM container ID is a public loader ID — it is in the page
+source of every site that uses GTM. Google Ads conversion IDs and labels are a different
+matter entirely; those stay inside GTM, which is why a new pixel never needs a deploy.
 
-> ⚠️ **Step 6 is not optional.** `NEXT_PUBLIC_*` variables are compiled into the
-> JavaScript at build time, not read at runtime. Saving the variable changes nothing
-> until a new build runs. Restarting the container does nothing either — the old value
-> is already inside the image.
+### Changing it needs a rebuild
 
-**Verify it worked:** open the live page, view source (Ctrl-U), search for `GTM-`.
-You should see your ID. If not, the rebuild hasn't happened.
+The ID is compiled into the HTML at build time. Editing `site.ts` and pushing does that
+automatically; restarting the container does not.
 
-### Deploying without it
+**Verify:** open the live page, view source (Ctrl-U), search for `GTM-`.
 
-**A missing GTM ID does not block anything.** The workflow logs a warning and carries on.
-`components/analytics/Gtm.tsx` returns `null` when the variable is unset, so the container
-script never renders — no requests, no errors, no console noise. The site is byte-for-byte
-a normal site that happens to have no analytics.
+### Overriding it
 
-This is deliberate: tracking is a marketing concern, and a marketing concern should never
-be able to take the clinic's page offline. The warning exists only because the failure is
-otherwise invisible — the site looks perfect and simply never reports a conversion.
+Set the `NEXT_PUBLIC_GTM_ID` repository **variable** (*Settings → Secrets and variables →
+Actions → Variables*) and it wins over `site.ts`. That is for pointing a staging build at
+a separate container — leave it unset in normal operation. The workflow prints which of
+the two it used on every run.
 
-### Building with it outside CI
-
-If you build the image by hand on the server:
+Building by hand:
 
 ```bash
 docker build --build-arg NEXT_PUBLIC_GTM_ID=GTM-XXXXXXX -t dr-nicole-landing-pages:latest .
 ```
 
-Omit the flag and you get the same no-analytics build described above.
+### With no ID at all
+
+Both components return `null` — no container script, no requests, no console noise. The
+site is byte-for-byte a normal site that happens to have no analytics, which is deliberate:
+tracking is a marketing concern and should never be able to take the clinic's page offline.
 
 ---
 
