@@ -31,8 +31,23 @@ export function BookAnchor() {
       const destination = document.getElementById(useForm ? 'book-form' : 'book');
       if (!destination) return; // fall through to the default anchor jump
 
+      /*
+       * preventDefault only — never stopPropagation.
+       *
+       * React attaches its listeners to the root container, which is a
+       * DESCENDANT of `document`. Stopping propagation here, in the capture
+       * phase, means the event never reaches React at all, so every onClick on
+       * the way down silently stops firing. That is what left the mobile menu
+       * open after tapping "Book Consultation": the overlay's own
+       * `onClick={() => setOpen(false)}` was never called, and the page scrolled
+       * away underneath a menu that was still covering it and still holding the
+       * scroll lock.
+       *
+       * preventDefault alone is enough to suppress the anchor jump: next/link
+       * checks `defaultPrevented` before routing, and it is already true by the
+       * time its handler runs.
+       */
       event.preventDefault();
-      event.stopPropagation();
 
       const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 

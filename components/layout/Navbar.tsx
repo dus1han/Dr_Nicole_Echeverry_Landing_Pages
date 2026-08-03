@@ -188,8 +188,16 @@ export function Navbar({
                 >
                   Book Consultation
                 </ButtonLink>
+                {/*
+                  Closes the menu too. A tel: link hands off to the dialer
+                  rather than navigating, so without this the visitor returns
+                  from the call to a menu still covering the page — and, because
+                  the overlay holds a scroll lock, to a page that will not
+                  scroll.
+                */}
                 <a
                   href={telUrl}
+                  onClick={() => setOpen(false)}
                   className="flex items-center justify-center gap-2 py-2 font-sans text-sm text-muted"
                 >
                   <Phone className="h-4 w-4" aria-hidden="true" />

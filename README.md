@@ -158,7 +158,8 @@ Measured against the production build, not assumed. Re-run any of these yourself
 | Text contrast (AA) | every measurable pair passes at 390 and 1440 | `node scripts/audit-contrast.mjs <url>` |
 | Accessibility + reduced-motion + no-JS | all passing | `node scripts/audit-a11y.mjs <url>` |
 | Layout stability | page height does not self-shift | `node scripts/check-layout-stability.mjs <url>` |
-| Book CTA routing | desktop → section, mobile → form | `node scripts/check-book-anchor.mjs <url>` |
+| Book CTA routing | desktop → section, mobile → form, in **one** tap | `node scripts/check-book-anchor.mjs <url>` |
+| Mobile menu closes on selection | every link closes it and releases the scroll lock | `node scripts/check-mobile-menu.mjs <url>` |
 | Types | clean | `npm run typecheck` |
 | API route | valid → 200 · invalid → 422 · honeypot → silent 200 | — |
 
@@ -180,7 +181,8 @@ Not part of the build or deploy; delete them if you'd rather not ship them.
 | `scripts/check-scroll-perf.mjs <url> [cpu] [width]` | Frame pacing while scrolling |
 | `scripts/bisect-scroll-perf.mjs <url> [cpu]` | Scroll FPS with each effect disabled, to find the cost |
 | `scripts/check-layout-stability.mjs <url> [secs]` | Detects a page that shifts its own height |
-| `scripts/check-book-anchor.mjs <url>` | Verifies the mobile/desktop Book destination |
+| `scripts/check-book-anchor.mjs <url>` | Book destination per viewport, in one tap, and after an interrupting touch |
+| `scripts/check-mobile-menu.mjs <url>` | Every mobile-menu link closes the overlay and unlocks scrolling |
 | `scripts/measure-gaps.mjs <url> [width]` | Section padding vs. real empty space |
 | `scripts/measure-box.mjs <url> <width> <sel…>` | Geometry for arbitrary selectors |
 
