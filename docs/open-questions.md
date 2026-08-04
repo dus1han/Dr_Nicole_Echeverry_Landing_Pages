@@ -13,13 +13,17 @@ Applies to all display copy, titles, meta, OG cards, structured data, alt text.
 **Not applied** to `info@dranicolecheverry.com`, `dranicolecheverry.com`, or the Facebook/Instagram URLs — those are live endpoints and stay byte-for-byte as supplied.
 
 ### Before/after → **real photographs supplied** ✅
-Six clinic-supplied composites (before left, after right, already watermarked) replaced the
-generated placeholders. `results.isPlaceholder` is now `false`, so the sample ribbons and the
-content-gate warning for this section are gone.
+**Three** clinic-supplied composites (before left, after right, already watermarked) — a
+replacement set provided 3 Aug 2026, cut down from the six used previously.
+`results.isPlaceholder` is `false`, so the sample ribbons and the content-gate warning for
+this section are gone.
 
 They are used **whole and never split down the middle**. The seam is not at the midpoint —
-measured across the six it lands between x=321 and x=404 on a 700px canvas — so a fixed 50%
-cut would slice through a patient's body. See the note in `scripts/prepare-assets.mjs`.
+in this set it sits at x=321, x=350 and x=364 on a 700px canvas — so a fixed 50% cut would
+slice through a patient's body. See the note in `scripts/prepare-assets.mjs`.
+
+`npm run assets` deletes any case file the current set no longer produces, so the retired
+photographs are gone from `public/` rather than left unreferenced in a public repository.
 
 Two things still outstanding on these:
 

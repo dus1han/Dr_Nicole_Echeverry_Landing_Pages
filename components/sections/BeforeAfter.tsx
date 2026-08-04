@@ -33,7 +33,15 @@ export function BeforeAfter(content: ResultsContent) {
           corner ribbons on each card and the `check:content` build gate still
           prevent placeholder imagery reaching production unnoticed.
         */}
-        <RevealGroup className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {/*
+          One column, then three — never two.
+
+          With three wide cases a two-column breakpoint puts two on the first
+          row and strands the third, which reads as a missing fourth case rather
+          than a deliberate set. Going straight from one to three keeps every row
+          full at any width.
+        */}
+        <RevealGroup className="mt-10 grid gap-5 lg:grid-cols-3">
           {content.cases.map((item) => (
             <RevealItem key={item.id} variants={scaleIn} className="h-full">
               <figure className="relative flex h-full flex-col overflow-hidden rounded-[var(--radius-md)] border border-blush-200 bg-white shadow-[var(--shadow-card)] transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[var(--shadow-lift)]">

@@ -277,9 +277,6 @@ export const mommyMakeover: LandingPageContent = {
       { id: 'case-1', image: { src: `${IMG}/results/case-1.jpg`, alt: 'Before and after a Mommy Makeover' } },
       { id: 'case-2', image: { src: `${IMG}/results/case-2.jpg`, alt: 'Before and after a Mommy Makeover' } },
       { id: 'case-3', image: { src: `${IMG}/results/case-3.jpg`, alt: 'Before and after a Mommy Makeover' } },
-      { id: 'case-4', image: { src: `${IMG}/results/case-4.jpg`, alt: 'Before and after a Mommy Makeover' } },
-      { id: 'case-5', image: { src: `${IMG}/results/case-5.jpg`, alt: 'Before and after a Mommy Makeover' } },
-      { id: 'case-6', image: { src: `${IMG}/results/case-6.jpg`, alt: 'Before and after a Mommy Makeover' } },
     ],
     /*
      * RETAINED BUT NOT RENDERED. The client asked for this to be removed from

@@ -14,7 +14,7 @@
  */
 
 import sharp from 'sharp';
-import { mkdir, access } from 'node:fs/promises';
+import { mkdir, access, readdir, rm } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -22,7 +22,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..');
 const SRC = join(ROOT, '..', 'Mommy makeover');
 const SRC_LOGO = join(SRC, 'Doctor photos & logo');
-const SRC_RESULTS = join(SRC, 'before after');
+const SRC_RESULTS = join(SRC, 'New set');
 const SRC_CREDS = join(SRC, 'Logos for description');
 const OUT_CREDS = join(ROOT, 'public', 'logo', 'credentials');
 const OUT_IMG = join(ROOT, 'public', 'images', 'mommy-makeover');
@@ -49,19 +49,20 @@ const PORTRAITS = [
  * already watermarked with the clinic's branding.
  *
  * They are used WHOLE and never split down the middle. The obvious shortcut is
- * to cut each in half and feed the existing two-image card, but the seam is not
- * where you would assume — measured across these six it lands anywhere from
- * x=321 to x=404 on a 700px canvas. A fixed 50% cut would slice through a
- * patient's body on most of them, and on a medical results gallery that is not
- * a cosmetic defect.
+ * to cut each in half and feed a two-image card, but the seam is not where you
+ * would assume: measured across this set it sits at x=321, x=350 and x=364 on a
+ * 700px canvas, and across the previous set it ranged to x=404. A fixed 50% cut
+ * would slice through a patient's body, and on a medical results gallery that
+ * is not a cosmetic defect.
+ *
+ * Anything in OUT_RESULTS that these no longer produce is deleted, so replacing
+ * six cases with three does not leave three orphans behind for the next person
+ * to wonder about.
  */
 const RESULT_CASES = [
   ['Untitled design (18).png', 'case-1'],
   ['Untitled design (19).png', 'case-2'],
   ['Untitled design (20).png', 'case-3'],
-  ['Untitled design (21).png', 'case-4'],
-  ['Untitled design (22).png', 'case-5'],
-  ['Untitled design (23).png', 'case-6'],
 ];
 
 /**
@@ -308,6 +309,17 @@ async function buildResults() {
 
     console.log(`  ✓ ${slug}.jpg (${meta.width}×${meta.height})`);
     built += 1;
+  }
+
+  // Remove anything this run did not produce. Without it, cutting the gallery
+  // from six cases to three leaves case-4/5/6 in public/ — unreferenced, still
+  // committed, and still real patients' photographs sitting in a public repo.
+  const expected = new Set(RESULT_CASES.map(([, slug]) => `${slug}.jpg`));
+  for (const file of await readdir(OUT_RESULTS)) {
+    if (!expected.has(file)) {
+      await rm(join(OUT_RESULTS, file));
+      console.log(`  – removed ${file} (no longer in the set)`);
+    }
   }
 
   if (built < RESULT_CASES.length) {
