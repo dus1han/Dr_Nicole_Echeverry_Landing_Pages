@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useId } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { Plus } from 'lucide-react';
 import type { FaqContent } from '@/content/types';
 import { site, whatsappUrl } from '@/content/site';
@@ -14,7 +13,6 @@ export function Faq(content: FaqContent) {
   // null = every question collapsed on load. Nothing opens until it's clicked,
   // so the section stays compact and scannable as a list of questions.
   const [open, setOpen] = useState<number | null>(null);
-  const reduced = useReducedMotion();
   const baseId = useId();
 
   const ctaHref =
@@ -82,29 +80,31 @@ export function Faq(content: FaqContent) {
                     </button>
                   </h3>
 
-                  <AnimatePresence initial={false}>
-                    {isOpen && (
-                      <motion.div
-                        id={panelId}
-                        role="region"
-                        aria-labelledby={buttonId}
-                        initial={reduced ? { opacity: 0 } : { height: 0, opacity: 0 }}
-                        animate={reduced ? { opacity: 1 } : { height: 'auto', opacity: 1 }}
-                        exit={reduced ? { opacity: 0 } : { height: 0, opacity: 0 }}
-                        transition={{
-                          type: reduced ? 'tween' : 'spring',
-                          stiffness: 260,
-                          damping: 30,
-                          duration: reduced ? 0.15 : undefined,
-                        }}
-                        className="overflow-hidden"
-                      >
-                        <p className="px-6 pb-6 text-[0.9375rem] leading-[1.78] text-muted sm:px-7">
-                          {item.answer}
-                        </p>
-                      </motion.div>
+                  {/*
+                    A grid row animating from 0fr to 1fr — the one reliable way
+                    to transition to a content-driven height without JavaScript
+                    measuring it. Replaces an AnimatePresence block that shipped
+                    an animation runtime to do the same job.
+
+                    The panel stays mounted so aria-controls always points at a
+                    real element; `invisible` keeps its contents out of the tab
+                    order and the accessibility tree while collapsed.
+                  */}
+                  <div
+                    id={panelId}
+                    role="region"
+                    aria-labelledby={buttonId}
+                    className={cn(
+                      'grid transition-[grid-template-rows,opacity] duration-500 ease-[var(--ease-out-soft)]',
+                      isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0',
                     )}
-                  </AnimatePresence>
+                  >
+                    <div className={cn('overflow-hidden', !isOpen && 'invisible')}>
+                      <p className="px-6 pb-6 text-[0.9375rem] leading-[1.78] text-muted sm:px-7">
+                        {item.answer}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </RevealItem>
             );

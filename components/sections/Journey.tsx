@@ -1,7 +1,3 @@
-'use client';
-
-import { useRef } from 'react';
-import { motion, useScroll, useSpring, useReducedMotion } from 'motion/react';
 import type { JourneyContent } from '@/content/types';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { RevealGroup, RevealItem } from '@/components/ui/Reveal';
@@ -15,18 +11,10 @@ import { RevealGroup, RevealItem } from '@/components/ui/Reveal';
  * roughly a third of the height. Below `lg` it becomes a compact grid rather
  * than a long column.
  */
+// The connector fills left-to-right as the section scrolls through — it turns
+// an abstract list into visible forward motion. Now a CSS view timeline rather
+// than a scroll listener feeding a spring; see `.anim-track-fill`.
 export function Journey(content: JourneyContent) {
-  const ref = useRef<HTMLDivElement>(null);
-  const reduced = useReducedMotion();
-
-  // The connector fills left-to-right as the section scrolls through — it
-  // turns an abstract list into visible forward motion.
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start 85%', 'end 65%'],
-  });
-  const scaleX = useSpring(scrollYProgress, { stiffness: 90, damping: 26 });
-
   return (
     <section
       id="journey"
@@ -53,7 +41,7 @@ export function Journey(content: JourneyContent) {
           so its whileInView observer never fired and every step stayed at
           opacity 0 — only the connector line rendered.
         */}
-        <div ref={ref} className="relative mt-12">
+        <div className="relative mt-12">
           {/*
             Connector, desktop only. Inset to 10% each side so it starts and
             ends at the centre of the first and last badges (5 columns → badge
@@ -69,10 +57,16 @@ export function Journey(content: JourneyContent) {
             aria-hidden="true"
             className="absolute left-[10%] right-[10%] top-7 hidden h-px bg-sage-300 lg:block"
           />
-          <motion.span
+          {/*
+            Fills as the section crosses the viewport, driven by
+            `animation-timeline: view()` — advanced by the compositor, with no
+            scroll listener and no spring recalculated every frame. Where that
+            is unsupported the line renders fully drawn, which is the honest
+            fallback for a progress indicator.
+          */}
+          <span
             aria-hidden="true"
-            className="absolute left-[10%] right-[10%] top-7 hidden h-px origin-left bg-[image:var(--gradient-brand)] lg:block"
-            style={reduced ? { scaleX: 1 } : { scaleX }}
+            className="anim-track-fill absolute left-[10%] right-[10%] top-7 hidden h-px origin-left bg-[image:var(--gradient-brand)] lg:block"
           />
 
           <RevealGroup

@@ -505,6 +505,200 @@
 }
 
 /* ============================================================
+   SCROLL REVEALS
+
+   Replaces the Motion-driven `Reveal` component. Thirteen sections rendered
+   roughly eighty of those, and every one hydrated as a JavaScript animation
+   component — which is most of where a 5,250ms Total Blocking Time came from
+   on a mid-range phone.
+
+   Now the markup is server-rendered with a class, and ONE IntersectionObserver
+   for the whole document adds `is-in`. Same effect, no animation runtime, and
+   thirteen sections stop shipping component code to do it.
+
+   Only opacity and transform, so each reveal stays on the compositor.
+   ============================================================ */
+
+.rv {
+  opacity: 0;
+  transition:
+    opacity 0.52s var(--ease-out-soft),
+    transform 0.52s var(--ease-out-soft);
+  /* Stagger inside a RevealGroup. --i is set per child; 0 when standalone. */
+  transition-delay: calc(var(--i, 0) * 80ms);
+}
+
+.rv-up {
+  transform: translateY(32px);
+}
+.rv-fade {
+  transform: none;
+}
+.rv-scale {
+  transform: scale(0.94);
+}
+.rv-left {
+  transform: translateX(-48px);
+}
+.rv-right {
+  transform: translateX(48px);
+}
+
+/* Hairlines that draw outward rather than fade in. */
+.rv-draw {
+  transform: scaleX(0);
+}
+
+/*
+ * Ticks draw their stroke. 32 is comfortably longer than the path, so the
+ * offset fully hides it without needing the exact measured length.
+ */
+.rv-tick {
+  stroke-dasharray: 32;
+  stroke-dashoffset: 32;
+  transition:
+    stroke-dashoffset 0.8s var(--ease-out-soft) 0.15s,
+    opacity 0.3s var(--ease-out-soft);
+}
+
+.rv-tick.is-in {
+  stroke-dashoffset: 0;
+}
+
+.no-js .rv-tick {
+  stroke-dashoffset: 0;
+}
+
+.rv.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+/*
+ * Scroll-linked effects, formerly `useScroll` feeding springs.
+ *
+ * `animation-timeline: view()` ties progress to the element's own passage
+ * through the viewport, evaluated by the compositor with no scroll listener and
+ * nothing recalculated per frame in JavaScript.
+ *
+ * Both degrade honestly where it is unsupported: the connector renders fully
+ * drawn, and the parallax layer simply sits still — which is what it looked
+ * like at rest anyway.
+ */
+@keyframes track-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes parallax-drift {
+  from {
+    transform: translateY(-6%);
+  }
+  to {
+    transform: translateY(6%);
+  }
+}
+
+@supports (animation-timeline: view()) {
+  .anim-track-fill {
+    animation: track-fill linear both;
+    animation-timeline: view();
+    animation-range: entry 15% cover 45%;
+  }
+
+  .anim-parallax {
+    animation: parallax-drift linear both;
+    animation-timeline: view();
+  }
+}
+
+/* Mobile menu: overlay fade and the staggered entrance of its links. */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes menu-item-in {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+}
+
+.anim-fade-in {
+  animation: fade-in 0.25s var(--ease-out-soft) both;
+}
+
+.anim-menu-item {
+  animation: menu-item-in 0.4s var(--ease-out-soft) both;
+}
+
+/*
+ * Pointer effects, formerly spring-driven motion values.
+ *
+ * Both are hover-only, so `@media (hover: hover)` means a touch device never
+ * evaluates them. They animate transform alone, so they stay on the compositor.
+ */
+@media (hover: hover) and (pointer: fine) {
+  .magnetic {
+    display: inline-block;
+    transition: transform 0.28s var(--ease-out-soft);
+  }
+  .magnetic:hover {
+    transform: translateY(-2px) scale(1.02);
+  }
+
+  .tilt-card {
+    transition: transform 0.45s var(--ease-out-soft);
+    transform-style: preserve-3d;
+  }
+  .tilt-card:hover {
+    transform: perspective(900px) rotateX(1.6deg) rotateY(-1.6deg) translateY(-4px);
+  }
+}
+
+/*
+ * Reading-progress bar, driven by the scroll position itself.
+ *
+ * `animation-timeline: scroll()` runs on the compositor with no main-thread
+ * work at all — the previous implementation recalculated a spring on every
+ * scroll frame in JavaScript. Unsupported browsers simply never start the
+ * animation, leaving the bar at scaleX(0) and invisible, which is the correct
+ * degradation for a progress indicator.
+ */
+@keyframes scroll-progress {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.anim-scroll-progress {
+  transform: scaleX(0);
+}
+
+@supports (animation-timeline: scroll()) {
+  .anim-scroll-progress {
+    animation: scroll-progress linear both;
+    animation-timeline: scroll(root block);
+  }
+}
+
+/*
+ * Without JavaScript nothing adds `is-in`, so every revealed block would stay
+ * invisible. The content must not depend on the enhancement.
+ */
+.no-js .rv {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
+/* ============================================================
    HERO CROSS-FADE
    Three stills dissolving into one another behind the hero copy.
 
@@ -604,7 +798,18 @@
   .anim-spin-slow,
   .anim-ken-burns,
   .anim-glow,
-  .anim-headline {
+  .anim-headline,
+  /*
+   * The scroll-linked and menu animations added when Motion was removed.
+   * Each one's resting state is already the correct end state — the connector
+   * sits fully drawn, the parallax layer sits still, the menu sits opaque — so
+   * `animation: none` needs no companion rule here.
+   */
+  .anim-track-fill,
+  .anim-parallax,
+  .anim-scroll-progress,
+  .anim-fade-in,
+  .anim-menu-item {
     animation: none !important;
   }
 
@@ -618,6 +823,13 @@
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
+  }
+
+  /* Reveals keep the fade, lose the movement, and lose the stagger. */
+  .rv {
+    transform: none !important;
+    transition-duration: 0.15s !important;
+    transition-delay: 0ms !important;
   }
 
   /*

@@ -3,14 +3,12 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { Menu, X, Phone } from 'lucide-react';
 import { site, telUrl } from '@/content/site';
 import { useScrolledPast, useScrollLock } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
 import { ButtonLink } from '@/components/ui/Button';
 import { Marquee } from '@/components/effects/Marquee';
-import { EASE_OUT } from '@/lib/motion';
 
 type NavItem = { label: string; href: string };
 
@@ -30,7 +28,6 @@ export function Navbar({
 }) {
   const scrolled = useScrolledPast(60);
   const [open, setOpen] = useState(false);
-  const reduced = useReducedMotion();
   useScrollLock(open);
 
   return (
@@ -154,15 +151,14 @@ export function Navbar({
         </nav>
       </header>
 
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            className="fixed inset-0 z-[60] lg:hidden"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
-          >
+      {/*
+        Conditionally rendered, with a CSS fade on the way in.
+        AnimatePresence existed to animate the exit as well; that is not worth
+        an animation runtime resident on every page, and the menu closing
+        instantly is if anything the more responsive behaviour.
+      */}
+      {open && (
+        <div className="anim-fade-in fixed inset-0 z-[60] lg:hidden">
             <div className="absolute inset-0 bg-[linear-gradient(180deg,var(--color-blush-50)_0%,var(--color-blush-100)_100%)]" />
 
             <div className="relative flex h-full flex-col">
@@ -187,11 +183,12 @@ export function Navbar({
 
               <ul className="container-page flex flex-1 flex-col justify-center gap-2">
                 {items.map((item, i) => (
-                  <motion.li
+                  // Staggered by a per-item delay rather than by a parent
+                  // orchestrating its children.
+                  <li
                     key={item.href}
-                    initial={reduced ? { opacity: 0 } : { opacity: 0, x: -24 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.06 * i + 0.1, duration: 0.4, ease: EASE_OUT }}
+                    className="anim-menu-item"
+                    style={{ animationDelay: `${0.06 * i + 0.1}s` }}
                   >
                     <a
                       href={item.href}
@@ -200,7 +197,7 @@ export function Navbar({
                     >
                       {item.label}
                     </a>
-                  </motion.li>
+                  </li>
                 ))}
               </ul>
 
@@ -230,9 +227,8 @@ export function Navbar({
                 </a>
               </div>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
     </>
   );
 }

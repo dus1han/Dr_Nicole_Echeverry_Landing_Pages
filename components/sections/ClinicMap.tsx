@@ -7,7 +7,6 @@ import { site, telUrl, whatsappUrl } from '@/content/site';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Reveal } from '@/components/ui/Reveal';
 import { ButtonLink } from '@/components/ui/Button';
-import { useReducedMotion } from 'motion/react';
 
 /**
  * Keyless Google Maps embed — no API key, no billing account, works on deploy.
@@ -21,7 +20,11 @@ export function ClinicMap(content: ClinicMapContent) {
   const [shouldMount, setShouldMount] = useState(false);
   const [failed, setFailed] = useState(false);
   const sentinel = useRef<HTMLDivElement>(null);
-  const reduced = useReducedMotion();
+  // matchMedia rather than a hook from an animation library — this was the
+  // only thing keeping that dependency in this file.
+  const reduced =
+    typeof window !== 'undefined' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   useEffect(() => {
     const el = sentinel.current;

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
-import { motion, useReducedMotion } from 'motion/react';
+
 import { Loader2 } from 'lucide-react';
 import type { BookingContent } from '@/content/types';
 import { consultationSchema } from '@/lib/consultation-schema';
@@ -10,7 +10,7 @@ import { Reveal } from '@/components/ui/Reveal';
 import { Button } from '@/components/ui/Button';
 import { TextField } from '@/components/ui/Field';
 import { LEAD_FLAG, readClickId } from '@/lib/analytics';
-import { EASE_OUT } from '@/lib/motion';
+
 
 type Status = 'idle' | 'submitting' | 'success' | 'error';
 type Errors = Partial<Record<string, string>>;
@@ -21,7 +21,6 @@ type Errors = Partial<Record<string, string>>;
  * thank-you page lives.
  */
 export function BookingForm({ slug, ...content }: BookingContent & { slug: string }) {
-  const reduced = useReducedMotion();
   const [status, setStatus] = useState<Status>('idle');
   const [errors, setErrors] = useState<Errors>({});
   const [formError, setFormError] = useState<string | null>(null);
@@ -141,24 +140,22 @@ export function BookingForm({ slug, ...content }: BookingContent & { slug: strin
           <Reveal>
             <div className="relative rounded-[var(--radius-lg)] bg-[image:var(--gradient-brand)] p-px shadow-[var(--shadow-card)]">
               <div className="rounded-[calc(var(--radius-lg)-1px)] bg-white p-7 sm:p-9">
+              {/*
+                The success panel is on screen for a moment only — a successful
+                submit navigates to the thank-you page — so its entrance is CSS
+                rather than a reason to ship an animation runtime.
+              */}
               {status === 'success' ? (
-                <motion.div
-                  className="flex min-h-80 flex-col items-center justify-center gap-5 text-center"
-                  initial={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.96 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.5, ease: EASE_OUT }}
-                >
+                <div className="anim-scale-in flex min-h-80 flex-col items-center justify-center gap-5 text-center">
                   <span className="flex h-16 w-16 items-center justify-center rounded-full bg-rose-500/10 ring-1 ring-rose-400/40">
                     <svg viewBox="0 0 24 24" className="h-8 w-8" fill="none">
-                      <motion.path
+                      <path
+                        className="rv rv-tick is-in"
                         d="M4.5 12.5 L9.5 17.5 L19.5 6.5"
                         stroke="var(--color-rose-600)"
                         strokeWidth={2.2}
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        initial={{ pathLength: reduced ? 1 : 0 }}
-                        animate={{ pathLength: 1 }}
-                        transition={{ duration: reduced ? 0 : 0.7, ease: EASE_OUT, delay: 0.15 }}
                       />
                     </svg>
                   </span>
@@ -168,7 +165,7 @@ export function BookingForm({ slug, ...content }: BookingContent & { slug: strin
                   <p className="max-w-sm text-[0.9375rem] leading-relaxed text-muted">
                     {content.successBody}
                   </p>
-                </motion.div>
+                </div>
               ) : (
                 <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5">
                   {/* Honeypot — hidden from humans, irresistible to bots. */}

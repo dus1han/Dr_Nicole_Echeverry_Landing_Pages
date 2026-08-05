@@ -1,8 +1,4 @@
-﻿'use client';
-
-import Image from 'next/image';
-import { useRef } from 'react';
-import { motion, useScroll, useTransform, useReducedMotion } from 'motion/react';
+﻿import Image from 'next/image';
 import { ArrowDownRight } from 'lucide-react';
 import type { WhatIsItContent } from '@/content/types';
 import { SectionHeading } from '@/components/ui/SectionHeading';
@@ -10,14 +6,6 @@ import { Reveal, RevealGroup, RevealItem } from '@/components/ui/Reveal';
 import { slideFromLeft } from '@/lib/motion';
 
 export function WhatIsIt(content: WhatIsItContent) {
-  const ref = useRef<HTMLDivElement>(null);
-  const reduced = useReducedMotion();
-
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start end', 'end start'],
-  });
-  const y = useTransform(scrollYProgress, [0, 1], ['-6%', '6%']);
 
   return (
     // Tighter than the shared `section-y` (144px), tuned against the hero and
@@ -48,10 +36,13 @@ export function WhatIsIt(content: WhatIsItContent) {
           />
 
           <div
-            ref={ref}
+           
             className="relative aspect-4/5 overflow-hidden rounded-[var(--radius-lg)] bg-plum-900 shadow-[var(--shadow-card)]"
           >
-            <motion.div className="absolute inset-[-6%]" style={reduced ? undefined : { y }}>
+            {/* Parallax on a view-progress timeline: no scroll listener, no transform
+                recalculated in JS. Falls back to a static image, which is what
+                it looked like at rest anyway. */}
+            <div className="anim-parallax absolute inset-[-6%]">
               <Image
                 src={content.image.src}
                 alt={content.image.alt}
@@ -60,7 +51,7 @@ export function WhatIsIt(content: WhatIsItContent) {
                 sizes="(max-width: 1023px) 92vw, 46vw"
                 className="object-cover"
               />
-            </motion.div>
+            </div>
 
             <div
               aria-hidden="true"

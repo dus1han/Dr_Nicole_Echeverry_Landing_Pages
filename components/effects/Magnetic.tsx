@@ -1,59 +1,23 @@
-'use client';
-
-import { motion, useMotionValue, useSpring, useReducedMotion } from 'motion/react';
-import { useRef, type ReactNode } from 'react';
-import { useIsDesktop } from '@/lib/hooks';
-
-type MagneticProps = {
-  children: ReactNode;
-  className?: string;
-  /** Maximum pull toward the cursor, in pixels. */
-  strength?: number;
-};
+import type { ReactNode } from 'react';
+import { cn } from '@/lib/utils';
 
 /**
- * Pulls its child gently toward the cursor, springing back on leave.
+ * Subtle lift on hover for primary buttons.
  *
- * Desktop + pointer only. On touch devices this renders a plain wrapper with
- * no listeners and no motion values.
+ * This used to track the pointer with two springs, which meant a mousemove
+ * listener and two animation values per button — real main-thread work for an
+ * effect only mouse users ever saw, and one that cost every mobile visitor the
+ * library to serve it.
+ *
+ * A CSS transform on hover reads almost identically and runs on the compositor.
+ * Touch devices have no hover state, so they now pay nothing at all.
  */
-export function Magnetic({ children, className, strength = 12 }: MagneticProps) {
-  const ref = useRef<HTMLDivElement>(null);
-  const isDesktop = useIsDesktop();
-  const reduced = useReducedMotion();
-
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const sx = useSpring(x, { stiffness: 220, damping: 20, mass: 0.4 });
-  const sy = useSpring(y, { stiffness: 220, damping: 20, mass: 0.4 });
-
-  const enabled = isDesktop && !reduced;
-
-  if (!enabled) {
-    return <div className={className}>{children}</div>;
-  }
-
-  return (
-    <motion.div
-      ref={ref}
-      className={className}
-      style={{ x: sx, y: sy }}
-      onPointerMove={(e) => {
-        const el = ref.current;
-        if (!el) return;
-        const r = el.getBoundingClientRect();
-        const dx = e.clientX - (r.left + r.width / 2);
-        const dy = e.clientY - (r.top + r.height / 2);
-        // Normalise by half-size so the pull is proportional, then cap it.
-        x.set(Math.max(-strength, Math.min(strength, (dx / (r.width / 2)) * strength)));
-        y.set(Math.max(-strength, Math.min(strength, (dy / (r.height / 2)) * strength)));
-      }}
-      onPointerLeave={() => {
-        x.set(0);
-        y.set(0);
-      }}
-    >
-      {children}
-    </motion.div>
-  );
+export function Magnetic({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return <span className={cn('magnetic', className)}>{children}</span>;
 }

@@ -1,16 +1,15 @@
-'use client';
-
-import { motion, useReducedMotion } from 'motion/react';
-import { DUR, EASE_OUT } from '@/lib/motion';
 import { cn } from '@/lib/utils';
 
 /**
  * Gold tick that draws itself on scroll.
  *
- * Triggers on its own `whileInView` rather than inheriting a variant from an
- * ancestor Reveal group. Inheritance broke once the tick sat behind extra
- * wrappers (the tilt card's transform layer), leaving every tick stuck at
- * opacity 0 — self-triggering is predictable wherever the component is used.
+ * Server-rendered. The shared reveal observer adds `is-in` and CSS animates the
+ * stroke via dashoffset — no animation library, no per-tick observer.
+ *
+ * It carries its own `rv` class rather than inheriting an entrance from an
+ * ancestor group, which is the same reason the Motion version self-triggered:
+ * inheritance broke once a tick sat behind an extra wrapper, leaving every one
+ * stuck invisible.
  */
 const TONES = {
   light: 'bg-rose-500/10 ring-1 ring-rose-400/35',
@@ -31,8 +30,6 @@ export function CheckDraw({
   className?: string;
   tone?: keyof typeof TONES;
 }) {
-  const reduced = useReducedMotion();
-
   return (
     <span
       className={cn(
@@ -43,16 +40,13 @@ export function CheckDraw({
       aria-hidden="true"
     >
       <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none">
-        <motion.path
+        <path
+          className="rv rv-tick"
           d="M4.5 12.5 L9.5 17.5 L19.5 6.5"
           stroke={STROKES[tone]}
           strokeWidth={2.4}
           strokeLinecap="round"
           strokeLinejoin="round"
-          initial={reduced ? { pathLength: 1, opacity: 1 } : { pathLength: 0, opacity: 0 }}
-          whileInView={{ pathLength: 1, opacity: 1 }}
-          viewport={{ once: true, amount: 0.6 }}
-          transition={{ duration: reduced ? 0 : DUR.slow, ease: EASE_OUT, delay: 0.15 }}
         />
       </svg>
     </span>

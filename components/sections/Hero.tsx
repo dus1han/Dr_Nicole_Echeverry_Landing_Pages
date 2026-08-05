@@ -56,7 +56,13 @@ export function Hero(content: HeroContent) {
             // full strength rather than under a wash, so compression artefacts
             // that the scrim used to hide are visible.
             quality={86}
-            sizes="100vw"
+            /*
+              Not a flat 100vw. On a phone the frame is a 4:3 band roughly a
+              third of the viewport height, so asking for a full-width source
+              downloaded pixels that were then thrown away — measured at 42KB
+              of waste on the mobile audit.
+            */
+            sizes="(max-width: 640px) 110vw, 100vw"
             data-hero-frame={i}
             style={{ animationDelay: `${i * FRAME_STAGGER}s` }}
             /*
@@ -104,15 +110,21 @@ export function Hero(content: HeroContent) {
           impact the whole hero exists for. Measured: it needs 541px at the 64px
           desktop size, so the card is 40rem with 40px padding, leaving 560px.
         */}
-        <div className="relative -mt-16 w-full max-w-xl sm:-mt-24 lg:mt-0 lg:max-w-[40rem]">
+        <div className="relative -mt-10 w-full max-w-xl sm:-mt-14 lg:mt-0 lg:max-w-[40rem]">
           {/*
-            A gold hairline offset behind the card, echoing the framing used on
-            the surgeon's portrait further down the page. Hidden on mobile,
-            where there is no room for it to read as anything but clutter.
+            No card, no border, no shadow — the type sits on the photograph.
+            The panel version read as a box pasted over the picture and took up
+            most of the frame; this keeps the image the subject and lets the
+            words belong to it.
+
+            Legibility comes from a soft pool of cream behind the text rather
+            than a hard edge: dense where the words are, gone before it reaches
+            the body. A radial-gradient, so it costs no blur and no extra
+            raster — the same reasoning as the headline glow.
           */}
           <div
             aria-hidden="true"
-            className="absolute inset-0 hidden translate-x-3 translate-y-3 rounded-[2rem] border border-gold-500/35 lg:block"
+            className="pointer-events-none absolute -inset-x-8 -inset-y-10 -z-10 rounded-[3rem] bg-[radial-gradient(75%_72%_at_26%_50%,rgb(254_250_248/0.95)_0%,rgb(254_250_248/0.86)_42%,rgb(254_250_248/0)_78%)]"
           />
 
           {/*
@@ -120,7 +132,7 @@ export function Hero(content: HeroContent) {
             through just enough to tie the card to what is behind it, and text
             on 95% cream is still, for contrast purposes, text on cream.
           */}
-          <div className="anim-scale-in relative flex flex-col items-start gap-6 rounded-[2rem] border border-white/70 bg-cream/95 p-7 shadow-[var(--shadow-lift)] sm:p-9 lg:p-10">
+          <div className="anim-scale-in relative flex flex-col items-start gap-5">
             <h1 className="relative font-display tracking-[-0.02em]">
               {/*
                 A radial-gradient, not a blur filter — the scroll-performance

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Playfair_Display, Manrope } from 'next/font/google';
 import { site } from '@/content/site';
 import { ScrollProgress } from '@/components/layout/ScrollProgress';
+import { RevealObserver } from '@/components/ui/RevealObserver';
 import { GtmScript, GtmNoScript } from '@/components/analytics/Gtm';
 import { ClickIdCapture } from '@/components/analytics/ClickIdCapture';
 import { ORIGIN, INDEXABLE } from '@/lib/site-url';
@@ -49,13 +50,26 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  /*
+   * `no-js` is the DEFAULT, and RevealObserver removes it on mount.
+   *
+   * Scroll reveals start at opacity 0 and are shown by an observer, so a
+   * visitor without JavaScript would otherwise meet a page of invisible blocks.
+   * Defaulting to the safe state means the fallback holds even if the bundle
+   * never arrives, rather than depending on it to opt out.
+   */
   return (
-    <html lang="en" dir="ltr" className={`${playfair.variable} ${manrope.variable}`}>
+    <html
+      lang="en"
+      dir="ltr"
+      className={`no-js ${playfair.variable} ${manrope.variable}`}
+    >
       <body className="antialiased">
         {/* Must be the first thing in <body> — GTM's documented placement. */}
         <GtmNoScript id={site.analytics.gtmId} />
         <GtmScript id={site.analytics.gtmId} />
         <ClickIdCapture />
+        <RevealObserver />
 
         <a
           href="#main"

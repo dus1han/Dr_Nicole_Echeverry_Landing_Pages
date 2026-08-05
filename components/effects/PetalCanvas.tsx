@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { useReducedMotion } from 'motion/react';
 import { useIsDesktop } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
 
@@ -40,7 +39,9 @@ export function PetalCanvas({
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const isDesktop = useIsDesktop();
-  const reduced = useReducedMotion();
+  const reduced =
+    typeof window !== 'undefined' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   useEffect(() => {
     if (!isDesktop || reduced) return;

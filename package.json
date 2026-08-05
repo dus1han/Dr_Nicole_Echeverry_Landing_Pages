@@ -16,7 +16,6 @@
   "dependencies": {
     "clsx": "^2.1.1",
     "lucide-react": "^0.469.0",
-    "motion": "^11.15.0",
     "next": "^15.1.4",
     "nodemailer": "^9.0.3",
     "react": "^19.0.0",
@@ -34,5 +33,12 @@
     "playwright": "^1.62.0",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.7.3"
-  }
+  },
+  "browserslist": [
+    "chrome >= 111",
+    "edge >= 111",
+    "firefox >= 128",
+    "safari >= 16.4",
+    "not dead"
+  ]
 }

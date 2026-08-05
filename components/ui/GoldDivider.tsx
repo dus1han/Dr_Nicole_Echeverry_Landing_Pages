@@ -1,42 +1,20 @@
-'use client';
-
-import { motion, useReducedMotion } from 'motion/react';
 import { cn } from '@/lib/utils';
-import { DUR, EASE_OUT } from '@/lib/motion';
 
-/** Hairline rule that fades at both ends, with a rotated diamond at centre. */
-export function GoldDivider({
-  className,
-  tone = 'light',
-}: {
-  className?: string;
-  tone?: 'light' | 'dark';
-}) {
-  const reduced = useReducedMotion();
-
+/**
+ * A gold hairline that draws itself outward when it scrolls into view.
+ *
+ * Server-rendered; the shared reveal observer adds `is-in` and CSS does the
+ * rest. It used to be a Motion component animating scaleX.
+ */
+export function GoldDivider({ className }: { className?: string }) {
   return (
-    <motion.div
+    <div
       aria-hidden="true"
-      className={cn('relative flex w-full items-center justify-center', className)}
-      initial={reduced ? { opacity: 0 } : { opacity: 0, scaleX: 0.3 }}
-      whileInView={{ opacity: 1, scaleX: 1 }}
-      viewport={{ once: true, amount: 0.6 }}
-      transition={{ duration: DUR.slow, ease: EASE_OUT }}
+      className={cn('flex items-center justify-center gap-3', className)}
     >
-      <span
-        className={cn(
-          'h-px w-full max-w-3xl',
-          tone === 'dark'
-            ? 'bg-[linear-gradient(90deg,transparent,rgba(217,185,140,0.55),transparent)]'
-            : 'bg-[linear-gradient(90deg,transparent,rgba(201,160,99,0.45),transparent)]',
-        )}
-      />
-      <span
-        className={cn(
-          'absolute h-1.5 w-1.5 rotate-45',
-          tone === 'dark' ? 'bg-gold-400' : 'bg-gold-500',
-        )}
-      />
-    </motion.div>
+      <span className="rv rv-draw h-px w-16 origin-right bg-[linear-gradient(90deg,transparent,var(--color-gold-500))] sm:w-24" />
+      <span className="rv rv-fade h-1.5 w-1.5 rotate-45 bg-gold-500/70" />
+      <span className="rv rv-draw h-px w-16 origin-left bg-[linear-gradient(90deg,var(--color-gold-500),transparent)] sm:w-24" />
+    </div>
   );
 }

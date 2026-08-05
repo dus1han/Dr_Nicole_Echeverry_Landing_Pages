@@ -1,69 +1,80 @@
-'use client';
-
-import { motion, useReducedMotion, type Variants } from 'motion/react';
-import type { ReactNode, ElementType } from 'react';
-import { fadeUp, reducedFade, staggerParent, VIEWPORT } from '@/lib/motion';
-
-type RevealProps = {
-  children: ReactNode;
-  /** Which entrance to use. Ignored under prefers-reduced-motion. */
-  variants?: Variants;
-  className?: string;
-  delay?: number;
-  as?: ElementType;
-  amount?: number;
-};
+import type { ReactNode, ElementType, CSSProperties } from 'react';
+import { Children, isValidElement, cloneElement } from 'react';
+import { fadeUp, type RevealVariant } from '@/lib/motion';
+import { cn } from '@/lib/utils';
 
 /**
  * Scroll-triggered entrance. Fires once.
  *
- * Content is always in the DOM at full opacity if JS never runs — the
- * animation is an enhancement, not a gate on the content.
+ * SERVER components. They render a class and nothing else; a single
+ * IntersectionObserver for the whole document (see RevealObserver) adds
+ * `is-in` when each one arrives. That is the entire mechanism.
+ *
+ * Previously each of these was a Motion component. The page renders about
+ * eighty of them across thirteen sections, and hydrating that many animation
+ * components was the largest single contributor to a 5,250ms Total Blocking
+ * Time on a mid-range phone. Nothing about the effect changed; it simply stopped
+ * costing JavaScript.
+ *
+ * Without JS nothing adds `is-in`, so `.no-js .rv` in globals.css puts the
+ * content back at full opacity — the animation is an enhancement, never a gate
+ * on reading the page.
  */
+
+type RevealProps = {
+  children: ReactNode;
+  /** Which entrance to use. Ignored under prefers-reduced-motion. */
+  variants?: RevealVariant;
+  className?: string;
+  /** Seconds, matching the old Motion API. */
+  delay?: number;
+  as?: ElementType;
+  /** Accepted for source compatibility; the shared observer sets the threshold. */
+  amount?: number;
+};
+
 export function Reveal({
   children,
   variants = fadeUp,
   className,
   delay = 0,
-  as = 'div',
-  amount,
+  as: Tag = 'div',
 }: RevealProps) {
-  const reduced = useReducedMotion();
-  const MotionTag = motion[as as 'div'] ?? motion.div;
+  const style = delay ? ({ transitionDelay: `${delay}s` } as CSSProperties) : undefined;
 
   return (
-    <MotionTag
-      className={className}
-      initial="hidden"
-      whileInView="show"
-      viewport={amount ? { once: true, amount } : VIEWPORT}
-      variants={reduced ? reducedFade : variants}
-      transition={delay ? { delay } : undefined}
-    >
+    <Tag className={cn('rv', variants.reveal, className)} style={style}>
       {children}
-    </MotionTag>
+    </Tag>
   );
 }
 
-/** Wraps children so each `RevealItem` inside enters in sequence. */
+/**
+ * Staggers the `RevealItem`s inside it.
+ *
+ * The delay is set per child with a `--i` custom property rather than by the
+ * parent orchestrating its children, which is what Motion's variant
+ * propagation did. That propagation was also fragile — it silently stopped
+ * crossing wrapper components, which is what once left the FAQ ticks and the
+ * journey steps invisible.
+ */
 export function RevealGroup({
   children,
   className,
-  as = 'div',
-  amount,
+  as: Tag = 'div',
 }: Omit<RevealProps, 'variants' | 'delay'>) {
-  const MotionTag = motion[as as 'div'] ?? motion.div;
+  let i = 0;
 
   return (
-    <MotionTag
-      className={className}
-      initial="hidden"
-      whileInView="show"
-      viewport={amount ? { once: true, amount } : VIEWPORT}
-      variants={staggerParent}
-    >
-      {children}
-    </MotionTag>
+    <Tag className={className}>
+      {Children.map(children, (child) => {
+        if (!isValidElement(child)) return child;
+        const props = child.props as { style?: CSSProperties };
+        return cloneElement(child as never, {
+          style: { ...props.style, ['--i' as string]: i++ },
+        });
+      })}
+    </Tag>
   );
 }
 
@@ -71,14 +82,12 @@ export function RevealItem({
   children,
   className,
   variants = fadeUp,
-  as = 'div',
-}: Omit<RevealProps, 'delay' | 'amount'>) {
-  const reduced = useReducedMotion();
-  const MotionTag = motion[as as 'div'] ?? motion.div;
-
+  as: Tag = 'div',
+  style,
+}: Omit<RevealProps, 'delay' | 'amount'> & { style?: CSSProperties }) {
   return (
-    <MotionTag className={className} variants={reduced ? reducedFade : variants}>
+    <Tag className={cn('rv', variants.reveal, className)} style={style}>
       {children}
-    </MotionTag>
+    </Tag>
   );
 }

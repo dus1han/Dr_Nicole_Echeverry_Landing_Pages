@@ -1,13 +1,11 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef, useId } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { Star, Quote, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import type { ReviewsContent, Review } from '@/content/types';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Reveal } from '@/components/ui/Reveal';
 import { useIsDesktop } from '@/lib/hooks';
-import { EASE_OUT } from '@/lib/motion';
 import { cn } from '@/lib/utils';
 
 const AUTO_MS = 6500;
@@ -93,7 +91,6 @@ function ReviewCard({ review, onOpen }: { review: Review; onOpen: () => void }) 
 }
 
 function ReviewModal({ review, onClose }: { review: Review; onClose: () => void }) {
-  const reduced = useReducedMotion();
   const panelRef = useRef<HTMLDivElement>(null);
   const labelId = useId();
 
@@ -141,20 +138,14 @@ function ReviewModal({ review, onClose }: { review: Review; onClose: () => void 
   }, [onClose]);
 
   return (
-    <motion.div
-      className="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: reduced ? 0.12 : 0.25, ease: EASE_OUT }}
-    >
+    <div className="anim-fade-in fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6">
       <div
         className="absolute inset-0 bg-plum-900/45 backdrop-blur-sm"
         onClick={onClose}
         aria-hidden="true"
       />
 
-      <motion.div
+      <div
         ref={panelRef}
         role="dialog"
         aria-modal="true"
@@ -166,11 +157,7 @@ function ReviewModal({ review, onClose }: { review: Review; onClose: () => void 
           `auto` when its partner is not — so the decorative quote mark, which
           sits a few pixels outside the panel, produced a horizontal scrollbar.
         */
-        className="relative max-h-[85vh] w-full max-w-xl overflow-y-auto overflow-x-hidden overscroll-contain rounded-[var(--radius-lg)] border border-blush-200 bg-white p-7 shadow-[var(--shadow-card)] outline-none sm:p-9"
-        initial={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.97, y: 10 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.97, y: 10 }}
-        transition={{ duration: reduced ? 0.12 : 0.3, ease: EASE_OUT }}
+        className="anim-scale-in relative max-h-[85vh] w-full max-w-xl overflow-y-auto overflow-x-hidden overscroll-contain rounded-[var(--radius-lg)] border border-blush-200 bg-white p-7 shadow-[var(--shadow-card)] outline-none sm:p-9"
       >
         <button
           type="button"
@@ -207,14 +194,13 @@ function ReviewModal({ review, onClose }: { review: Review; onClose: () => void 
             <p className="mt-0.5 font-sans text-[0.8125rem] text-muted">{review.descriptor}</p>
           )}
         </div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }
 
 export function Reviews(content: ReviewsContent) {
   const isDesktop = useIsDesktop();
-  const reduced = useReducedMotion();
   const perView = isDesktop ? 3 : 1;
   const pages = Math.max(1, Math.ceil(content.items.length / perView));
   const [page, setPage] = useState(0);
@@ -234,10 +220,10 @@ export function Reviews(content: ReviewsContent) {
   useEffect(() => {
     // `open` pauses it too: rotating the carousel under an open dialog means
     // closing it returns you to a different set of cards than you left.
-    if (paused || open || reduced || pages < 2) return;
+    if (paused || open || pages < 2) return;
     const t = setInterval(() => setPage((p) => (p + 1) % pages), AUTO_MS);
     return () => clearInterval(t);
-  }, [paused, open, reduced, pages]);
+  }, [paused, open, pages]);
 
   const close = useCallback(() => setOpen(null), []);
 
@@ -279,19 +265,13 @@ export function Reviews(content: ReviewsContent) {
                 const items = content.items.slice(i * perView, i * perView + perView);
 
                 return (
-                  <motion.div
+                  <div
                     key={i}
                     aria-hidden={!isActive}
                     className={cn(
-                      'col-start-1 row-start-1 grid gap-6 md:grid-cols-2 lg:grid-cols-3',
-                      !isActive && 'pointer-events-none',
+                      'col-start-1 row-start-1 grid gap-6 transition-opacity duration-500 ease-[var(--ease-out-soft)] md:grid-cols-2 lg:grid-cols-3',
+                      isActive ? 'opacity-100' : 'pointer-events-none opacity-0',
                     )}
-                    initial={false}
-                    animate={{
-                      opacity: isActive ? 1 : 0,
-                      y: reduced || isActive ? 0 : 12,
-                    }}
-                    transition={{ duration: reduced ? 0.15 : 0.42, ease: EASE_OUT }}
                   >
                     {items.map((review) => (
                       <ReviewCard
@@ -300,7 +280,7 @@ export function Reviews(content: ReviewsContent) {
                         onOpen={() => setOpen(review)}
                       />
                     ))}
-                  </motion.div>
+                  </div>
                 );
               })}
             </div>
@@ -355,9 +335,7 @@ export function Reviews(content: ReviewsContent) {
         </Reveal>
       </div>
 
-      <AnimatePresence>
-        {open && <ReviewModal key={open.name} review={open} onClose={close} />}
-      </AnimatePresence>
+      {open && <ReviewModal key={open.name} review={open} onClose={close} />}
     </section>
   );
 }
