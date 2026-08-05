@@ -75,8 +75,11 @@ Four animated count-ups. **Real figures required from the client** — placehold
 **Eyebrow:** `THE PROCEDURE` — [N]
 **H2:** What is a Mommy Makeover? — [C] line 9
 
-**Body** — [C] line 10:
-> A Mommy Makeover is a personalized combination of procedures designed to restore and refine the natural contours of your body following pregnancy, childbirth, and breastfeeding.
+**Body** — [C] line 10, with one edit:
+> A Mommy Makeover is a personalized combination of procedures designed to restore the natural contours of your body following pregnancy, childbirth, and breastfeeding.
+
+> The source read "restore **and refine** the natural contours". The client cut those two
+> words on 3 Aug 2026; the rest is verbatim.
 
 **Lead-in** — [C] line 11:
 > Depending on your goals, your Mommy Makeover may include procedures such as:
@@ -111,15 +114,23 @@ Image: `procedure-tummy.png`
 Image: `procedure-breast.png`
 
 ### Card 3 — Liposuction
-> Liposuction removes unwanted fat from specific areas of the body to improve contours and create more balanced proportions. It can be performed on the abdomen, waist, flanks, hips, and thighs, including 360° lipo body contouring.
+Rewritten by the client on 3 Aug 2026. The earlier version described the same procedure and
+also mentioned 360° lipo body contouring, which this one drops.
 
-- Targets stubborn fat deposits
-- Sculpts the waist and body contours
-- Creates a more balanced silhouette
+> Liposuction removes stubborn fat from the abdomen, waist, flanks, hips, and thighs, refining natural body shape with improved balance.
+
+- Waist and flanks to create a slimmer waistline
+- Refine the abdomen to complement your tummy tuck results
+- Thighs & Hips for smoother, balanced contours
+
+> The supplied second bullet ended in a full stop while the other two did not. Dropped —
+> no bullet anywhere else on the page carries one.
 
 Image: `procedure-lipo.jpg`
 
-**Section footer CTA** — [N]: *Every plan is built around you. →* **Book Your Consultation**
+**Section footer CTA** — [N]: **Book Your Consultation**
+(The closing line above it, *"Every plan is built around you, never around a package."*, was
+removed at the client's request.)
 
 ---
 

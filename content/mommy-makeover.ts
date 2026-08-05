@@ -83,7 +83,9 @@ export const mommyMakeover: LandingPageContent = {
   whatIsIt: {
     eyebrow: 'The Procedure',
     heading: 'What is a Mommy Makeover?',
-    body: 'A Mommy Makeover is a personalized combination of procedures designed to restore and refine the natural contours of your body following pregnancy, childbirth, and breastfeeding.',
+    // "and refine" removed at the client's request, 3 Aug 2026. Otherwise the
+    // supplied wording, unchanged.
+    body: 'A Mommy Makeover is a personalized combination of procedures designed to restore the natural contours of your body following pregnancy, childbirth, and breastfeeding.',
     leadIn: 'Depending on your goals, your Mommy Makeover may include procedures such as:',
     chips: [
       { label: 'Tummy Tuck', href: '#tummy-tuck' },
@@ -136,12 +138,18 @@ export const mommyMakeover: LandingPageContent = {
       {
         id: 'liposuction',
         name: 'Liposuction',
+        /*
+         * Rewritten by the client, 3 Aug 2026. Verbatim except for one thing:
+         * the supplied second bullet ended in a full stop while the other two
+         * did not, and no bullet anywhere else on the page does. Dropped, so a
+         * stray mark does not read as a typo on a premium page.
+         */
         description:
-          'Liposuction removes unwanted fat from specific areas of the body to improve contours and create more balanced proportions. It can be performed on the abdomen, waist, flanks, hips, and thighs, including 360° lipo body contouring.',
+          'Liposuction removes stubborn fat from the abdomen, waist, flanks, hips, and thighs, refining natural body shape with improved balance.',
         benefits: [
-          'Targets stubborn fat deposits',
-          'Sculpts the waist and body contours',
-          'Creates a more balanced silhouette',
+          'Waist and flanks to create a slimmer waistline',
+          'Refine the abdomen to complement your tummy tuck results',
+          'Thighs & Hips for smoother, balanced contours',
         ],
         image: {
           src: `${IMG}/procedure-lipo.jpg`,
