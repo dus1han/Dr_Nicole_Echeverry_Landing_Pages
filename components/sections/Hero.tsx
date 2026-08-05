@@ -1,23 +1,27 @@
-import Image from 'next/image';
+
 import type { HeroContent } from '@/content/types';
 import { ButtonLink } from '@/components/ui/Button';
 
 /**
- * Full-bleed editorial hero: photographs at full strength, copy on its own card.
+ * Full-bleed editorial hero: three photographs dissolving behind the copy.
  *
- * The first attempt laid a pale cream gradient across the left half so the type
- * would be legible on top of the picture. It worked and it looked washed out —
- * a LIGHT scrim over a photograph does not darken it, it drains it, and these
- * images are soft neutrals to begin with so there was nothing left to drain.
+ * Two earlier attempts are worth recording, because both looked reasonable in
+ * isolation and neither survived contact with the page.
  *
- * So the wash is gone. The photograph is at full strength edge to edge, and the
- * copy sits on a near-solid card floating above it. Contrast stops being a
- * gradient stop someone has to tune and becomes text on cream, which cannot
- * fail. The layering is also what makes it feel expensive: one flat plane reads
- * as a stock header, two planes with a shadow between them read as a magazine
- * spread.
+ * A pale cream gradient across the left half made the type legible and drained
+ * the picture — a LIGHT scrim over a photograph does not darken it, and these
+ * are soft neutrals with nothing to spare. Then a near-solid card carrying the
+ * copy fixed contrast but read as a box pasted over the picture, and on a phone
+ * it took most of the screen.
  *
- * Still a SERVER component animated in pure CSS. A Motion entrance renders at
+ * What works is neither: the photograph runs at full strength, and the words sit
+ * directly on it over a soft pool of cream that is dense behind the text and
+ * gone by the time it reaches the body. Legibility without a hard edge.
+ *
+ * Phones get a genuinely different crop rather than the same frame squeezed —
+ * see the `picture` element below.
+ *
+ * A SERVER component animated in pure CSS. A JavaScript entrance renders at
  * opacity 0 until React hydrates, which once left this headline invisible for
  * ~4.3s while it was the LCP element.
  */
@@ -35,43 +39,53 @@ export function Hero(content: HeroContent) {
     <section className="relative isolate overflow-hidden bg-cream">
       {/* ---------------- Photograph layer ---------------- */}
       {/*
-        A tall band above the copy on phones, the whole section behind it from
-        lg. The band leads on mobile at the client's request, and an earlier
-        version that put copy first pushed the primary CTA below the fold on an
-        844px viewport.
+        Full-bleed behind the copy at EVERY width.
+
+        It used to be a band above the text on phones, with the copy on cream
+        beneath it. That stacked arrangement gave the pale block most of the
+        screen and looked nothing like the desktop treatment. Now the phone gets
+        the same idea: photograph edge to edge, words on top of it.
+
+        The picture still leads — the top two thirds are clear image, and the
+        copy sits in the lower third where the scrim has faded up to cream.
       */}
-      <div className="relative aspect-4/3 w-full sm:aspect-21/9 lg:absolute lg:inset-0 lg:aspect-auto lg:h-full">
+      <div className="absolute inset-0 h-full w-full">
+        {/*
+          `picture`, not next/image, because this needs ART DIRECTION rather
+          than a resize. A 16:9 frame stretched over a tall phone viewport crops
+          so hard that only a narrow vertical slice survives and the subject
+          reads as an abstract close-up; the phone gets a genuinely different
+          crop, composed around the torso.
+          next/image cannot express that, and there is nothing to give up here —
+          `prepare-assets` already emits both at 43–67KB, so this also skips the
+          /_next/image round trip on the LCP element.
+
+          The `-portrait` companion is derived rather than listed in content
+          because the same script writes both, so the pair cannot drift apart.
+        */}
         {content.frames.map((frame, i) => (
-          <Image
-            key={frame.src}
-            src={frame.src}
-            alt={frame.alt}
-            fill
-            // Only the first frame is a real LCP candidate; the others dissolve
-            // in seconds later and must not compete for bandwidth with it.
-            priority={i === 0}
-            fetchPriority={i === 0 ? 'high' : 'low'}
-            loading={i === 0 ? 'eager' : 'lazy'}
-            // 86, not 80. The sources are 1672px wide and this is now shown at
-            // full strength rather than under a wash, so compression artefacts
-            // that the scrim used to hide are visible.
-            quality={86}
-            /*
-              Not a flat 100vw. On a phone the frame is a 4:3 band roughly a
-              third of the viewport height, so asking for a full-width source
-              downloaded pixels that were then thrown away — measured at 42KB
-              of waste on the mobile audit.
-            */
-            sizes="(max-width: 640px) 110vw, 100vw"
-            data-hero-frame={i}
-            style={{ animationDelay: `${i * FRAME_STAGGER}s` }}
-            /*
-              Leans right on narrow screens: the subject is right-of-centre, so
-              a centred crop of a 16:9 frame into a portrait-ish band puts empty
-              room on screen and the body half out of it.
-            */
-            className="anim-hero-cross absolute inset-0 h-full w-full object-cover object-[70%_50%] lg:object-center"
-          />
+          <picture key={frame.src}>
+            <source
+              media="(max-width: 767px)"
+              srcSet={frame.src.replace(/\.jpg$/, '-portrait.jpg')}
+              width={706}
+              height={941}
+            />
+            <img
+              src={frame.src}
+              alt={frame.alt}
+              width={1672}
+              height={941}
+              // Only the first frame is a real LCP candidate; the others
+              // dissolve in seconds later and must not compete for bandwidth.
+              fetchPriority={i === 0 ? 'high' : 'low'}
+              loading={i === 0 ? 'eager' : 'lazy'}
+              decoding={i === 0 ? 'sync' : 'async'}
+              data-hero-frame={i}
+              style={{ animationDelay: `${i * FRAME_STAGGER}s` }}
+              className="anim-hero-cross absolute inset-0 h-full w-full object-cover object-center"
+            />
+          </picture>
         ))}
 
         {/*
@@ -90,27 +104,43 @@ export function Hero(content: HeroContent) {
           every section is protected rather than just this one.
         */}
 
-        {/* Melts the band into the copy on mobile, and the section into the next one at every width. */}
+        {/*
+          The copy's backing, per layout.
+
+          On a phone it is a vertical fade: clear image across the top, resolving
+          to cream by the lower third where the words are. Desktop keeps the
+          radial pool on the left instead, which is on the copy block itself.
+
+          Both stop well short of opaque across the whole frame — that was the
+          washed-out version, and the point here is that the photograph reads.
+        */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-[linear-gradient(to_top,var(--color-cream),transparent)]"
+          className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,var(--color-cream)_16%,rgb(254_250_248/0.92)_34%,rgb(254_250_248/0.35)_56%,transparent_74%)] lg:hidden"
+        />
+
+        {/* Joins the section to the one below it at every width. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-[linear-gradient(to_top,var(--color-cream),transparent)]"
         />
       </div>
 
       {/* ---------------- Copy card ---------------- */}
-      <div className="container-page relative z-10 pb-14 lg:flex lg:min-h-[min(90svh,860px)] lg:items-center lg:py-28">
-        {/*
-          -mt on mobile lifts the card over the photograph's lower edge. That
-          overlap is the whole trick: it turns two stacked blocks into one
-          composition, and costs a margin.
-        */}
+      {/*
+        The section's height now comes from here, since the photograph is
+        absolutely positioned at every width. min-h on mobile is what keeps the
+        image visible above the copy; `justify-end` drops the words into the
+        lower third where the scrim has reached cream.
+      */}
+      <div className="container-page relative z-10 flex min-h-[86svh] flex-col justify-end pb-12 pt-32 lg:min-h-[min(90svh,860px)] lg:justify-center lg:py-28">
         {/*
           Width is set by the headline, not by taste. "Mommy Makeover" has to
           hold one line — broken into "Mommy / Makeover / in Dubai" it loses the
           impact the whole hero exists for. Measured: it needs 541px at the 64px
-          desktop size, so the card is 40rem with 40px padding, leaving 560px.
+          desktop size, so this is 40rem.
         */}
-        <div className="relative -mt-10 w-full max-w-xl sm:-mt-14 lg:mt-0 lg:max-w-[40rem]">
+        <div className="relative w-full max-w-xl lg:max-w-[40rem]">
           {/*
             No card, no border, no shadow — the type sits on the photograph.
             The panel version read as a box pasted over the picture and took up
@@ -124,14 +154,9 @@ export function Hero(content: HeroContent) {
           */}
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute -inset-x-8 -inset-y-10 -z-10 rounded-[3rem] bg-[radial-gradient(75%_72%_at_26%_50%,rgb(254_250_248/0.95)_0%,rgb(254_250_248/0.86)_42%,rgb(254_250_248/0)_78%)]"
+            className="pointer-events-none absolute -inset-x-8 -inset-y-10 -z-10 hidden rounded-[3rem] bg-[radial-gradient(75%_72%_at_26%_50%,rgb(254_250_248/0.95)_0%,rgb(254_250_248/0.86)_42%,rgb(254_250_248/0)_78%)] lg:block"
           />
 
-          {/*
-            bg-cream/95, not solid. The five per cent lets the photograph ghost
-            through just enough to tie the card to what is behind it, and text
-            on 95% cream is still, for contrast purposes, text on cream.
-          */}
           <div className="anim-scale-in relative flex flex-col items-start gap-5">
             <h1 className="relative font-display tracking-[-0.02em]">
               {/*

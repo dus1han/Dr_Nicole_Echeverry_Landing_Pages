@@ -373,9 +373,28 @@ async function buildHeroFrames() {
       .jpeg({ quality: 80, mozjpeg: true, progressive: true })
       .toFile(join(OUT_IMG, out));
 
+    /*
+     * A portrait companion for phones — art direction, not a resize.
+     *
+     * A 16:9 frame stretched over a tall phone viewport crops so hard that only
+     * a narrow vertical slice survives, and the subject reads as an abstract
+     * close-up rather than a body. Cropping deliberately around the torso keeps
+     * the photograph legible at the shape a phone actually is.
+     *
+     * The subject sits right of centre in all three, hence the offset window
+     * rather than a centred one.
+     */
+    const portrait = out.replace('.jpg', '-portrait.jpg');
+    await sharp(from)
+      .extract({ left: 660, top: 0, width: 706, height: 941 })
+      .jpeg({ quality: 82, mozjpeg: true, progressive: true })
+      .toFile(join(OUT_IMG, portrait));
+
     const after = (await stat(join(OUT_IMG, out))).size;
+    const afterP = (await stat(join(OUT_IMG, portrait))).size;
     console.log(
-      `  ✓ ${out}  ${Math.round(before / 1024)}KB → ${Math.round(after / 1024)}KB`,
+      `  ✓ ${out}  ${Math.round(before / 1024)}KB → ${Math.round(after / 1024)}KB` +
+        `   + ${portrait} ${Math.round(afterP / 1024)}KB`,
     );
   }
 }
