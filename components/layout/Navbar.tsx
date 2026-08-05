@@ -47,6 +47,31 @@ export function Navbar({
             : 'border-b border-transparent bg-transparent',
         )}
       >
+        {/*
+          Legibility scrim, shown only while the header is transparent.
+
+          Before this, the header carried no background at rest and simply
+          borrowed the contrast of whatever sat beneath it. That held for as long
+          as every page opened on a pale section, and broke the moment the hero
+          became full-bleed photography: the links and the phone number ended up
+          on skin tone at close to no contrast.
+
+          Fixing it here rather than in the hero matters. A scrim inside the hero
+          protects this one page; a scrim inside the header protects any section
+          that ever sits under it, including whatever page two turns out to be.
+
+          Note the automated contrast audit passed throughout — it resolves a
+          background by walking up the DOM and cannot evaluate text over an
+          image. A green check was not evidence here.
+        */}
+        <div
+          aria-hidden="true"
+          className={cn(
+            'pointer-events-none absolute inset-x-0 top-0 -z-10 h-[9.5rem] transition-opacity duration-300',
+            'bg-[linear-gradient(to_bottom,var(--color-cream)_0%,rgba(254,250,248,0.9)_42%,rgba(254,250,248,0.5)_72%,transparent_100%)]',
+            scrolled ? 'opacity-0' : 'opacity-100',
+          )}
+        />
         <div
           className={cn(
             'overflow-hidden border-b border-gold-500/20 bg-blush-100 transition-[height,opacity] duration-300',

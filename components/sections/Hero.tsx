@@ -3,22 +3,23 @@ import type { HeroContent } from '@/content/types';
 import { ButtonLink } from '@/components/ui/Button';
 
 /**
- * Full-bleed editorial hero: three photographs dissolving behind fixed copy.
+ * Full-bleed editorial hero: photographs at full strength, copy on its own card.
  *
- * It replaces a boxed portrait sitting beside a column of text — the most
- * common hero on the internet, and one that made this page look like every
- * other clinic's. The photographs are all shot with the subject to the right
- * and open space to the left, so a full-bleed treatment uses the composition
- * the photographer actually framed instead of cropping it into a card.
+ * The first attempt laid a pale cream gradient across the left half so the type
+ * would be legible on top of the picture. It worked and it looked washed out —
+ * a LIGHT scrim over a photograph does not darken it, it drains it, and these
+ * images are soft neutrals to begin with so there was nothing left to drain.
  *
- * Still a SERVER component with pure-CSS animation, for the reason the previous
- * version documented and which has not changed: a Motion entrance renders at
+ * So the wash is gone. The photograph is at full strength edge to edge, and the
+ * copy sits on a near-solid card floating above it. Contrast stops being a
+ * gradient stop someone has to tune and becomes text on cream, which cannot
+ * fail. The layering is also what makes it feel expensive: one flat plane reads
+ * as a stock header, two planes with a shadow between them read as a magazine
+ * spread.
+ *
+ * Still a SERVER component animated in pure CSS. A Motion entrance renders at
  * opacity 0 until React hydrates, which once left this headline invisible for
- * ~4.3s and made it the LCP element. Nothing here waits for JavaScript.
- *
- * The aurora and the petal canvas are gone from this section. Behind a
- * full-bleed photograph neither is visible, and the canvas was one of only two
- * left on the page after the scroll-performance work.
+ * ~4.3s while it was the LCP element.
  */
 
 const rise = (delay: number) => ({
@@ -31,17 +32,15 @@ const FRAME_STAGGER = -8;
 
 export function Hero(content: HeroContent) {
   return (
-    <section className="hero-shell grain relative isolate overflow-hidden bg-cream">
+    <section className="relative isolate overflow-hidden bg-cream">
       {/* ---------------- Photograph layer ---------------- */}
       {/*
-        A band above the copy on phones, the whole section behind it from lg.
-
-        The band is deliberate rather than a fallback. The client asked for the
-        photograph to lead on mobile, and an earlier version that put copy first
-        pushed the primary CTA to y=807 on an 844px viewport — below the fold.
-        16/10 keeps the image cinematic while leaving the button reachable.
+        A tall band above the copy on phones, the whole section behind it from
+        lg. The band leads on mobile at the client's request, and an earlier
+        version that put copy first pushed the primary CTA below the fold on an
+        844px viewport.
       */}
-      <div className="relative aspect-16/10 w-full sm:aspect-21/9 lg:absolute lg:inset-0 lg:aspect-auto lg:h-full">
+      <div className="relative aspect-4/3 w-full sm:aspect-21/9 lg:absolute lg:inset-0 lg:aspect-auto lg:h-full">
         {content.frames.map((frame, i) => (
           <Image
             key={frame.src}
@@ -53,129 +52,141 @@ export function Hero(content: HeroContent) {
             priority={i === 0}
             fetchPriority={i === 0 ? 'high' : 'low'}
             loading={i === 0 ? 'eager' : 'lazy'}
-            quality={80}
+            // 86, not 80. The sources are 1672px wide and this is now shown at
+            // full strength rather than under a wash, so compression artefacts
+            // that the scrim used to hide are visible.
+            quality={86}
             sizes="100vw"
             data-hero-frame={i}
             style={{ animationDelay: `${i * FRAME_STAGGER}s` }}
             /*
-              object-position leans right on narrow screens: the subject is
-              right-of-centre, so a centred crop of a 16:9 frame into a 16:10
-              band puts empty room on screen and the body half out of it.
-              From lg the frame is full-bleed and the default centre is correct.
+              Leans right on narrow screens: the subject is right-of-centre, so
+              a centred crop of a 16:9 frame into a portrait-ish band puts empty
+              room on screen and the body half out of it.
             */
-            className="anim-hero-cross absolute inset-0 h-full w-full object-cover object-[72%_50%] lg:object-center"
+            className="anim-hero-cross absolute inset-0 h-full w-full object-cover object-[70%_50%] lg:object-center"
           />
         ))}
 
         {/*
-          Two scrims, one per layout.
-
-          Mobile: bottom-up into cream, so the band melts into the copy beneath
-          rather than ending on a hard edge.
-
-          Desktop: left-to-right, opaque where the text sits and clear over the
-          subject. This is what guarantees contrast — the copy is effectively on
-          cream no matter which frame is showing, so the type never has to be
-          legible against a photograph.
+          A vignette, not a wash. It deepens the corners and leaves the centre
+          untouched, so the picture gains depth instead of losing contrast — the
+          opposite of what the cream gradient did. A radial-gradient, so it
+          costs no blur and no extra raster.
         */}
         <div
           aria-hidden="true"
-          className="absolute inset-0 bg-[linear-gradient(to_top,var(--color-cream)_2%,rgba(254,250,248,0.35)_38%,transparent_70%)] lg:hidden"
+          className="absolute inset-0 bg-[radial-gradient(125%_105%_at_68%_38%,transparent_38%,rgb(88_64_73/0.30)_100%)]"
         />
+
+        {/*
+          No scrim under the header here — the Navbar now carries its own, so
+          every section is protected rather than just this one.
+        */}
+
+        {/* Melts the band into the copy on mobile, and the section into the next one at every width. */}
         <div
           aria-hidden="true"
-          className="absolute inset-0 hidden lg:block lg:bg-[linear-gradient(100deg,var(--color-cream)_0%,var(--color-cream)_38%,rgba(254,250,248,0.9)_54%,rgba(254,250,248,0.3)_72%,transparent_88%)]"
-        />
-        {/* Softens the join into the section below at every width. */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-[linear-gradient(to_top,var(--color-cream),transparent)]"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-[linear-gradient(to_top,var(--color-cream),transparent)]"
         />
       </div>
 
-      {/* ---------------- Copy ---------------- */}
-      {/*
-        pt clears the fixed header, which is 117px tall until the announcement
-        marquee collapses on scroll. On mobile the band already sits above this,
-        so only the desktop overlay needs the allowance.
-      */}
-      <div className="container-page relative z-10 pb-12 pt-10 lg:flex lg:min-h-[min(88svh,820px)] lg:items-center lg:pb-24 lg:pt-[8.5rem]">
+      {/* ---------------- Copy card ---------------- */}
+      <div className="container-page relative z-10 pb-14 lg:flex lg:min-h-[min(90svh,860px)] lg:items-center lg:py-28">
         {/*
-          38rem, not narrower. At 34rem the focal line broke into three ragged
-          lines — "Mommy / Makeover / in Dubai" — which is the exact failure the
-          previous hero carried a comment about. "Mommy Makeover" needs roughly
-          520px to hold one line at this size, and the column has to clear that
-          before anything else about the layout is worth judging.
+          -mt on mobile lifts the card over the photograph's lower edge. That
+          overlap is the whole trick: it turns two stacked blocks into one
+          composition, and costs a margin.
         */}
-        <div className="flex max-w-xl flex-col items-start gap-6 lg:max-w-[38rem]">
-          <h1 className="relative font-display tracking-[-0.02em]">
-            {/*
-              A radial-gradient, not a blur filter — the scroll-performance work
-              on this page established that a large `filter: blur()` re-rasterises
-              on every scroll frame and a gradient does not.
-            */}
-            <span
-              aria-hidden="true"
-              className="anim-glow pointer-events-none absolute -left-[8%] top-[20%] h-[70%] w-[85%] rounded-full bg-[radial-gradient(closest-side,rgb(232_138_171/0.38),transparent)]"
-            />
-
-            <span
-              className="anim-rise relative block text-[clamp(1.25rem,2.4vw,1.875rem)] font-medium leading-[1.15] text-plum-700"
-              style={{ animationDelay: '0.06s' }}
-            >
-              {content.headline.leadIn}
-            </span>
-
-            {/*
-              Two nested spans on purpose: `.anim-rise` and `.anim-headline`
-              both set `animation`, so on a single element the later rule would
-              silently cancel the other. Outer owns the entrance, inner the
-              perpetual sheen.
-            */}
-            <span className="anim-rise relative mt-2 block" style={{ animationDelay: '0.14s' }}>
-              <span className="anim-headline block text-[clamp(2.375rem,5vw,4.25rem)] font-bold leading-[1.02]">
-                {content.headline.focus}
-              </span>
-            </span>
-          </h1>
-
-          <p
-            {...rise(0.28)}
-            className="anim-rise font-display text-[clamp(1.0625rem,1.7vw,1.375rem)] italic text-plum-700"
-          >
-            {content.attribution}
-          </p>
-
+        {/*
+          Width is set by the headline, not by taste. "Mommy Makeover" has to
+          hold one line — broken into "Mommy / Makeover / in Dubai" it loses the
+          impact the whole hero exists for. Measured: it needs 541px at the 64px
+          desktop size, so the card is 40rem with 40px padding, leaving 560px.
+        */}
+        <div className="relative -mt-16 w-full max-w-xl sm:-mt-24 lg:mt-0 lg:max-w-[40rem]">
           {/*
-            A hairline rule rather than more copy. It gives the block an
-            editorial spine and separates the claim from the promise without
-            adding a word the visitor has to read.
+            A gold hairline offset behind the card, echoing the framing used on
+            the surgeon's portrait further down the page. Hidden on mobile,
+            where there is no room for it to read as anything but clutter.
           */}
-          <span
-            {...rise(0.32)}
+          <div
             aria-hidden="true"
-            className="anim-rise block h-px w-24 bg-[linear-gradient(90deg,var(--color-gold-500),transparent)]"
+            className="absolute inset-0 hidden translate-x-3 translate-y-3 rounded-[2rem] border border-gold-500/35 lg:block"
           />
 
-          <p
-            {...rise(0.36)}
-            className="anim-rise max-w-[44ch] text-[clamp(1rem,1.3vw,1.1875rem)] leading-[1.65] text-ink/75"
-          >
-            {content.subheadline}
-          </p>
+          {/*
+            bg-cream/95, not solid. The five per cent lets the photograph ghost
+            through just enough to tie the card to what is behind it, and text
+            on 95% cream is still, for contrast purposes, text on cream.
+          */}
+          <div className="anim-scale-in relative flex flex-col items-start gap-6 rounded-[2rem] border border-white/70 bg-cream/95 p-7 shadow-[var(--shadow-lift)] sm:p-9 lg:p-10">
+            <h1 className="relative font-display tracking-[-0.02em]">
+              {/*
+                A radial-gradient, not a blur filter — the scroll-performance
+                work on this page established that a large `filter: blur()`
+                re-rasterises on every scroll frame and a gradient does not.
+              */}
+              <span
+                aria-hidden="true"
+                className="anim-glow pointer-events-none absolute left-[-10%] top-[18%] h-[72%] w-[88%] rounded-full bg-[radial-gradient(closest-side,rgb(232_138_171/0.40),transparent)]"
+              />
 
-          <div {...rise(0.44)} className="anim-rise flex flex-wrap items-center gap-4 pt-1">
-            <ButtonLink href={content.primaryCta.href} size="lg" magnetic>
-              {content.primaryCta.label}
-            </ButtonLink>
-            <ButtonLink
-              href={content.secondaryCta.href}
-              variant="secondary"
-              size="lg"
-              withArrow
+              <span
+                className="anim-rise relative block text-[clamp(1.125rem,2.2vw,1.75rem)] font-medium leading-[1.15] text-plum-700"
+                style={{ animationDelay: '0.06s' }}
+              >
+                {content.headline.leadIn}
+              </span>
+
+              {/*
+                Two nested spans on purpose: `.anim-rise` and `.anim-headline`
+                both set `animation`, so on one element the later rule would
+                silently cancel the other. Outer owns the entrance, inner the
+                perpetual sheen.
+              */}
+              <span className="anim-rise relative mt-2 block" style={{ animationDelay: '0.14s' }}>
+                {/* Lower bound is 2.125rem, not 2.25: at 36px the phrase needed
+                    302px and a 390px phone leaves 292px inside the card. */}
+                <span className="anim-headline block text-[clamp(2.125rem,4.4vw,4rem)] font-bold leading-[1.02]">
+                  {content.headline.focus}
+                </span>
+              </span>
+            </h1>
+
+            <p
+              {...rise(0.28)}
+              className="anim-rise font-display text-[clamp(1rem,1.6vw,1.3125rem)] italic text-plum-700"
             >
-              {content.secondaryCta.label}
-            </ButtonLink>
+              {content.attribution}
+            </p>
+
+            <span
+              {...rise(0.32)}
+              aria-hidden="true"
+              className="anim-rise block h-px w-24 bg-[linear-gradient(90deg,var(--color-gold-500),transparent)]"
+            />
+
+            <p
+              {...rise(0.36)}
+              className="anim-rise max-w-[42ch] text-[clamp(1rem,1.25vw,1.125rem)] leading-[1.65] text-ink/75"
+            >
+              {content.subheadline}
+            </p>
+
+            <div {...rise(0.44)} className="anim-rise flex flex-wrap items-center gap-4 pt-1">
+              <ButtonLink href={content.primaryCta.href} size="lg" magnetic>
+                {content.primaryCta.label}
+              </ButtonLink>
+              <ButtonLink
+                href={content.secondaryCta.href}
+                variant="secondary"
+                size="lg"
+                withArrow
+              >
+                {content.secondaryCta.label}
+              </ButtonLink>
+            </div>
           </div>
         </div>
       </div>

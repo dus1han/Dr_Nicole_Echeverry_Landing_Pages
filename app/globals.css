@@ -542,23 +542,22 @@
 }
 
 /*
- * Lets the browser skip the hero entirely once it has scrolled away.
+ * `content-visibility: auto` was here and has been REMOVED. Recording why, so
+ * it does not get re-added as an obvious win.
  *
- * A CSS animation keeps ticking off-screen, and this one drives three
- * full-bleed layers — measured at ~8fps of the scroll budget spent animating
- * something nobody can see. `content-visibility: auto` makes the browser skip
- * rendering the subtree when it is outside the viewport, which recovers all of
- * it: 47fps → 49fps, matching the ceiling measured with the animation disabled.
+ * It works: skipping the off-screen hero recovered the ~8fps that animating
+ * three full-bleed layers nobody can see was costing, 47fps → 49fps.
  *
- * `contain-intrinsic-size: auto <fallback>` is the safe form — `auto` tells the
- * browser to remember the real size once rendered, so scrolling back up cannot
- * shift the layout. The fallback only applies before first render, and this
- * section is above the fold.
+ * It also broke the mobile "Book" CTA. Skipping the subtree swaps the hero's
+ * real height for `contain-intrinsic-size`, which changes the document height
+ * mid-scroll and moves the target out from under a jump already in flight. The
+ * regression test caught it: the booking form landed 9373px from the viewport
+ * instead of 108px.
+ *
+ * Eight frames per second is not worth the primary conversion path on the
+ * primary device, and the hero already measured faster than the one it replaced
+ * without this.
  */
-.hero-shell {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 780px;
-}
 
 /* ============================================================
    REDUCED MOTION
