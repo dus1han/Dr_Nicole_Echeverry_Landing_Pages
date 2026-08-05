@@ -107,7 +107,14 @@ export type HeroContent = {
   };
   attribution: string;
   subheadline: string;
-  image: ImageAsset;
+  /**
+   * Frames that dissolve into one another behind the copy.
+   *
+   * They must share a composition — subject to one side, open space where the
+   * text sits — or the headline lands on a body halfway through the cycle. One
+   * frame is valid and simply renders as a still.
+   */
+  frames: ImageAsset[];
   primaryCta: Cta;
   secondaryCta: Cta;
 };

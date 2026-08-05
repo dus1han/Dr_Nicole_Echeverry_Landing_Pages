@@ -14,7 +14,7 @@
  */
 
 import sharp from 'sharp';
-import { mkdir, access, readdir, rm } from 'node:fs/promises';
+import { mkdir, access, readdir, rm, stat } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -24,6 +24,29 @@ const SRC = join(ROOT, '..', 'Mommy makeover');
 const SRC_LOGO = join(SRC, 'Doctor photos & logo');
 const SRC_RESULTS = join(SRC, 'New set');
 const SRC_CREDS = join(SRC, 'Logos for description');
+const SRC_HERO = join(SRC, 'Tummy Tuck');
+
+/**
+ * Hero frames — [source file, output slug].
+ *
+ * Three of the five supplied, chosen because they share a composition: subject
+ * on the right, open negative space on the left. That is what lets them
+ * dissolve into one another behind fixed copy without the text ever landing on
+ * a body.
+ *
+ * The dark brown frame is left out deliberately — against the other two its
+ * exposure jumps, and a cross-fade between them reads as a fault rather than a
+ * transition.
+ *
+ * Sources are 1.4–1.8MB PNGs at 1672×941. Re-encoded to mozjpeg because this is
+ * the LCP image on the page and a PNG of a photograph is several hundred
+ * kilobytes spent on nothing.
+ */
+const HERO_FRAMES = [
+  ['d7135601-8bba-4ba7-ba83-d55921ca4c25.png', 'hero-1.jpg'],
+  ['a86c4f08-fc3b-4097-8da9-f2606ec58c80.png', 'hero-2.jpg'],
+  ['ce403b0a-e785-42cd-8e32-f035c642de4f.png', 'hero-3.jpg'],
+];
 const OUT_CREDS = join(ROOT, 'public', 'logo', 'credentials');
 const OUT_IMG = join(ROOT, 'public', 'images', 'mommy-makeover');
 const OUT_RESULTS = join(OUT_IMG, 'results');
@@ -329,6 +352,34 @@ async function buildResults() {
   console.log('  see docs/open-questions.md.');
 }
 
+async function buildHeroFrames() {
+  console.log('\n· Hero frames');
+
+  for (const [file, out] of HERO_FRAMES) {
+    const from = join(SRC_HERO, file);
+    if (!(await exists(from))) {
+      console.warn(`  ! ${file} not found — skipped`);
+      continue;
+    }
+
+    // stat, not sharp's metadata().size — that is only populated when the
+    // input is a Buffer, and reports NaN for a file path.
+    const before = (await stat(from)).size;
+
+    await sharp(from)
+      // 1672 wide is the source. Kept, not upscaled: on a full-bleed hero the
+      // browser picks from the responsive set, and there is nothing to gain by
+      // inventing pixels the photographer did not take.
+      .jpeg({ quality: 80, mozjpeg: true, progressive: true })
+      .toFile(join(OUT_IMG, out));
+
+    const after = (await stat(join(OUT_IMG, out))).size;
+    console.log(
+      `  ✓ ${out}  ${Math.round(before / 1024)}KB → ${Math.round(after / 1024)}KB`,
+    );
+  }
+}
+
 async function buildCredentialLogos() {
   console.log('\n· Training & affiliation marks');
 
@@ -399,6 +450,7 @@ async function main() {
   await buildLogos();
   await buildIcons();
   await buildResults();
+  await buildHeroFrames();
   await buildCredentialLogos();
   console.log('\nDone.\n');
 }

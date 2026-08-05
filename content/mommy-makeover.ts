@@ -49,10 +49,25 @@ export const mommyMakeover: LandingPageContent = {
     attribution: 'with Dr. Nicole Echeverry',
     subheadline:
       'World-class body contouring inspired by Colombian aesthetic artistry.',
-    image: {
-      src: `${IMG}/hero.jpg`,
-      alt: 'A woman in neutral activewear standing confidently in a light, calm interior',
-    },
+    /*
+     * Three frames that dissolve into one another. All three are shot with the
+     * subject to the right and open space to the left, which is where the copy
+     * sits — that shared composition is what keeps the headline off a body for
+     * the whole cycle.
+     *
+     * Only the first carries a descriptive alt. The other two show the same
+     * subject in the same setting, so describing each in turn would make a
+     * screen reader announce the same thing three times for what is, to a
+     * listener, one decorative background.
+     */
+    frames: [
+      {
+        src: `${IMG}/hero-1.jpg`,
+        alt: 'A woman’s midriff in neutral activewear, photographed in soft daylight',
+      },
+      { src: `${IMG}/hero-2.jpg`, alt: '' },
+      { src: `${IMG}/hero-3.jpg`, alt: '' },
+    ],
     primaryCta: { label: 'Book Your Consultation', href: '#book' },
     secondaryCta: { label: 'See The Results', href: '#results' },
   },
