@@ -167,13 +167,15 @@ export const mommyMakeover: LandingPageContent = {
     heading: 'Am I the right candidate?',
     body: 'Every woman’s body responds differently to pregnancy and childbirth. If you’ve maintained a healthy lifestyle but still struggle with changes that diet and exercise alone can’t improve, a personalized Mommy Makeover can help restore balance, shape, and confidence.',
     leadIn: 'You may be a good candidate if you:',
+    /*
+     * Trimmed by the client, 3 Aug 2026: six criteria to four. "in the near
+     * future" dropped from the first, and the last two removed entirely.
+     */
     criteria: [
-      'Have completed your family or are not planning another pregnancy in the near future.',
+      'Have completed your family or are not planning another pregnancy.',
       'Have loose abdominal skin or muscle separation following pregnancy.',
       'Experience sagging or volume loss in your breasts after breastfeeding.',
       'Maintain a stable weight but struggle with stubborn areas of fat.',
-      'Feel your body no longer reflects how you feel inside.',
-      'Are in good overall health and looking for a comprehensive body restoration procedure.',
     ],
     cta: { label: 'Request an Honest Assessment', href: '#book' },
     image: {

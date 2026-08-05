@@ -146,18 +146,21 @@ removed at the client's request.)
 
 **Lead-in** — [N]: *You may be a good candidate if you:*
 
-**Checklist** — [C] lines 35–40, verbatim:
-1. Have completed your family or are not planning another pregnancy in the near future.
+**Checklist** — [C] lines 35–40, trimmed by the client on 3 Aug 2026 from six to four:
+1. Have completed your family or are not planning another pregnancy.
 2. Have loose abdominal skin or muscle separation following pregnancy.
 3. Experience sagging or volume loss in your breasts after breastfeeding.
 4. Maintain a stable weight but struggle with stubborn areas of fat.
-5. Feel your body no longer reflects how you feel inside.
-6. Are in good overall health and looking for a comprehensive body restoration procedure.
 
-**Closing** — [N]:
-> Not sure whether this is right for you? A consultation will tell you honestly — including if the answer is *not yet*.
+> Removed: *"in the near future"* from item 1, and two whole items — *"Feel your body no
+> longer reflects how you feel inside."* and *"Are in good overall health and looking for a
+> comprehensive body restoration procedure."*
 
-CTA: **Request an Honest Assessment**
+**Closing** — removed at the client's request. The line was:
+> ~~Not sure whether this is right for you? A consultation will tell you honestly — including if the answer is *not yet*.~~
+
+CTA: **Request an Honest Assessment**, now centred beneath the grid (the banner card that
+held the closing line went with it).
 
 ---
 
