@@ -24,11 +24,31 @@ export function BookAnchor() {
       if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
 
       const target = event.target as HTMLElement | null;
-      const link = target?.closest?.('a[href="#book"]');
+      /*
+       * Every in-page link, not only "#book".
+       *
+       * `html` no longer declares `scroll-behavior: smooth` — see globals.css
+       * for why — so without this the navigation links would jump instantly.
+       * Handling them here restores the smooth feel exactly where it is safe,
+       * using the same distance rule, instead of applying it globally where it
+       * produced a scroll long enough for a finger to cancel.
+       */
+      const link = target?.closest?.('a[href^="#"]') as HTMLAnchorElement | null;
       if (!link) return;
 
-      const useForm = window.matchMedia(MOBILE_QUERY).matches;
-      const destination = document.getElementById(useForm ? 'book-form' : 'book');
+      const hash = link.getAttribute('href') ?? '';
+      if (hash.length < 2) return; // bare "#"
+
+      /*
+       * "#book" is special: on a phone it resolves to the FORM so the first
+       * input is on screen, and on a larger screen to the SECTION so the
+       * heading is read first. Every other link goes where it says.
+       */
+      const isBook = hash === '#book';
+      const useForm = isBook && window.matchMedia(MOBILE_QUERY).matches;
+      const destination = document.getElementById(
+        useForm ? 'book-form' : decodeURIComponent(hash.slice(1)),
+      );
       if (!destination) return; // fall through to the default anchor jump
 
       /*
@@ -73,8 +93,9 @@ export function BookAnchor() {
         block: 'start',
       });
 
-      // Keep the URL meaningful without triggering a second jump.
-      history.replaceState(null, '', '#book');
+      // Keep the URL meaningful without triggering a second jump. The link's
+      // own hash, not a hardcoded one — this handles every in-page link now.
+      history.replaceState(null, '', hash);
     };
 
     /*

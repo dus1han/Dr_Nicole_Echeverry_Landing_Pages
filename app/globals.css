@@ -136,7 +136,24 @@
   }
 
   html {
-    scroll-behavior: smooth;
+    /*
+     * `auto`, not `smooth`. Smoothness is applied per-click in BookAnchor,
+     * which only asks for it over short distances.
+     *
+     * Declaring it here made EVERY in-page jump animate, including the one from
+     * the hero to the booking form near the bottom of a ~14,000px page — well
+     * over a second of animation that any touch cancels. BookAnchor handles the
+     * hydrated case, but it is a client component, and on a slow connection a
+     * tap can land before it attaches. The native fallback then ran that same
+     * cancellable scroll, which is the "I have to press Book twice" report
+     * surviving in the pre-hydration window. Caught by running the anchor test
+     * against the live site rather than localhost, where the latency does not
+     * exist.
+     *
+     * An instant jump cannot be interrupted, so the un-enhanced baseline is now
+     * the reliable one and JavaScript only makes it prettier.
+     */
+    scroll-behavior: auto;
     /* Sticky nav is 72px; keeps anchor targets from hiding beneath it. */
     scroll-padding-top: 5.5rem;
     -webkit-text-size-adjust: 100%;
