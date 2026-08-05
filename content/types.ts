@@ -235,7 +235,8 @@ export type ResultsContent = Placeholderable & {
 export type JourneyContent = {
   eyebrow: string;
   heading: string;
-  lead: string;
+  /** Optional. Omit it and the heading sits directly above the steps. */
+  lead?: string;
   steps: Array<{ title: string; description: string }>;
 };
 

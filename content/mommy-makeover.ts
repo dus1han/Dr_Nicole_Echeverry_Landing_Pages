@@ -316,14 +316,22 @@ export const mommyMakeover: LandingPageContent = {
   journey: {
     eyebrow: 'What to Expect',
     heading: 'Your journey, step by step',
-    lead: 'The unknown is the hardest part. Here is exactly what happens, from your first message to your last follow-up.',
+    // Lead removed at the client's request, 3 Aug 2026. The steps themselves
+    // answer "what happens next", so the sentence introducing them was saying
+    // the same thing twice.
     // Tightened for the horizontal 5-across layout — each description is one
     // short sentence so the columns stay even and the section stays compact.
     steps: [
       {
         title: 'Private Consultation',
+        /*
+         * Client rewrite, 3 Aug 2026. Supplied as "what is suits for your
+         * body" — the stray "is" is corrected here. Unlike a patient
+         * testimonial, where the words are the point, this is the clinic's own
+         * marketing copy and a grammatical slip only reads as carelessness.
+         */
         description:
-          'An unhurried conversation about your history, your goals, and what is realistic for your body.',
+          'A conversation about your history, goals & what suits your body.',
       },
       {
         title: 'Your Personalised Plan',
@@ -342,8 +350,9 @@ export const mommyMakeover: LandingPageContent = {
       },
       {
         title: 'Guided Recovery',
+        // Client rewrite, 3 Aug 2026.
         description:
-          'Scheduled follow-ups and direct access to the team — you are never left to guess.',
+          'Scheduled follow-ups & personalized aftercare help ensure your recovery progresses smoothly.',
       },
     ],
   },
@@ -355,10 +364,15 @@ export const mommyMakeover: LandingPageContent = {
      * REAL, client-supplied reviews. `isPlaceholder: false` turns off the dev
      * warning and turns on the "Verified patient" badge.
      *
-     * Reproduced as supplied. The originals carry a few spelling and grammar
-     * slips ("awsome", "with my eyes close") and they are kept — a testimonial
-     * that has been tidied up is no longer the words the patient wrote, and on
-     * a medical page that distinction is worth more than the polish.
+     * Spelling and grammar are left as the patients wrote them ("awsome",
+     * "with my eyes close") — a testimonial that has been tidied up is no
+     * longer the words the patient wrote, and on a medical page that
+     * distinction is worth more than the polish.
+     *
+     * Two quotes were SHORTENED by the client on 3 Aug 2026, removing the
+     * Colombia reference and a few clauses. Cutting is a stronger edit than
+     * fixing a typo — it changes what the patient is on record as saying — so
+     * it is noted in docs/open-questions.md rather than done quietly.
      *
      * `rating` is absent throughout because no ratings were supplied. Five
      * stars is the likely answer and that is not a good enough reason to
@@ -375,7 +389,7 @@ export const mommyMakeover: LandingPageContent = {
       {
         title: 'I Love my Body! My body came out beautiful, my skin was fixed',
         quote:
-          'My experience with Dr. Echeverry was absolutely amazing! I had liposculpture with her and her husband Dr. Reyes. The work was phenomenal. Everything healed extremely quickly. Dr. Echeverry was so sweet, she truly is a Barbie body sculptor. Not only did she give me my dream body, but she even fixed my acne with some prescription acne medication. My body came out beautiful, my skin was fixed, thanks to Dr. Echeverry.',
+          'My experience with Dr. Echeverry was absolutely amazing! I had liposculpture with her and her husband Dr. Reyes. The work was phenomenal. Dr. Echeverry was so sweet, she even fixed my acne with some prescription acne medication. My body came out beautiful, my skin was fixed, thanks to Dr. Echeverry.',
         name: 'Laluna2016',
       },
       {
@@ -392,7 +406,7 @@ export const mommyMakeover: LandingPageContent = {
       },
       {
         quote:
-          'I did with the dr a full facelift. My results was awsome. I am so happy with all the procedures. I am so beautiful now. Trust me, this is the best place to do your surgery. You have to come to Colombia to do it.',
+          'I did with the dr a full facelift. My results was awsome. I am so happy with all the procedures. I am so beautiful now. Trust me, this is the best place to do your surgery.',
         name: 'Luz Pedreros',
       },
       {

@@ -24,12 +24,23 @@ export const consultationSchema = z.object({
     .max(32, 'That number looks too long.')
     .regex(/^[+()\d\s-]+$/, 'Please use digits, spaces, + and - only.'),
 
+  /**
+   * Optional at the client's request — the phone number is the required
+   * channel now.
+   *
+   * Still validated WHEN GIVEN. Accepting anything at all would mean the team
+   * replies into the void, which is worse than not asking: the patient believes
+   * she has been in touch and hears nothing back.
+   */
   email: z
     .string()
     .trim()
-    .min(1, 'Please add an email address.')
-    .email('That email doesn’t look quite right.')
-    .max(200),
+    .max(200)
+    .optional()
+    .default('')
+    .refine((value) => value === '' || z.string().email().safeParse(value).success, {
+      message: 'That email doesn’t look quite right.',
+    }),
 
   /**
    * Which landing page the enquiry came from — it names the subject line, and

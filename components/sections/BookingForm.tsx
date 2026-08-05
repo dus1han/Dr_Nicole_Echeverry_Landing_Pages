@@ -196,11 +196,17 @@ export function BookingForm({ slug, ...content }: BookingContent & { slug: strin
                     defaultValue="+971 "
                     error={errors.phone}
                   />
+                  {/*
+                    Optional at the client's request. Labelled so, rather than
+                    marking the other two as required: on a three-field form
+                    the exception is the shorter thing to say, and an unlabelled
+                    optional field just looks like one you are about to be told
+                    off for skipping.
+                  */}
                   <TextField
-                    label="Email address"
+                    label="Email address (optional)"
                     name="email"
                     type="email"
-                    required
                     autoComplete="email"
                     error={errors.email}
                   />

@@ -54,7 +54,8 @@ function getTransport(): Transporter {
 export type Enquiry = {
   name: string;
   phone: string;
-  email: string;
+  /** Optional — the form asks for it but does not require it. */
+  email?: string;
   slug: string;
   gclid?: string;
   gclidSource?: string;
@@ -84,10 +85,14 @@ const escapeHtml = (value: string) =>
 export async function sendEnquiry(enquiry: Enquiry): Promise<void> {
   const label = pageLabel(enquiry.slug);
 
+  const email = enquiry.email?.trim() || '';
+
   const rows: Array<[string, string]> = [
     ['Name', enquiry.name],
     ['Phone', enquiry.phone],
-    ['Email', enquiry.email],
+    // Spelled out rather than omitted. A missing row reads as a rendering bug;
+    // "not provided" tells the team to pick up the phone.
+    ['Email', email || 'not provided'],
     ['Page', `${label} (/${enquiry.slug})`],
     ['Received', new Date(enquiry.receivedAt).toUTCString()],
   ];
@@ -113,7 +118,11 @@ export async function sendEnquiry(enquiry: Enquiry): Promise<void> {
           .join('')}
       </table>
       <p style="margin:16px 0 0;font-size:13px;color:#7a5a65">
-        Reply to this email to answer ${escapeHtml(enquiry.name)} directly.
+        ${
+          email
+            ? `Reply to this email to answer ${escapeHtml(enquiry.name)} directly.`
+            : `${escapeHtml(enquiry.name)} did not leave an email address — call or WhatsApp the number above.`
+        }
       </p>
     </div>`;
 
@@ -122,9 +131,10 @@ export async function sendEnquiry(enquiry: Enquiry): Promise<void> {
     // anything else here only produces a mismatch that spam filters notice.
     from: `${site.doctor.name} Website <${USER}>`,
     to: RECIPIENTS,
-    // Lets the team answer the patient by hitting reply, rather than
-    // copying the address out of the body.
-    replyTo: `${enquiry.name} <${enquiry.email}>`,
+    // Only when there is one. `Name <>` is a malformed header, and some servers
+    // reject the whole message over it — losing the enquiry because the patient
+    // declined to give an optional field.
+    ...(email ? { replyTo: `${enquiry.name} <${email}>` } : {}),
     subject: `[${label}] New consultation request — ${enquiry.name}`,
     text,
     html,
