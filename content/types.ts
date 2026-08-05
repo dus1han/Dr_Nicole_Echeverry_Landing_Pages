@@ -112,13 +112,23 @@ export type HeroContent = {
   secondaryCta: Cta;
 };
 
-export type TrustStat = {
-  value: number;
-  /** Rendered after the counted value, e.g. "+" or "%". */
-  suffix?: string;
-  prefix?: string;
-  label: string;
-};
+/**
+ * A figure in the trust strip — either a number that counts up, or a word.
+ *
+ * A union rather than one shape with an optional number, so a stat cannot be
+ * declared with both or with neither. "Double" and "Zero" are claims in their
+ * own right and are not numbers pretending to be words; giving them their own
+ * variant keeps the counting animation off them, where it would look broken.
+ */
+export type TrustStat =
+  | {
+      value: number;
+      /** Rendered after the counted value, e.g. "+" or "%". */
+      suffix?: string;
+      prefix?: string;
+      label: string;
+    }
+  | { text: string; label: string };
 
 export type TrustStripContent = Placeholderable & {
   stats: TrustStat[];

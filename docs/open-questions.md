@@ -93,6 +93,18 @@ calm palette the page was built around.
 
 ---
 
+### Trust bar figures → **supplied** ✅
+Four client-supplied figures replaced the invented ones on 3 Aug 2026, so
+`trust.isPlaceholder` is `false` and **`npm run check:content` now passes clean** — no
+placeholder blocks remain anywhere on the page.
+
+| | |
+|---|---|
+| 🟡 **"Zero — scars on body"** | The client's wording, reproduced verbatim. An abdominoplasty leaves a scar by definition, and this page sells tummy tuck alongside breast surgery and liposuction, so as written it reads as a claim of *no scarring at all*. DHA health-advertising rules prohibit misleading claims, and Google Ads applies its own scrutiny to healthcare creative. If the intended meaning is that scars are placed where underwear hides them, wording it that way is both true and more persuasive — "Hidden" / "Scar placement", say. Worth a decision before this runs in paid advertising. |
+| 🟡 **"Double — board certified"** | Verify which two boards, and that both are current. |
+
+---
+
 ## 🔴 Must resolve before launch
 
 ### 1. Clinic street address — 🟡 downgraded, no longer blocking

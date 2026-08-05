@@ -60,13 +60,21 @@ export const mommyMakeover: LandingPageContent = {
   /* ---------------------------------------------------------------- */
 
   trust: {
-    // TODO: real figures needed from the client — see docs/open-questions.md.
-    isPlaceholder: true,
+    /*
+     * Client-supplied, 3 Aug 2026 — these replaced four invented figures, so
+     * the content gate no longer flags this block.
+     *
+     * "Zero scars on body" is the client's wording and is repeated verbatim.
+     * See docs/open-questions.md: an abdominoplasty leaves a scar by
+     * definition, so this reads as a claim about placement rather than absence
+     * and is worth a second look before it runs in paid advertising.
+     */
+    isPlaceholder: false,
     stats: [
-      { value: 10, suffix: '+', label: 'Years of surgical experience' },
-      { value: 1500, suffix: '+', label: 'Procedures performed' },
-      { value: 3, label: 'Countries trained in' },
-      { value: 98, suffix: '%', label: 'Patient satisfaction' },
+      { value: 19, suffix: '+', label: 'Years of experience' },
+      { text: 'Double', label: 'Board certified' },
+      { text: 'Zero', label: 'Scars on body' },
+      { text: 'Personalized', label: 'Surgical planning' },
     ],
   },
 
