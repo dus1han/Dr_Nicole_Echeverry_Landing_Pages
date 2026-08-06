@@ -138,6 +138,63 @@ docker compose up -d --remove-orphans || fail "docker compose up failed."
 # --- wait for healthy, not merely started ----------------------------------
 # `up -d` returns as soon as the process starts, which is well before Next is
 # answering requests. Reporting success there would call a broken deploy green.
+# --- warm the image optimizer ----------------------------------------------
+# Next optimises images on FIRST REQUEST and caches the result. Straight after a
+# deploy that cache is empty, so the first visitor to each page pays for every
+# encode on it — and, once, three of those requests never came back at all,
+# leaving the before/after gallery blank on desktop while the container sat idle
+# at 0% CPU. A restart cleared it and it has not been reproducible since, so
+# this is not presented as a root-cause fix.
+#
+# What it does do is make the deploy, rather than a visitor, the one that runs
+# every encode. By the time traffic arrives the bytes are already on disk, which
+# both removes that failure window and takes ~700ms per image off the first
+# view. Paid ads land directly on these pages, so the first visitor is not a
+# rounding error — they are the campaign.
+#
+# The URL list is read out of the served HTML rather than hardcoded, so a new
+# page or a new photograph is covered without anyone remembering to add it.
+warm_images() {
+  command -v curl >/dev/null 2>&1 || { echo "==> curl unavailable; skipping image warm-up"; return; }
+
+  port=$(grep '^SITE_PORT=' .env | cut -d= -f2-)
+  [ -n "$port" ] || { echo "==> no SITE_PORT; skipping image warm-up"; return; }
+  base="http://127.0.0.1:$port"
+
+  # The browser Accept header. Without it the optimizer returns JPEG and warms
+  # a variant no real browser will ever ask for.
+  accept='image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8'
+
+  # Every page, from the sitemap the build already emits.
+  paths=$(curl -fsS --max-time 20 "$base/sitemap.xml" 2>/dev/null \
+    | grep -o '<loc>[^<]*</loc>' \
+    | sed -e 's|</\?loc>||g' -e 's|https\?://[^/]*||' \
+    | sed 's|^$|/|' | sort -u)
+  [ -n "$paths" ] || { echo "==> could not read sitemap; skipping image warm-up"; return; }
+
+  list=$(mktemp)
+  for p in $paths; do
+    # Only the widths real devices choose — measured at 360 on a phone and 640
+    # on a 1440px laptop, with 828 for retina. Warming all ten srcset candidates
+    # would triple the work to cache variants nothing requests.
+    curl -fsS --max-time 20 "$base$p" 2>/dev/null \
+      | grep -o '/_next/image?url=[^",[:space:]]*' \
+      | sed 's/&amp;/\&/g' \
+      | grep -E '[?&]w=(360|640|828)[&]' >> "$list" || true
+  done
+  sort -u "$list" -o "$list"
+
+  n=$(wc -l < "$list" | tr -d ' ')
+  if [ "$n" -gt 0 ]; then
+    xargs -a "$list" -I{} -P 4 \
+      curl -s -o /dev/null -H "Accept: $accept" --max-time 45 "$base{}" 2>/dev/null || true
+    echo "==> warmed $n image variants across $(echo "$paths" | wc -l | tr -d ' ') pages"
+  else
+    echo "==> no optimised images found to warm"
+  fi
+  rm -f "$list"
+}
+
 echo "==> waiting for health"
 cid=$(docker compose ps -q web)
 [ -n "$cid" ] || fail "no 'web' container after up -d."
@@ -147,6 +204,8 @@ for i in $(seq 1 30); do
   if [ "$status" = "healthy" ]; then
     echo "==> healthy after $((i * 5))s"
     docker ps --filter "id=$cid" --format '    {{.Names}} | {{.Status}} | {{.Ports}}'
+
+    warm_images
 
     # Untagged layers accumulate fast and fill a small VPS disk.
     docker image prune -af --filter "until=168h" >/dev/null 2>&1 || true
