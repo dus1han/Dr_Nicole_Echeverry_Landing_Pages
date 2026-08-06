@@ -29,7 +29,7 @@ Personalised Treatment Plans
 | Dr. Nicole | `#meet-dr-nicole` |
 | Results | `#results` |
 | FAQ | `#faq` |
-| `+971 55 557 3563` | `tel:+971555573563` |
+| `+971 56 663 6359` | `tel:+971566636359` |
 | **Book Consultation** (button) | `#book` |
 
 ---
@@ -346,7 +346,7 @@ CTA: **Book Your Consultation** · secondary: *Message us on WhatsApp*
 **Privacy note:** Your details are confidential and never shared. — [N]
 
 **Contact rail beside the form** — [C] lines 90–95:
-- Phone / WhatsApp — `+971 55 557 3563`
+- Phone / WhatsApp — `+971 56 663 6359`
 - Email — `info@dranicolecheverry.com`
 - Location — `https://share.google/JFXKjPDSRNDthp82J` **[A — plain-text street address needed]**
 
@@ -364,7 +364,7 @@ CTA: **Book Your Consultation** · secondary: *Message us on WhatsApp*
 | Clinic name | **Kasaesthetic Clinic** | ✅ Resolved from the supplied share link |
 | Street address | *(pending)* | 🔴 **Needed** — not verifiable from public sources |
 | Area / Emirate | *(pending)* | 🔴 Needed |
-| Phone | `+971 55 557 3563` | [C] line 90 |
+| Phone | `+971 56 663 6359` | [C] line 90 |
 | WhatsApp | same number | [C] |
 | Email | `info@dranicolecheverry.com` | [C] line 91 |
 | Consultation hours | *(pending)* | 🟡 Needed |
@@ -386,7 +386,7 @@ Wrapped in a gold-hairline frame with a blush vignette overlay and a pulsing gra
 > Source lines 88–95
 
 - **Logo** — white version on `plum-900` — [C] line 88
-- **Contact** — [C] lines 89–91: `+971 55 557 3563` · `info@dranicolecheverry.com`
+- **Contact** — [C] lines 89–91: `+971 56 663 6359` · `info@dranicolecheverry.com`
 - **Connect with us** — [C] lines 92–95:
   - Facebook — `https://www.facebook.com/dranicolecheverry`
   - Instagram — `https://www.instagram.com/dra.nicolecheverry_surgery`
@@ -401,7 +401,7 @@ Wrapped in a gold-hairline frame with a blush vignette overlay and a pulsing gra
 
 ## 17 · Persistent CTAs — [N]
 
-- Floating WhatsApp bubble → `https://wa.me/971555573563?text=Hi%2C%20I%27d%20like%20to%20ask%20about%20a%20Mommy%20Makeover%20consultation.`
+- Floating WhatsApp bubble → `https://wa.me/971566636359?text=Hi%2C%20I%27d%20like%20to%20ask%20about%20a%20Mommy%20Makeover%20consultation.`
 - Mobile sticky bar: **Call** (`tel:`) · **WhatsApp** · **Book** (`#book`)
 
 ---

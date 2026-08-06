@@ -133,7 +133,7 @@ Fluid type scale using `clamp()`: H1 `clamp(2.75rem, 7vw, 5.5rem)` down to body 
 Thin gradient strip, infinite horizontal scroll: `Colombian Aesthetic Artistry` · `Board-Certified Plastic Surgeon` · `Private Consultations in Dubai` · `Personalised Treatment Plans` — separated by gold diamond glyphs. Pauses on hover.
 
 **1 · Sticky navigation**
-Transparent over hero → on scroll (>60px) becomes frosted `blur(20px)` cream with gold hairline bottom border and a shrunken logo. Links: What Is It · Procedures · Dr. Nicole · Results · FAQ. Right side: `+971 55 557 3563` (tel link) + gradient pill **Book Consultation**. Mobile: full-screen overlay menu with staggered link entrance.
+Transparent over hero → on scroll (>60px) becomes frosted `blur(20px)` cream with gold hairline bottom border and a shrunken logo. Links: What Is It · Procedures · Dr. Nicole · Results · FAQ. Right side: `+971 56 663 6359` (tel link) + gradient pill **Book Consultation**. Mobile: full-screen overlay menu with staggered link entrance.
 
 **2 · Hero** — *the money shot*
 - **Layout:** 55/45 split. Left = copy, right = the Dubai balcony image (`03_32_08 AM.png`) in an organic blob-masked frame with a slow Ken Burns drift.

@@ -34,9 +34,9 @@ export const site: SiteConfig = {
   },
 
   contact: {
-    phoneDisplay: '+971 55 557 3563',
-    phoneRaw: '+971555573563',
-    whatsappNumber: '971555573563',
+    phoneDisplay: '+971 56 663 6359',
+    phoneRaw: '+971566636359',
+    whatsappNumber: '971566636359',
     // Kept byte-for-byte as supplied. The domain spells the surname without
     // the leading "E" — respelling it would bounce real enquiry emails.
     email: 'info@dranicolecheverry.com',
@@ -71,6 +71,22 @@ export const site: SiteConfig = {
     { slug: 'breast-lift', title: 'Breast Lift & Augmentation', live: true },
   ],
 };
+
+/**
+ * A page's display name, resolved from its slug.
+ *
+ * The one lookup for "which treatment is this page about", used by the enquiry
+ * subject line and by the pre-filled WhatsApp messages. Those messages used to
+ * name the treatment inline, which meant /breast-lift opened WhatsApp with a
+ * message about a Mommy Makeover — a copy of the first page's wording that no
+ * one thought to change, saying the wrong procedure to a real patient.
+ *
+ * Unknown slugs fall back to the slug itself: bounded, and visibly odd rather
+ * than silently absent.
+ */
+export function pageTitle(slug: string): string {
+  return site.landingPages.find((page) => page.slug === slug)?.title ?? slug;
+}
 
 /** Pre-filled WhatsApp deep link. */
 export function whatsappUrl(message: string): string {

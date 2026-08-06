@@ -6,8 +6,18 @@ import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon';
 import { useScrolledPast } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
 
-const WA_MESSAGE =
-  "Hi, I'd like to ask about a Mommy Makeover consultation with Dr. Nicole.";
+/**
+ * Names the treatment the visitor is actually reading about.
+ *
+ * This was a constant naming Mommy Makeover, so the WhatsApp button on
+ * /breast-lift opened a message about the wrong procedure. The treatment comes
+ * from the page's slug via the shared registry rather than being written out
+ * again here, so a third page cannot repeat it.
+ */
+const waMessage = (treatment?: string) =>
+  treatment
+    ? `Hi, I'd like to ask about a ${treatment} consultation with ${site.doctor.shortName}.`
+    : `Hi, I'd like to ask about a consultation with ${site.doctor.shortName}.`;
 
 /**
  * Always-on conversion layer — a sticky Call / WhatsApp / Book bar on mobile.
@@ -20,7 +30,7 @@ const WA_MESSAGE =
  * removed through AnimatePresence, which meant an animation runtime resident on
  * every page just to move one element 100% down.
  */
-export function FloatingCta() {
+export function FloatingCta({ treatment }: { treatment?: string }) {
   const visible = useScrolledPast(600);
 
   return (
@@ -51,7 +61,7 @@ export function FloatingCta() {
             <span className="font-sans text-[11px] font-semibold">Call</span>
           </a>
           <a
-            href={whatsappUrl(WA_MESSAGE)}
+            href={whatsappUrl(waMessage(treatment))}
             target="_blank"
             rel="noopener noreferrer"
             tabIndex={visible ? undefined : -1}

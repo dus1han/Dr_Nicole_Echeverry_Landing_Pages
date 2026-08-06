@@ -1,5 +1,5 @@
 import nodemailer, { type Transporter } from 'nodemailer';
-import { site } from '@/content/site';
+import { site, pageTitle } from '@/content/site';
 
 /**
  * Enquiry delivery over SMTP.
@@ -62,19 +62,6 @@ export type Enquiry = {
   receivedAt: string;
 };
 
-/**
- * The page's display name, resolved from the slug ON THE SERVER.
- *
- * The client sends a slug, never the label that ends up in the subject line.
- * Putting caller-supplied text into a subject is how a bot writes its own
- * headline into the clinic's inbox — and, with a newline, its own headers.
- * Unknown slugs fall back to the slug itself, which is still bounded by the
- * schema's length limit and pattern.
- */
-function pageLabel(slug: string): string {
-  return site.landingPages.find((page) => page.slug === slug)?.title ?? slug;
-}
-
 const escapeHtml = (value: string) =>
   value
     .replace(/&/g, '&amp;')
@@ -83,7 +70,16 @@ const escapeHtml = (value: string) =>
     .replace(/"/g, '&quot;');
 
 export async function sendEnquiry(enquiry: Enquiry): Promise<void> {
-  const label = pageLabel(enquiry.slug);
+  /*
+   * Resolved from the slug ON THE SERVER.
+   *
+   * The client sends a slug, never the label that ends up in the subject line.
+   * Putting caller-supplied text into a subject is how a bot writes its own
+   * headline into the clinic's inbox — and, with a newline, its own headers.
+   * Unknown slugs fall back to the slug itself, which is still bounded by the
+   * schema's length limit and pattern.
+   */
+  const label = pageTitle(enquiry.slug);
 
   const email = enquiry.email?.trim() || '';
 

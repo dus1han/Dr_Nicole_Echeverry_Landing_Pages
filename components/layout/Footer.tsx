@@ -3,7 +3,17 @@ import { Facebook, Instagram, MapPin, Phone, Mail } from 'lucide-react';
 import { site, telUrl, mailUrl, whatsappUrl } from '@/content/site';
 import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon';
 
-const WA_MESSAGE = "Hi, I'd like to ask about a consultation with Dr. Nicole.";
+/**
+ * Names the treatment, like every other WhatsApp entry point on the page.
+ *
+ * Each page is about one procedure, so a message that does not say which one
+ * makes the clinic ask before it can answer — and they cannot tell which
+ * campaign it came from.
+ */
+const waMessage = (treatment?: string) =>
+  treatment
+    ? `Hi, I'd like to ask about a ${treatment} consultation with ${site.doctor.shortName}.`
+    : `Hi, I'd like to ask about a consultation with ${site.doctor.shortName}.`;
 
 /**
  * Three columns: brand · contact · location.
@@ -12,7 +22,13 @@ const WA_MESSAGE = "Hi, I'd like to ask about a consultation with Dr. Nicole.";
  * scroll with a sticky nav, so in-page anchors in the footer were duplicating
  * navigation the visitor already has.
  */
-export function Footer({ items }: { items: Array<{ label: string; href: string }> }) {
+export function Footer({
+  items,
+  treatment,
+}: {
+  items: Array<{ label: string; href: string }>;
+  treatment?: string;
+}) {
   const { lat, lng } = site.clinic.coordinates;
 
   /*
@@ -29,7 +45,7 @@ export function Footer({ items }: { items: Array<{ label: string; href: string }
   const socials = [
     { href: site.social.instagram, Icon: Instagram, label: 'Instagram' },
     { href: site.social.facebook, Icon: Facebook, label: 'Facebook' },
-    { href: whatsappUrl(WA_MESSAGE), Icon: WhatsAppIcon, label: 'WhatsApp' },
+    { href: whatsappUrl(waMessage(treatment)), Icon: WhatsAppIcon, label: 'WhatsApp' },
   ];
 
   return (

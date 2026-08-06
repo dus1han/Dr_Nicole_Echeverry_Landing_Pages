@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "assets": "node scripts/prepare-assets.mjs",
     "check:content": "node scripts/check-content.mjs",
-    "check:images": "node scripts/check-images.mjs"
+    "check:images": "node scripts/check-images.mjs",
+    "check:contact": "node scripts/check-contact-links.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",

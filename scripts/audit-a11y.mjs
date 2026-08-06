@@ -194,7 +194,31 @@ console.log('\nJavaScript disabled');
   report(noJs.h1.length > 10, `hero headline present without JS — "${noJs.h1.slice(0, 40)}"`);
   report(noJs.faq.length > 3, `FAQ heading present without JS — "${noJs.faq}"`);
   report(noJs.answers > 0, `FAQ answers in the DOM without JS — ${noJs.answers}`);
-  report(bodyText.includes('+971 55 557 3563'), 'phone number present without JS');
+  /*
+   * Checked against the page's own tel: link, not a number written out here.
+   *
+   * A literal would have to be edited every time the clinic changes its number
+   * — and if anyone forgot, this would report a missing phone number on a page
+   * that has a perfectly good one, which is the same false alarm the hardcoded
+   * copy strings above caused.
+   *
+   * What matters is that the two agree: the digits a visitor can read are the
+   * digits their phone would dial.
+   */
+  const phone = await page.evaluate(() => {
+    const a = document.querySelector('a[href^="tel:"]');
+    return a ? { href: a.getAttribute('href'), text: a.textContent.trim() } : null;
+  });
+  report(phone !== null, 'a tel: link is present without JS');
+  if (phone) {
+    const digits = (s) => (s ?? '').replace(/[^\d]/g, '');
+    report(
+      digits(phone.text) === digits(phone.href),
+      'the displayed number matches the one it dials',
+      `${phone.text} → ${phone.href}`,
+    );
+    report(bodyText.includes(phone.text), 'the number is readable in the page text');
+  }
   await ctx.close();
 }
 

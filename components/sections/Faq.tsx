@@ -9,15 +9,23 @@ import { Reveal, RevealGroup, RevealItem } from '@/components/ui/Reveal';
 import { ButtonLink } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
 
-export function Faq(content: FaqContent) {
+export function Faq({ treatment, ...content }: FaqContent & { treatment?: string }) {
   // null = every question collapsed on load. Nothing opens until it's clicked,
   // so the section stays compact and scannable as a list of questions.
   const [open, setOpen] = useState<number | null>(null);
   const baseId = useId();
 
+  // Named the first page's treatment regardless of which page rendered it, so
+  // /breast-lift asked Dr. Nicole about a Mommy Makeover. The name now comes
+  // from the page itself; without one the question stays general rather than
+  // wrong.
   const ctaHref =
     content.footerCta.href === 'whatsapp'
-      ? whatsappUrl(`Hi, I have a question about a Mommy Makeover with ${site.doctor.shortName}.`)
+      ? whatsappUrl(
+          treatment
+            ? `Hi, I have a question about a ${treatment} with ${site.doctor.shortName}.`
+            : `Hi, I have a question for ${site.doctor.shortName}.`,
+        )
       : content.footerCta.href;
 
   return (

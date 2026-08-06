@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { mommyMakeover as content } from '@/content/mommy-makeover';
 import { buildJsonLd } from '@/lib/schema';
+import { pageTitle } from '@/content/site';
 import { PageShell } from '@/components/layout/PageShell';
 import { Hero } from '@/components/sections/Hero';
 import { TrustStrip } from '@/components/sections/TrustStrip';
@@ -44,7 +45,7 @@ export default function MommyMakeoverPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <PageShell nav={content.nav} announcements={content.announcements}>
+      <PageShell slug={content.slug} nav={content.nav} announcements={content.announcements}>
         <Hero {...content.hero} />
         <TrustStrip {...content.trust} />
         <WhatIsIt {...content.whatIsIt} />
@@ -55,7 +56,7 @@ export default function MommyMakeoverPage() {
         <BeforeAfter {...content.results} />
         <Journey {...content.journey} />
         <Reviews {...content.reviews} />
-        <Faq {...content.faq} />
+        <Faq {...content.faq} treatment={pageTitle(content.slug)} />
         <BookingForm {...content.booking} slug={content.slug} />
       </PageShell>
     </>
