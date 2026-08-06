@@ -66,7 +66,10 @@ export const site: SiteConfig = {
     gtmId: 'GTM-WF7NSMXG',
   },
 
-  landingPages: [{ slug: 'mommy-makeover', title: 'Mommy Makeover', live: true }],
+  landingPages: [
+    { slug: 'mommy-makeover', title: 'Mommy Makeover', live: true },
+    { slug: 'breast-lift', title: 'Breast Lift & Augmentation', live: true },
+  ],
 };
 
 /** Pre-filled WhatsApp deep link. */

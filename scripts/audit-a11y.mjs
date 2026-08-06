@@ -175,9 +175,25 @@ console.log('\nJavaScript disabled');
   const page = await ctx.newPage();
   await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60_000 });
 
+  /*
+   * Asserted structurally, not against known strings.
+   *
+   * These used to look for "Feel Like Yourself Again" and "Frequently Asked
+   * Questions" — the first page's copy. That passed for as long as there was
+   * one page, then reported two failures the moment a second one arrived with
+   * different words, which is a bug in the test rather than the page. What
+   * actually matters is that the content is server-rendered at all.
+   */
+  const noJs = await page.evaluate(() => ({
+    h1: document.querySelector('h1')?.innerText?.trim() ?? '',
+    faq: document.querySelector('#faq h2')?.innerText?.trim() ?? '',
+    answers: document.querySelectorAll('#faq [role="region"]').length,
+  }));
   const bodyText = (await page.locator('body').innerText()).replace(/\s+/g, ' ');
-  report(bodyText.includes('Feel Like Yourself Again'), 'hero headline present without JS');
-  report(bodyText.includes('Frequently Asked Questions'), 'FAQ heading present without JS');
+
+  report(noJs.h1.length > 10, `hero headline present without JS — "${noJs.h1.slice(0, 40)}"`);
+  report(noJs.faq.length > 3, `FAQ heading present without JS — "${noJs.faq}"`);
+  report(noJs.answers > 0, `FAQ answers in the DOM without JS — ${noJs.answers}`);
   report(bodyText.includes('+971 55 557 3563'), 'phone number present without JS');
   await ctx.close();
 }

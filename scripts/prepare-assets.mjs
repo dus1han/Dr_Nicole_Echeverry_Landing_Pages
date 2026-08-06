@@ -135,10 +135,51 @@ const CRED_H = 120;
  */
 const CRED_TINT = { r: 0x58, g: 0x40, b: 0x49 };
 
+/* ------------------------------------------------------------------ *
+ * Page 2 — /breast-lift
+ *
+ * Its own source folder and its own output folder. Nothing is shared but the
+ * helper functions, so re-running this can never touch the first page's
+ * photographs.
+ * ------------------------------------------------------------------ */
+const SRC_BL = join(ROOT, '..', 'Breast Lift');
+const SRC_BL_HERO = join(SRC_BL, 'Breast Augmentation');
+const SRC_BL_RESULTS = join(SRC_BL, 'Breast lift', 'B A');
+const OUT_IMG_BL = join(ROOT, 'public', 'images', 'breast-lift');
+const OUT_RESULTS_BL = join(OUT_IMG_BL, 'results');
+
+/** The three widest frames — the only ones composed with space at the left for copy. */
+const BL_HERO_FRAMES = [
+  ['8317bdc7-6b57-4a61-9af3-5dd2ea1c1a68.png', 'hero-1.jpg'],
+  ['91e2d1dd-46fe-40e8-8a24-b583409d13a3.png', 'hero-2.jpg'],
+  ['fe3488fe-de10-42ce-a8f6-627570deb9e6.png', 'hero-3.jpg'],
+];
+
+/**
+ * The subject sits further right in this set than in the first page's, so the
+ * portrait window is shifted accordingly — a window tuned for one set crops the
+ * wrong part of another.
+ */
+const BL_HERO_PORTRAIT = { left: 800, top: 0, width: 706, height: 941 };
+
+const BL_PHOTOS = [
+  ['630999bc-379d-4073-8f59-43f6507dff0f.png', 'what-is-it.jpg', 1200],
+  ['3d5bcaf8-8a53-4325-b212-0b5bd5127b80.png', 'procedure-lift.jpg', 1100],
+  ['9f3486b3-8a31-4fb8-bb10-5cfdd553c561.png', 'procedure-augmentation.jpg', 1100],
+  ['b4e3641d-6a82-420c-8626-d95bfc4e62ca.png', 'procedure-combined.jpg', 1100],
+  ['6e3b7b40-cd66-48d0-ab6c-f8447fafb415.png', 'candidacy.jpg', 1100],
+];
+
+const BL_RESULT_CASES = [
+  ['Untitled design (32).png', 'case-1'],
+  ['Untitled design (33).png', 'case-2'],
+  ['Untitled design (34).png', 'case-3'],
+];
+
 const exists = async (p) => access(p).then(() => true).catch(() => false);
 
 async function ensureDirs() {
-  for (const d of [OUT_IMG, OUT_RESULTS, OUT_LOGO, OUT_CREDS]) {
+  for (const d of [OUT_IMG, OUT_RESULTS, OUT_LOGO, OUT_CREDS, OUT_IMG_BL, OUT_RESULTS_BL]) {
     await mkdir(d, { recursive: true });
   }
 }
@@ -155,11 +196,28 @@ async function optimise(from, to, width) {
   return true;
 }
 
-async function copyPhotos() {
-  console.log('\n· Photographs');
-  for (const [src, dest, width] of [...PHOTOS, ...PORTRAITS]) {
-    const from = (await exists(join(SRC, src))) ? join(SRC, src) : join(SRC_LOGO, src);
-    if (await optimise(from, join(OUT_IMG, dest), width)) {
+async function copyPhotos({
+  label = 'Photographs',
+  srcDirs = [SRC, SRC_LOGO],
+  outDir = OUT_IMG,
+  photos = [...PHOTOS, ...PORTRAITS],
+} = {}) {
+  console.log(`\n· ${label}`);
+  for (const [src, dest, width] of photos) {
+    // First directory that actually holds the file — the source sets are not
+    // organised the same way from one page to the next.
+    let from = null;
+    for (const dir of srcDirs) {
+      if (await exists(join(dir, src))) {
+        from = join(dir, src);
+        break;
+      }
+    }
+    if (!from) {
+      console.warn(`  ! ${src} not found — skipped`);
+      continue;
+    }
+    if (await optimise(from, join(outDir, dest), width)) {
       console.log(`  ✓ ${dest}`);
     }
   }
@@ -309,12 +367,16 @@ async function buildIcons() {
   }
 }
 
-async function buildResults() {
+async function buildResults({
+  srcDir = SRC_RESULTS,
+  outDir = OUT_RESULTS,
+  cases = RESULT_CASES,
+} = {}) {
   console.log('\n· Before/after — clinic-supplied composites');
 
   let built = 0;
-  for (const [file, slug] of RESULT_CASES) {
-    const from = join(SRC_RESULTS, file);
+  for (const [file, slug] of cases) {
+    const from = join(srcDir, file);
     if (!(await exists(from))) {
       console.warn(`  ! ${file} not found — skipped`);
       continue;
@@ -328,7 +390,7 @@ async function buildResults() {
     // exists in this repo. Re-encode only.
     await sharp(from)
       .jpeg({ quality: 86, mozjpeg: true, chromaSubsampling: '4:4:4' })
-      .toFile(join(OUT_RESULTS, `${slug}.jpg`));
+      .toFile(join(outDir, `${slug}.jpg`));
 
     console.log(`  ✓ ${slug}.jpg (${meta.width}×${meta.height})`);
     built += 1;
@@ -337,26 +399,39 @@ async function buildResults() {
   // Remove anything this run did not produce. Without it, cutting the gallery
   // from six cases to three leaves case-4/5/6 in public/ — unreferenced, still
   // committed, and still real patients' photographs sitting in a public repo.
-  const expected = new Set(RESULT_CASES.map(([, slug]) => `${slug}.jpg`));
-  for (const file of await readdir(OUT_RESULTS)) {
+  const expected = new Set(cases.map(([, slug]) => `${slug}.jpg`));
+  for (const file of await readdir(outDir)) {
     if (!expected.has(file)) {
-      await rm(join(OUT_RESULTS, file));
+      await rm(join(outDir, file));
       console.log(`  – removed ${file} (no longer in the set)`);
     }
   }
 
-  if (built < RESULT_CASES.length) {
-    console.warn(`\n  ! only ${built}/${RESULT_CASES.length} cases built`);
+  if (built < cases.length) {
+    console.warn(`\n  ! only ${built}/${cases.length} cases built`);
   }
   console.log('\n  Real patient photographs. Consent must be on file before launch —');
   console.log('  see docs/open-questions.md.');
 }
 
-async function buildHeroFrames() {
-  console.log('\n· Hero frames');
+/**
+ * Hero frames for one page.
+ *
+ * Parameterised because there is more than one landing page now. The portrait
+ * window is per-page: it is chosen by where the subject sits in that set's
+ * photographs, and a window tuned for one set crops the wrong part of another.
+ */
+async function buildHeroFrames({
+  label = 'Hero frames',
+  srcDir = SRC_HERO,
+  outDir = OUT_IMG,
+  frames = HERO_FRAMES,
+  portrait = { left: 660, top: 0, width: 706, height: 941 },
+} = {}) {
+  console.log(`\n· ${label}`);
 
-  for (const [file, out] of HERO_FRAMES) {
-    const from = join(SRC_HERO, file);
+  for (const [file, out] of frames) {
+    const from = join(srcDir, file);
     if (!(await exists(from))) {
       console.warn(`  ! ${file} not found — skipped`);
       continue;
@@ -371,30 +446,39 @@ async function buildHeroFrames() {
       // browser picks from the responsive set, and there is nothing to gain by
       // inventing pixels the photographer did not take.
       .jpeg({ quality: 80, mozjpeg: true, progressive: true })
-      .toFile(join(OUT_IMG, out));
+      .toFile(join(outDir, out));
 
     /*
      * A portrait companion for phones — art direction, not a resize.
      *
      * A 16:9 frame stretched over a tall phone viewport crops so hard that only
      * a narrow vertical slice survives, and the subject reads as an abstract
-     * close-up rather than a body. Cropping deliberately around the torso keeps
-     * the photograph legible at the shape a phone actually is.
+     * close-up rather than a body. Cropping deliberately around the subject
+     * keeps the photograph legible at the shape a phone actually is.
      *
-     * The subject sits right of centre in all three, hence the offset window
-     * rather than a centred one.
+     * The window is clamped to the source, because the two sets are not the
+     * same size — 1672×941 and 1652×952 — and an extract that runs past the
+     * edge throws rather than clipping.
      */
-    const portrait = out.replace('.jpg', '-portrait.jpg');
-    await sharp(from)
-      .extract({ left: 660, top: 0, width: 706, height: 941 })
-      .jpeg({ quality: 82, mozjpeg: true, progressive: true })
-      .toFile(join(OUT_IMG, portrait));
+    const meta = await sharp(from).metadata();
+    const win = {
+      left: Math.max(0, Math.min(portrait.left, meta.width - 1)),
+      top: Math.max(0, Math.min(portrait.top, meta.height - 1)),
+      width: Math.min(portrait.width, meta.width - portrait.left),
+      height: Math.min(portrait.height, meta.height - portrait.top),
+    };
 
-    const after = (await stat(join(OUT_IMG, out))).size;
-    const afterP = (await stat(join(OUT_IMG, portrait))).size;
+    const portraitName = out.replace('.jpg', '-portrait.jpg');
+    await sharp(from)
+      .extract(win)
+      .jpeg({ quality: 82, mozjpeg: true, progressive: true })
+      .toFile(join(outDir, portraitName));
+
+    const after = (await stat(join(outDir, out))).size;
+    const afterP = (await stat(join(outDir, portraitName))).size;
     console.log(
       `  ✓ ${out}  ${Math.round(before / 1024)}KB → ${Math.round(after / 1024)}KB` +
-        `   + ${portrait} ${Math.round(afterP / 1024)}KB`,
+        `   + ${portraitName} ${Math.round(afterP / 1024)}KB`,
     );
   }
 }
@@ -458,19 +542,55 @@ async function buildCredentialLogos() {
 }
 
 async function main() {
-  console.log('Preparing assets for /mommy-makeover…');
   if (!(await exists(SRC))) {
     console.error(`\nSource folder not found:\n  ${SRC}\n`);
     process.exit(1);
   }
   await ensureDirs();
-  await copyPhotos();
-  await buildHero();
+
+  // --- shared across every page -------------------------------------------
+  console.log('Shared assets…');
   await buildLogos();
   await buildIcons();
+  await buildCredentialLogos();
+
+  // --- /mommy-makeover -----------------------------------------------------
+  console.log('\n\nPreparing /mommy-makeover…');
+  await copyPhotos();
+  await buildHero();
   await buildResults();
   await buildHeroFrames();
-  await buildCredentialLogos();
+
+  /*
+   * --- /breast-lift -------------------------------------------------------
+   *
+   * Skipped rather than fatal when its source folder is absent. The two pages'
+   * assets are independent, and someone rebuilding one should not be blocked
+   * by not having the other's originals on their machine.
+   */
+  console.log('\n\nPreparing /breast-lift…');
+  if (!(await exists(SRC_BL))) {
+    console.warn(`  ! source folder not found, skipping:\n    ${SRC_BL}`);
+  } else {
+    await copyPhotos({
+      label: 'Photographs',
+      srcDirs: [SRC_BL_HERO, SRC_BL],
+      outDir: OUT_IMG_BL,
+      photos: BL_PHOTOS,
+    });
+    await buildResults({
+      srcDir: SRC_BL_RESULTS,
+      outDir: OUT_RESULTS_BL,
+      cases: BL_RESULT_CASES,
+    });
+    await buildHeroFrames({
+      srcDir: SRC_BL_HERO,
+      outDir: OUT_IMG_BL,
+      frames: BL_HERO_FRAMES,
+      portrait: BL_HERO_PORTRAIT,
+    });
+  }
+
   console.log('\nDone.\n');
 }
 

@@ -616,6 +616,22 @@
   }
 }
 
+/*
+ * Hero focus line, scaled by title length.
+ *
+ * `--hero-k` is set inline per page (see Hero.tsx). Every bound of the clamp is
+ * multiplied by it, so a longer title shrinks proportionally at every viewport
+ * rather than only at the top end — the lower bound is what a phone actually
+ * uses, and leaving it fixed is what let a long title overflow there.
+ */
+.hero-focus {
+  font-size: clamp(
+    calc(2.125rem * var(--hero-k, 1)),
+    calc(4.4vw * var(--hero-k, 1)),
+    calc(4rem * var(--hero-k, 1))
+  );
+}
+
 /* Mobile menu: overlay fade and the staggered entrance of its links. */
 @keyframes fade-in {
   from {

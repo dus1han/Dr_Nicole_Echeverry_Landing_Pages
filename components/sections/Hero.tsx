@@ -1,4 +1,5 @@
 
+import type { CSSProperties } from 'react';
 import type { HeroContent } from '@/content/types';
 import { ButtonLink } from '@/components/ui/Button';
 
@@ -183,9 +184,25 @@ export function Hero(content: HeroContent) {
                 perpetual sheen.
               */}
               <span className="anim-rise relative mt-2 block" style={{ animationDelay: '0.14s' }}>
-                {/* Lower bound is 2.125rem, not 2.25: at 36px the phrase needed
-                    302px and a 390px phone leaves 292px inside the card. */}
-                <span className="anim-headline block text-[clamp(2.125rem,4.4vw,4rem)] font-bold leading-[1.02]">
+                {/*
+                  Sized to the title it is given, not to a fixed scale.
+
+                  The type was tuned so "Mommy Makeover" holds one line. A
+                  second page arrived with "Breast Lift & Augmentation" — half
+                  again as long — and it broke to three lines, which is exactly
+                  the failure the tuning existed to prevent. Shrinking the scale
+                  for everyone would have made the shorter title needlessly
+                  small.
+
+                  So the scale is divided by how long the title actually is,
+                  computed on the server with no runtime cost. 28 characters is
+                  the pivot: at or under it nothing changes, and beyond it the
+                  size falls off in proportion. Measured against both pages.
+                */}
+                <span
+                  className="anim-headline hero-focus block font-bold leading-[1.02]"
+                  style={{ '--hero-k': Math.min(1, 28 / content.headline.focus.length) } as CSSProperties}
+                >
                   {content.headline.focus}
                 </span>
               </span>
