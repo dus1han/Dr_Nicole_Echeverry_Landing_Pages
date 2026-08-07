@@ -198,14 +198,51 @@ warm_images() {
   sort -u "$list" -o "$list"
 
   n=$(wc -l < "$list" | tr -d ' ')
-  if [ "$n" -gt 0 ]; then
-    xargs -a "$list" -I{} -P 4 \
-      curl -s -o /dev/null -H "Accept: $accept" --max-time 45 "$base{}" 2>/dev/null || true
-    echo "==> warmed $n image variants across $(echo "$paths" | wc -l | tr -d ' ') pages"
-  else
+  if [ "$n" -eq 0 ]; then
     echo "==> no optimised images found to warm"
+    rm -f "$list"
+    return
   fi
-  rm -f "$list"
+
+  # Failures are recorded and retried rather than assumed away.
+  #
+  # One deploy warmed only 125 of 271 variants — the rest stayed cold, which is
+  # the precise condition that leaves a visitor to trigger the first encode. The
+  # run reported success either way, because nothing was checking. A warm-up
+  # that silently half-works is worse than none: it reads as covered.
+  export WARM_ACCEPT="Accept: $accept"
+  export WARM_BASE="$base"
+  export WARM_FAILED
+  WARM_FAILED=$(mktemp)
+
+  warm_pass() {
+    : > "$WARM_FAILED"
+    xargs -a "$1" -P 4 -I{} sh -c '
+      code=$(curl -s -o /dev/null -H "$WARM_ACCEPT" -w "%{http_code}" --max-time 45 "$WARM_BASE$1")
+      [ "$code" = 200 ] || printf "%s\n" "$1" >> "$WARM_FAILED"
+    ' _ {} 2>/dev/null || true
+    wc -l < "$WARM_FAILED" | tr -d ' '
+  }
+
+  pages=$(echo "$paths" | wc -l | tr -d ' ')
+  missed=$(warm_pass "$list")
+
+  if [ "$missed" -gt 0 ]; then
+    echo "==> $missed of $n variants did not warm on the first pass; retrying those"
+    cp "$WARM_FAILED" "$list"
+    missed=$(warm_pass "$list")
+  fi
+
+  if [ "$missed" -gt 0 ]; then
+    # Not fatal — the site serves. Said loudly because these are exactly the
+    # variants a visitor will be first to request.
+    echo "::warning::$missed image variant(s) could not be warmed and remain cold."
+    sed 's/^/      /' "$WARM_FAILED" | head -20
+  else
+    echo "==> warmed all $n image variants across $pages pages"
+  fi
+
+  rm -f "$list" "$WARM_FAILED"
 }
 
 echo "==> waiting for health"
