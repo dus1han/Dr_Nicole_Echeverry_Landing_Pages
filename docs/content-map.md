@@ -185,7 +185,7 @@ held the closing line went with it).
 > **Applies to:** every piece of display copy, page titles, meta descriptions, OG cards, structured data, alt text, and the copyright line.
 >
 > **Does NOT apply to** — these are live endpoints and are kept byte-for-byte as supplied:
-> - Email `info@dranicolecheverry.com`
+> - Email `plasticsurgeonsdubai@gmail.com`
 > - Domain `dranicolecheverry.com`
 > - Facebook `facebook.com/dranicolecheverry`
 > - Instagram `instagram.com/dra.nicolecheverry_surgery`
@@ -347,7 +347,7 @@ CTA: **Book Your Consultation** · secondary: *Message us on WhatsApp*
 
 **Contact rail beside the form** — [C] lines 90–95:
 - Phone / WhatsApp — `+971 56 663 6359`
-- Email — `info@dranicolecheverry.com`
+- Email — `plasticsurgeonsdubai@gmail.com`
 - Location — `https://share.google/JFXKjPDSRNDthp82J` **[A — plain-text street address needed]**
 
 ---
@@ -366,7 +366,7 @@ CTA: **Book Your Consultation** · secondary: *Message us on WhatsApp*
 | Area / Emirate | *(pending)* | 🔴 Needed |
 | Phone | `+971 56 663 6359` | [C] line 90 |
 | WhatsApp | same number | [C] |
-| Email | `info@dranicolecheverry.com` | [C] line 91 |
+| Email | `plasticsurgeonsdubai@gmail.com` | [C] line 91 |
 | Consultation hours | *(pending)* | 🟡 Needed |
 | Get Directions | `https://share.google/JFXKjPDSRNDthp82J` | [C] line 95 |
 
@@ -386,7 +386,7 @@ Wrapped in a gold-hairline frame with a blush vignette overlay and a pulsing gra
 > Source lines 88–95
 
 - **Logo** — white version on `plum-900` — [C] line 88
-- **Contact** — [C] lines 89–91: `+971 56 663 6359` · `info@dranicolecheverry.com`
+- **Contact** — [C] lines 89–91: `+971 56 663 6359` · `plasticsurgeonsdubai@gmail.com`
 - **Connect with us** — [C] lines 92–95:
   - Facebook — `https://www.facebook.com/dranicolecheverry`
   - Instagram — `https://www.instagram.com/dra.nicolecheverry_surgery`

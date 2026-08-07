@@ -20,18 +20,30 @@ const waMessage = (treatment?: string) =>
     : `Hi, I'd like to ask about a consultation with ${site.doctor.shortName}.`;
 
 /**
- * Always-on conversion layer — a sticky Call / WhatsApp / Book bar on mobile.
+ * Always-on conversion layer — Call / WhatsApp / Book, wherever the visitor is.
  *
- * It appears only after the hero has scrolled away, so it never competes with
- * the hero's own CTAs. Desktop has no floating element: the sticky navigation
- * already carries a persistent "Book Consultation" button.
+ * Two shapes of the same three actions: a bottom bar on phones, where the
+ * bottom edge is within thumb reach, and a rail down the right edge from md up,
+ * where a bottom bar would sit far from the pointer and cover the page.
  *
- * The bar stays mounted and slides on a CSS transform. It used to be added and
- * removed through AnimatePresence, which meant an animation runtime resident on
- * every page just to move one element 100% down.
+ * Both appear only after the hero has scrolled away, so neither competes with
+ * the hero's own CTAs, and both stay mounted and slide on a CSS transform —
+ * mounting and unmounting them through an animation library meant a runtime
+ * resident on every page just to move one element off-screen.
  */
 export function FloatingCta({ treatment }: { treatment?: string }) {
   const visible = useScrolledPast(600);
+
+  const rail = [
+    { href: telUrl, Icon: Phone, label: 'Call Now', external: false },
+    {
+      href: whatsappUrl(waMessage(treatment)),
+      Icon: WhatsAppIcon,
+      label: 'WhatsApp',
+      external: true,
+    },
+    { href: '#book', Icon: CalendarHeart, label: 'Book Now', external: false },
+  ];
 
   return (
     <>
@@ -79,6 +91,65 @@ export function FloatingCta({ treatment }: { treatment?: string }) {
             <span className="font-sans text-[11px] font-semibold">Book</span>
           </a>
         </div>
+      </div>
+
+      {/*
+        ---------------- Desktop rail ----------------
+
+        Vertically centred on the right edge, which keeps it clear of both the
+        sticky header and the mobile bar's territory, and near the pointer
+        wherever the visitor is reading.
+
+        Cream rather than the brand gradient: this sits on top of the page for
+        the whole visit, and a saturated block in the corner competes with the
+        section it is floating over. The gradient is spent on Book Now alone —
+        the one action of the three that is not simply a way to reach the
+        clinic — so the eye lands on it first.
+
+        `md:` is exactly where the bottom bar stops, so the two never show at
+        once and no width is left without a persistent call to action.
+      */}
+      <div
+        className={cn(
+          'fixed right-0 top-1/2 z-40 hidden -translate-y-1/2 md:block',
+          'transition-transform duration-300 ease-[var(--ease-out-soft)]',
+          visible ? 'translate-x-0' : 'translate-x-full',
+        )}
+        aria-hidden={!visible}
+      >
+        <ul className="flex flex-col overflow-hidden rounded-l-[var(--radius-md)] border border-r-0 border-blush-200 bg-cream/95 shadow-[var(--shadow-card)] backdrop-blur-xl">
+          {rail.map(({ href, Icon, label, external }, i) => (
+            <li key={label}>
+              <a
+                href={href}
+                {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                tabIndex={visible ? undefined : -1}
+                aria-label={label === 'Call Now' ? `Call ${site.contact.phoneDisplay}` : label}
+                className={cn(
+                  // 64px wide and at least 64px tall: comfortably past the 44px
+                  // target minimum the rest of the page is held to.
+                  'group flex w-16 flex-col items-center justify-center gap-1.5 px-1 py-3.5',
+                  'transition-colors duration-300',
+                  i > 0 && 'border-t border-blush-200',
+                  label === 'Book Now'
+                    ? 'bg-[image:var(--gradient-fill)] text-white'
+                    : 'text-plum-800 hover:bg-blush-50',
+                )}
+              >
+                <Icon
+                  className={cn(
+                    'h-[19px] w-[19px] transition-transform duration-300 group-hover:scale-110',
+                    label === 'Book Now' ? '' : 'text-rose-600',
+                  )}
+                  aria-hidden="true"
+                />
+                <span className="text-center font-sans text-[10px] font-semibold leading-tight">
+                  {label}
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
       </div>
 
       {/* Screen-reader-only fallback so the number is always reachable. */}

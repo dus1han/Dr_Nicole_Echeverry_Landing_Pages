@@ -191,6 +191,8 @@ export const mommyMakeover: LandingPageContent = {
       'Have loose abdominal skin or muscle separation following pregnancy.',
       'Experience sagging or volume loss in your breasts after breastfeeding.',
       'Maintain a stable weight but struggle with stubborn areas of fat.',
+      // Added by the client, 7 Aug 2026.
+      'Have lost a significant amount of weight and would like to restore balanced body contours.',
     ],
     cta: { label: 'Request an Honest Assessment', href: '#book' },
     image: {

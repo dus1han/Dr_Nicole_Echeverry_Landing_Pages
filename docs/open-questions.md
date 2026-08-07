@@ -10,7 +10,7 @@ Nothing here blocks the build. Items marked 🔴 must be resolved before the pag
 Client confirmed: use the logo spelling. Corroborated by her own website, Doctify and RealSelf.
 
 Applies to all display copy, titles, meta, OG cards, structured data, alt text.
-**Not applied** to `info@dranicolecheverry.com`, `dranicolecheverry.com`, or the Facebook/Instagram URLs — those are live endpoints and stay byte-for-byte as supplied.
+**Not applied** to `dranicolecheverry.com`, or the Facebook/Instagram URLs — those are live endpoints and stay byte-for-byte as supplied.
 
 ### Before/after → **real photographs supplied** ✅
 **Three** clinic-supplied composites (before left, after right, already watermarked) — a

@@ -145,6 +145,8 @@ const CRED_TINT = { r: 0x58, g: 0x40, b: 0x49 };
 const SRC_BL = join(ROOT, '..', 'Breast Lift');
 const SRC_BL_HERO = join(SRC_BL, 'Breast Augmentation');
 const SRC_BL_RESULTS = join(SRC_BL, 'Breast lift', 'B A');
+/** Breast reduction imagery, supplied separately from the rest of the set. */
+const SRC_BL_REDUCTION = join(SRC_BL, 'BR');
 const OUT_IMG_BL = join(ROOT, 'public', 'images', 'breast-lift');
 const OUT_RESULTS_BL = join(OUT_IMG_BL, 'results');
 
@@ -167,6 +169,11 @@ const BL_PHOTOS = [
   ['3d5bcaf8-8a53-4325-b212-0b5bd5127b80.png', 'procedure-lift.jpg', 1100],
   ['9f3486b3-8a31-4fb8-bb10-5cfdd553c561.png', 'procedure-augmentation.jpg', 1100],
   ['b4e3641d-6a82-420c-8626-d95bfc4e62ca.png', 'procedure-combined.jpg', 1100],
+  // From the BR folder. Chosen over the two files the client named "Select"
+  // because it matches the other three cards — same warm neutral wall, same
+  // shoulders-down framing. The "Select" frames are a pink backdrop and a much
+  // tighter crop, either of which breaks the row.
+  ['e0ece1f6-5f79-4fdf-9942-efa99d4f8224.png', 'procedure-reduction.jpg', 1100],
   ['6e3b7b40-cd66-48d0-ab6c-f8447fafb415.png', 'candidacy.jpg', 1100],
 ];
 
@@ -574,7 +581,7 @@ async function main() {
   } else {
     await copyPhotos({
       label: 'Photographs',
-      srcDirs: [SRC_BL_HERO, SRC_BL],
+      srcDirs: [SRC_BL_HERO, SRC_BL_REDUCTION, SRC_BL],
       outDir: OUT_IMG_BL,
       photos: BL_PHOTOS,
     });

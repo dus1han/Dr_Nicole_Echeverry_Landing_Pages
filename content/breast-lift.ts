@@ -91,11 +91,13 @@ export const breastLift: LandingPageContent = {
     eyebrow: 'The Procedure',
     heading: 'What is a Breast Lift & Augmentation?',
     body: 'Pregnancy, breastfeeding, ageing, weight changes, and genetics can all influence the shape, position, and fullness of the breasts. Many women notice that their breasts no longer sit as they once did, lose upper fullness, or appear less symmetrical over time.',
-    leadIn: 'Two procedures, combined into one personalised treatment:',
+    // No lead-in: it named a number of procedures, which the client removed
+    // when breast reduction was added.
     chips: [
       { label: 'Breast Lift', href: '#lift' },
       { label: 'Breast Augmentation', href: '#augmentation' },
       { label: 'Combined Lift & Augmentation', href: '#combined' },
+      { label: 'Breast Reduction', href: '#reduction' },
     ],
     image: {
       src: `${IMG}/what-is-it.jpg`,
@@ -110,11 +112,16 @@ export const breastLift: LandingPageContent = {
    * The client's document describes one combined procedure rather than three.
    * It is split here into the two operations it names plus the combination,
    * because the section's whole job is to explain what "Lift & Augmentation"
-   * actually means — and every sentence below is theirs.
+   * actually means — and every sentence below is theirs. Breast reduction was
+   * added later, with its copy supplied the same way.
+   *
+   * The heading counted the procedures ("Two procedures, combined around you")
+   * and so contradicted the section the moment a fourth card arrived. It no
+   * longer names a number: the cards are the count.
    */
   procedures: {
     eyebrow: 'What It Involves',
-    heading: 'Two procedures, combined around you',
+    heading: 'Procedures, shaped around you',
     items: [
       {
         id: 'lift',
@@ -159,6 +166,21 @@ export const breastLift: LandingPageContent = {
         image: {
           src: `${IMG}/procedure-combined.jpg`,
           alt: 'A woman standing in neutral loungewear, photographed from the shoulders down',
+        },
+      },
+      {
+        id: 'reduction',
+        name: 'Breast Reduction',
+        description:
+          'Breast reduction reshapes and reduces breast size to create lighter, more balanced proportions while improving comfort and confidence.',
+        benefits: [
+          'Create balanced breast proportions',
+          'Reduce heaviness and discomfort',
+          'Feel more confident in everyday clothing',
+        ],
+        image: {
+          src: `${IMG}/procedure-reduction.jpg`,
+          alt: 'A woman in a soft cream bralette, photographed from the shoulders down',
         },
       },
     ],

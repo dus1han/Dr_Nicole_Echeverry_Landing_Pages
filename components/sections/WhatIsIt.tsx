@@ -74,12 +74,22 @@ export function WhatIsIt(content: WhatIsItContent) {
             </p>
           </Reveal>
 
-          <Reveal>
-            <p className="flex items-start gap-2 font-sans text-sm font-semibold text-plum-700">
-              <ArrowDownRight className="mt-0.5 h-4 w-4 shrink-0 text-gold-500" aria-hidden="true" />
-              {content.leadIn}
-            </p>
-          </Reveal>
+          {/*
+            Optional. /breast-lift's line counted the procedures, which stopped
+            being true once breast reduction was added, and the chips below say
+            the same thing more directly anyway.
+          */}
+          {content.leadIn && (
+            <Reveal>
+              <p className="flex items-start gap-2 font-sans text-sm font-semibold text-plum-700">
+                <ArrowDownRight
+                  className="mt-0.5 h-4 w-4 shrink-0 text-gold-500"
+                  aria-hidden="true"
+                />
+                {content.leadIn}
+              </p>
+            </Reveal>
+          )}
 
           <RevealGroup className="flex flex-wrap gap-3">
             {content.chips.map((chip) => (

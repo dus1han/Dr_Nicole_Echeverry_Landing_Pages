@@ -37,9 +37,15 @@ export const site: SiteConfig = {
     phoneDisplay: '+971 56 663 6359',
     phoneRaw: '+971566636359',
     whatsappNumber: '971566636359',
-    // Kept byte-for-byte as supplied. The domain spells the surname without
-    // the leading "E" — respelling it would bounce real enquiry emails.
-    email: 'info@dranicolecheverry.com',
+    /*
+     * The address shown to visitors, on every page.
+     *
+     * This is NOT where enquiries are delivered — the form posts to the server
+     * and ENQUIRY_TO in its .env decides who receives them. Changing one does
+     * not change the other, which is deliberate: the inbox the clinic publishes
+     * and the inbox their team actually works from need not be the same.
+     */
+    email: 'plasticsurgeonsdubai@gmail.com',
   },
 
   social: {

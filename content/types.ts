@@ -145,7 +145,8 @@ export type WhatIsItContent = {
   eyebrow: string;
   heading: string;
   body: string;
-  leadIn: string;
+  /** Optional — omit and the chips speak for themselves. */
+  leadIn?: string;
   /** Each chip scroll-links to its card in the procedures section. */
   chips: Array<{ label: string; href: string }>;
   image: ImageAsset;
@@ -211,7 +212,7 @@ export type WhyTrustContent = {
   pillars: Array<{ icon: PillarIcon; title: string; description: string }>;
 };
 
-export type PillarIcon = 'artistry' | 'personalised' | 'harmony' | 'care';
+export type PillarIcon = 'artistry' | 'personalised' | 'harmony' | 'care' | 'team';
 
 export type ResultCase = {
   id: string;

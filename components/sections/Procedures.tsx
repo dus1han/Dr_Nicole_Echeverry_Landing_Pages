@@ -7,6 +7,7 @@ import { TiltCard } from '@/components/effects/TiltCard';
 import { ButtonLink } from '@/components/ui/Button';
 import { GoldDivider } from '@/components/ui/GoldDivider';
 import { scaleIn } from '@/lib/motion';
+import { cn } from '@/lib/utils';
 
 export function Procedures(content: ProceduresContent) {
   return (
@@ -25,7 +26,25 @@ export function Procedures(content: ProceduresContent) {
           className="mx-auto max-w-2xl"
         />
 
-        <RevealGroup className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {/*
+          Columns follow the card count, so no row is left part-empty.
+
+          Three across was hardcoded, which was right while every page had three
+          procedures. /breast-lift has four, and at three columns the fourth
+          dropped onto a row of its own — reading as a missing fifth card rather
+          than a deliberate set. Same reasoning as the before/after gallery,
+          which goes one-to-three and never two for exactly this reason.
+
+          Four cards therefore lay out 2×2 rather than 4×1: at this container
+          width four abreast leaves each card too narrow for a heading and three
+          benefit lines without the text turning ragged.
+        */}
+        <RevealGroup
+          className={cn(
+            'mt-10 grid gap-6 md:grid-cols-2',
+            content.items.length % 3 === 0 ? 'lg:grid-cols-3' : 'lg:grid-cols-2',
+          )}
+        >
           {content.items.map((item) => (
             <RevealItem key={item.id} variants={scaleIn} className="h-full">
               <TiltCard className="h-full">

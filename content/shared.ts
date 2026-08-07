@@ -85,7 +85,7 @@ export const doctorBio = (treatment: string) =>
 export const doctorPullQuote =
   'Every treatment plan is designed to help you feel confident, comfortable, and like yourself again.';
 
-/** Her four principles. Only the second names a treatment. */
+/** Her principles. Only the second names a treatment. */
 export const whyTrustPillars = (treatment: string): WhyTrustContent['pillars'] => [
   {
     icon: 'artistry',
@@ -109,6 +109,14 @@ export const whyTrustPillars = (treatment: string): WhyTrustContent['pillars'] =
     title: 'Care at Every Stage',
     description:
       'From your initial consultation through every stage of recovery, Dr. Nicole and her team remain closely involved.',
+  },
+  // Added by the client, 7 Aug 2026. Placed after "Care at Every Stage", which
+  // already introduces the team — this says who they are.
+  {
+    icon: 'team',
+    title: 'An All-Female Team',
+    description:
+      'Every stage of your journey is guided by Dr. Nicole and a dedicated female team, ensuring comfort & privacy.',
   },
 ];
 

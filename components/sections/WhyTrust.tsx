@@ -1,14 +1,16 @@
-import { Palette, UserCog, Scale, HeartHandshake } from 'lucide-react';
+import { Palette, UserCog, Scale, HeartHandshake, UsersRound } from 'lucide-react';
 import type { WhyTrustContent, PillarIcon } from '@/content/types';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Reveal, RevealGroup, RevealItem } from '@/components/ui/Reveal';
 import { scaleIn } from '@/lib/motion';
+import { cn } from '@/lib/utils';
 
 const ICONS: Record<PillarIcon, typeof Palette> = {
   artistry: Palette,
   personalised: UserCog,
   harmony: Scale,
   care: HeartHandshake,
+  team: UsersRound,
 };
 
 export function WhyTrust(content: WhyTrustContent) {
@@ -27,11 +29,34 @@ export function WhyTrust(content: WhyTrustContent) {
           className="mx-auto max-w-2xl"
         />
 
-        <RevealGroup className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {content.pillars.map((pillar) => {
+        {/*
+          Four across, unless there are five — then three and a centred two.
+
+          A fifth pillar on a four-column grid drops alone onto the next row and
+          reads as a missing sixth. Five abreast would fix the raggedness by
+          making every card too narrow for its description. So five lays out on
+          a six-column grid with each card spanning two and the fourth starting
+          at column two, which centres the pair beneath the trio.
+        */}
+        <RevealGroup
+          className={cn(
+            'mt-10 grid gap-6 sm:grid-cols-2',
+            content.pillars.length === 5 ? 'lg:grid-cols-6' : 'lg:grid-cols-4',
+          )}
+        >
+          {content.pillars.map((pillar, i) => {
             const Icon = ICONS[pillar.icon];
+            const fiveUp = content.pillars.length === 5;
             return (
-              <RevealItem key={pillar.title} variants={scaleIn} className="h-full">
+              <RevealItem
+                key={pillar.title}
+                variants={scaleIn}
+                className={cn(
+                  'h-full',
+                  fiveUp && 'lg:col-span-2',
+                  fiveUp && i === 3 && 'lg:col-start-2',
+                )}
+              >
                 <article className="group relative flex h-full flex-col gap-4 overflow-hidden rounded-[var(--radius-md)] border border-blush-200 bg-white p-7 shadow-[var(--shadow-sm)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[var(--shadow-card)]">
                   {/* Gradient top edge grows in from the left on hover */}
                   <span
