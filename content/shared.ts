@@ -50,6 +50,10 @@ export const sharedTrust: TrustStripContent = {
 export const doctorCredentials: { label: string; items: CredentialMark[] } = {
   label: 'Training & Affiliations',
   items: [
+    {
+      name: 'Sociedad Colombiana de Cirugía Plástica Estética y Reconstructiva',
+      src: '/logo/credentials/sccp.png',
+    },
     { name: 'American Society of Plastic Surgeons', src: '/logo/credentials/asps.png' },
     {
       name: 'International Society of Aesthetic Plastic Surgery',

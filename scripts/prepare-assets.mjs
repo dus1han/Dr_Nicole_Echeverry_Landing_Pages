@@ -14,7 +14,7 @@
  */
 
 import sharp from 'sharp';
-import { mkdir, access, readdir, rm, stat } from 'node:fs/promises';
+import { mkdir, access, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -25,6 +25,8 @@ const SRC_LOGO = join(SRC, 'Doctor photos & logo');
 const SRC_RESULTS = join(SRC, 'New set');
 const SRC_CREDS = join(SRC, 'Logos for description');
 const SRC_HERO = join(SRC, 'Tummy Tuck');
+/** Later client deliveries: the English lockup, a society mark, a new case. */
+const SRC_NEW = join(ROOT, '..', 'New logos');
 
 /**
  * Hero frames — [source file, output slug].
@@ -103,6 +105,7 @@ const RESULT_CASES = [
  * layout shift.
  */
 const CREDENTIAL_LOGOS = [
+  ['images (1).png', 'sccp'],
   ['ASPS-Logo (1).png', 'asps'],
   ['images.png', 'isaps'],
   ['ezgif.com-webp-to-png-converter (10).png', 'aasma'],
@@ -179,7 +182,8 @@ const BL_PHOTOS = [
 
 const BL_RESULT_CASES = [
   ['Untitled design (32).png', 'case-1'],
-  ['Untitled design (33).png', 'case-2'],
+  // Replaced at the client's request; supplied in the later delivery folder.
+  ['Untitled design (38).png', 'case-2'],
   ['Untitled design (34).png', 'case-3'],
 ];
 
@@ -264,48 +268,181 @@ async function buildHero() {
   console.log(`  ✓ hero.jpg (square crop ${size}px from x=${left}, centred on the subject)`);
 }
 
-async function buildLogos() {
-  console.log('\n· Logo');
-  const src = join(SRC_LOGO, 'logo.png');
-  if (!(await exists(src))) {
-    console.warn('  ! logo.png not found — skipped');
-    return;
+/**
+ * Where the logo comes from, newest delivery first.
+ *
+ * The English lockup replaced the original, whose credential line was in
+ * Spanish. Preferred rather than swapped in place so the original still builds
+ * on a machine that only has the first delivery.
+ */
+async function logoSource() {
+  for (const candidate of [
+    join(SRC_NEW, 'WhatsApp Image 2026-08-06 at 16.07.31 (1).jpeg'),
+    join(SRC_LOGO, 'logo.png'),
+  ]) {
+    if (await exists(candidate)) return candidate;
+  }
+  return null;
+}
+
+/**
+ * The logo artwork, as white-on-transparent, whichever form the client sent.
+ *
+ * Everything downstream — the plum recolour, the footer's white mark, the
+ * browser icons — assumes white art on transparency, which is what the original
+ * PNG was. The English lockup arrived as a JPEG: black art on a white square,
+ * no alpha at all. Dropped in as-is it would have shown a white rectangle on
+ * the cream header and a white slab in the blush footer.
+ *
+ * So an opaque source is converted rather than special-cased: darkness becomes
+ * opacity, which preserves the anti-aliased edges of the serif exactly, and the
+ * colour channels are then replaced with white. A source that already has
+ * transparency is passed through untouched.
+ *
+ * Trimmed either way. The English artwork is a square canvas with the lockup in
+ * the upper two thirds, and that dead space would otherwise be baked into every
+ * placement as invisible padding.
+ */
+async function loadLogoArtwork(src) {
+  const meta = await sharp(src).metadata();
+
+  if (meta.hasAlpha) {
+    return sharp(src).trim().png().toBuffer();
   }
 
-  // The supplied logo is pure white on transparent: perfect for the dark footer.
-  await sharp(src).png({ compressionLevel: 9 }).toFile(join(OUT_LOGO, 'logo-white.png'));
-  console.log('  ✓ logo-white.png');
+  const { data, info } = await sharp(src)
+    .greyscale()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
 
-  // Recolour to plum-900 by keeping the alpha channel and replacing RGB.
-  // A plain tint would leave the white showing through; this rebuilds the
-  // colour channels from scratch and re-attaches the original alpha.
-  const { width, height } = await sharp(src).metadata();
-  const alpha = await sharp(src).ensureAlpha().extractChannel('alpha').toBuffer();
+  // 255 - luminance: black ink becomes fully opaque, the white ground fully
+  // transparent, and every grey edge pixel keeps its exact coverage.
+  const alpha = Buffer.allocUnsafe(info.width * info.height);
+  for (let i = 0; i < alpha.length; i += 1) alpha[i] = 255 - data[i];
 
-  const plum = { r: 0x3d, g: 0x16, b: 0x2a }; // --color-plum-900
-  const flat = await sharp({
-    create: { width, height, channels: 3, background: plum },
+  const white = await sharp({
+    create: {
+      width: info.width,
+      height: info.height,
+      channels: 3,
+      background: { r: 255, g: 255, b: 255 },
+    },
   })
     .png()
     .toBuffer();
 
-  await sharp(flat)
-    .joinChannel(alpha)
-    .png({ compressionLevel: 9 })
-    .toFile(join(OUT_LOGO, 'logo-plum.png'));
+  const opaqueOnly = await sharp(white)
+    .joinChannel(alpha, { raw: { width: info.width, height: info.height, channels: 1 } })
+    .png()
+    .toBuffer();
+
+  return sharp(opaqueOnly).trim().png().toBuffer();
+}
+
+/** Replace RGB while keeping alpha — a tint would leave the white showing. */
+async function recolour(buf, rgb) {
+  const { width, height } = await sharp(buf).metadata();
+  const alpha = await sharp(buf).ensureAlpha().extractChannel('alpha').toBuffer();
+  const flat = await sharp({ create: { width, height, channels: 3, background: rgb } })
+    .png()
+    .toBuffer();
+  return sharp(flat).joinChannel(alpha).png({ compressionLevel: 9 }).toBuffer();
+}
+
+async function buildLogos() {
+  console.log('\n· Logo');
+  const src = await logoSource();
+  if (!src) {
+    console.warn('  ! no logo source found — skipped');
+    return;
+  }
+
+  const art = await loadLogoArtwork(src);
+
+  // White on transparent: for the dark footer.
+  await sharp(art).png({ compressionLevel: 9 }).toFile(join(OUT_LOGO, 'logo-white.png'));
+  console.log('  ✓ logo-white.png');
+
+  const plum = { r: 0x3d, g: 0x16, b: 0x2a }; // --color-plum-900
+  await writeFile(join(OUT_LOGO, 'logo-plum.png'), await recolour(art, plum));
   console.log('  ✓ logo-plum.png (generated for the light navigation bar)');
+}
+
+/**
+ * Rows of the artwork that contain ink, grouped into bands.
+ *
+ * Used to find the monogram without knowing the artwork's dimensions. The
+ * previous version cropped y24–312, measured off the original 800×450 lockup;
+ * the English one is a square with the monogram much further down, so those
+ * numbers would have cut the icon in half. Reading the alpha channel works on
+ * whatever the client sends next.
+ */
+async function inkBands(buf) {
+  const { data, info } = await sharp(buf)
+    .ensureAlpha()
+    .extractChannel('alpha')
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+
+  const bands = [];
+  let start = null;
+  for (let y = 0; y <= info.height; y += 1) {
+    let inked = false;
+    if (y < info.height) {
+      for (let x = 0; x < info.width; x += 1) {
+        // 24, not 0: JPEG ringing leaves a faint haze around the artwork that
+        // would otherwise join every band into one.
+        if (data[y * info.width + x] > 24) {
+          inked = true;
+          break;
+        }
+      }
+    }
+    if (inked && start === null) start = y;
+    else if (!inked && start !== null) {
+      bands.push({ top: start, height: y - start });
+      start = null;
+    }
+  }
+
+  /*
+   * Merge rows of the same element back together.
+   *
+   * The monogram is NE stacked over EN with clear space between them, so
+   * "first band of ink" was the letters NE alone and the icon came out missing
+   * half the mark. Measured on this artwork: 21px between NE and EN, 71px
+   * between the monogram and the wordmark below it — the two are not separable
+   * by gap size on its own, because the wordmark is a fifth of the height.
+   *
+   * Relative to the smaller neighbour they are unambiguous: 21px is a tenth of
+   * a 210px letter, 71px is well over the 50px wordmark. Merging while the gap
+   * is under half the smaller neighbour therefore joins NE to EN and keeps the
+   * wordmark separate.
+   */
+  const merged = [];
+  for (const band of bands) {
+    const prev = merged[merged.length - 1];
+    const gap = prev ? band.top - (prev.top + prev.height) : Infinity;
+    if (prev && gap <= 0.5 * Math.min(prev.height, band.height)) {
+      prev.height = band.top + band.height - prev.top;
+    } else {
+      merged.push({ ...band });
+    }
+  }
+
+  return { bands: merged, width: info.width, height: info.height };
 }
 
 /**
  * Browser-tab icon, built from the logo's NE/EN monogram alone.
  *
- * The full lockup includes "NICOLE ECHEVERRY" and a line of Spanish credentials
- * which are illegible at 32px, so only the monogram is used. Measured from the
- * source alpha channel: the monogram occupies y29–304 of the 800×450 artwork,
- * the wordmark starts at y338.
+ * The full lockup includes "NICOLE ECHEVERRY" and a line of credentials which
+ * are illegible at 32px, so only the monogram is used — the first band of ink,
+ * found by reading the artwork rather than by hardcoded coordinates.
  *
- * The source mark is white, so it is recoloured to plum — the same treatment as
- * the on-site logo — and left on a TRANSPARENT background, per the client.
+ * The artwork is white on transparent by this point, so it is recoloured to
+ * plum — the same treatment as the on-site logo — and left on a TRANSPARENT
+ * background, per the client.
  *
  * One exception: `apple-icon.png` keeps a cream background. iOS composites a
  * transparent home-screen icon onto black, which would make a plum monogram
@@ -313,43 +450,35 @@ async function buildLogos() {
  */
 async function buildIcons() {
   console.log('\n· Browser icons');
-  const src = join(SRC_LOGO, 'logo.png');
-  if (!(await exists(src))) {
-    console.warn('  ! logo.png not found — skipped');
+  const src = await logoSource();
+  if (!src) {
+    console.warn('  ! no logo source found — skipped');
     return;
   }
 
-  const meta = await sharp(src).metadata();
-  // Clamp to the real artwork size rather than assuming 800×450.
-  const top = Math.min(24, meta.height - 1);
-  const height = Math.min(288, meta.height - top);
+  const art = await loadLogoArtwork(src);
+  const { bands, width } = await inkBands(art);
+  if (bands.length === 0) {
+    console.warn('  ! logo artwork has no visible ink — skipped');
+    return;
+  }
+
+  // The monogram is the first band; the wordmark and credential line follow.
+  const band = bands[0];
+  console.log(
+    `  · ${bands.length} band(s) of ink; monogram at y${band.top}–${band.top + band.height}`,
+  );
 
   // Two passes: sharp allows only one extract per pipeline before a resize, and
   // chaining .extract().trim() in a single pipeline errors with "bad extract
   // area". Crop to a buffer first, then trim that.
-  const cropped = await sharp(src)
-    .ensureAlpha()
-    .extract({ left: 0, top, width: meta.width, height })
+  const cropped = await sharp(art)
+    .extract({ left: 0, top: band.top, width, height: band.height })
     .png()
     .toBuffer();
 
   const trimmed = await sharp(cropped).trim().png().toBuffer();
-
-  // Recolour the white artwork to plum by keeping its alpha and replacing RGB —
-  // the same technique used for logo-plum.png.
-  const tm = await sharp(trimmed).metadata();
-  const alphaCh = await sharp(trimmed).ensureAlpha().extractChannel('alpha').toBuffer();
-  const plumFlat = await sharp({
-    create: {
-      width: tm.width,
-      height: tm.height,
-      channels: 3,
-      background: { r: 0x58, g: 0x40, b: 0x49 }, // --color-plum-900
-    },
-  })
-    .png()
-    .toBuffer();
-  const monogram = await sharp(plumFlat).joinChannel(alphaCh).png().toBuffer();
+  const monogram = await recolour(trimmed, { r: 0x58, g: 0x40, b: 0x49 }); // --color-plum-900
 
   const TRANSPARENT = { r: 0, g: 0, b: 0, alpha: 0 };
   const CREAM = { r: 0xfe, g: 0xfa, b: 0xf8, alpha: 1 }; // --color-cream
@@ -375,7 +504,7 @@ async function buildIcons() {
 }
 
 async function buildResults({
-  srcDir = SRC_RESULTS,
+  srcDirs = [SRC_RESULTS],
   outDir = OUT_RESULTS,
   cases = RESULT_CASES,
 } = {}) {
@@ -383,8 +512,16 @@ async function buildResults({
 
   let built = 0;
   for (const [file, slug] of cases) {
-    const from = join(srcDir, file);
-    if (!(await exists(from))) {
+    // Searched across directories: replacement cases arrive one at a time, in
+    // whichever folder the client happened to send them in.
+    let from = null;
+    for (const dir of srcDirs) {
+      if (await exists(join(dir, file))) {
+        from = join(dir, file);
+        break;
+      }
+    }
+    if (!from) {
       console.warn(`  ! ${file} not found — skipped`);
       continue;
     }
@@ -494,8 +631,17 @@ async function buildCredentialLogos() {
   console.log('\n· Training & affiliation marks');
 
   for (const [file, slug] of CREDENTIAL_LOGOS) {
-    const from = join(SRC_CREDS, file);
-    if (!(await exists(from))) {
+    // Searched across directories, because later marks arrived in a different
+    // delivery folder and moving a client's originals to suit this script is
+    // how originals get lost.
+    let from = null;
+    for (const dir of [SRC_CREDS, SRC_NEW]) {
+      if (await exists(join(dir, file))) {
+        from = join(dir, file);
+        break;
+      }
+    }
+    if (!from) {
       console.warn(`  ! ${file} not found — skipped`);
       continue;
     }
@@ -586,7 +732,7 @@ async function main() {
       photos: BL_PHOTOS,
     });
     await buildResults({
-      srcDir: SRC_BL_RESULTS,
+      srcDirs: [SRC_BL_RESULTS, SRC_NEW],
       outDir: OUT_RESULTS_BL,
       cases: BL_RESULT_CASES,
     });

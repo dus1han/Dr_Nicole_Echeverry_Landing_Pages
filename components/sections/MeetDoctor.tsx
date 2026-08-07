@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import type { CSSProperties } from 'react';
 import { Quote } from 'lucide-react';
 import type { DoctorContent } from '@/content/types';
 import { SectionHeading } from '@/components/ui/SectionHeading';
@@ -131,12 +132,24 @@ export function MeetDoctor(content: DoctorContent) {
             <Reveal className="pt-1">
               <div className="border-y border-plum-900/12 py-6">
                 {/*
-                  Centred, not left-aligned with the copy above it. Five marks
-                  of differing widths left-aligned end the row on a ragged edge
+                  Centred, not left-aligned with the copy above it. Marks of
+                  differing widths left-aligned end the row on a ragged edge
                   well short of the column, which reads as a layout accident
                   rather than a set.
+
+                  A grid whose column count IS the mark count, rather than a
+                  wrapping flex row. Six marks needed 598px of the 590px this
+                  column offers, so the sixth wrapped alone onto a second row —
+                  eight pixels deciding whether the set looks deliberate. Fixing
+                  that by shaving the gap would have bought exactly one more
+                  mark before it happened again. Cells share whatever width
+                  there is, so any count lands on one row here and three per row
+                  on a phone.
                 */}
-                <ul className="flex flex-wrap items-center justify-center gap-x-6 gap-y-5 sm:gap-x-8">
+                <ul
+                  className="grid grid-cols-3 items-center justify-items-center gap-x-6 gap-y-5 sm:[grid-template-columns:repeat(var(--marks),minmax(0,1fr))]"
+                  style={{ '--marks': content.credentials.items.length } as CSSProperties}
+                >
                   {content.credentials.items.map((mark) => (
                     <li key={mark.src}>
                       {/*
