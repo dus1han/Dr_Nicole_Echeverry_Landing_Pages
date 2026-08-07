@@ -54,7 +54,9 @@ cd "$SITE_PATH" || fail "cannot enter $SITE_PATH"
 if grep -q '^SITE_URL=' .env 2>/dev/null; then
   tmp=$(mktemp "$PWD/.env.XXXXXX")
   grep -v '^SITE_URL=' .env > "$tmp"
-  chmod 644 "$tmp"
+  # 600, not 644: this file holds SMTP_PASS. It is owned by the deploy user,
+  # which is the only account that needs to read it.
+  chmod 600 "$tmp"
   mv "$tmp" .env
   echo "==> removed inert SITE_URL from .env (it is a build arg, not a runtime value)"
 fi
@@ -75,7 +77,9 @@ fi
 if printf '%s' "$SITE_URL" | grep -q '^https://' && grep -q '^BIND_ADDR=' .env; then
   tmp=$(mktemp "$PWD/.env.XXXXXX")
   grep -v '^BIND_ADDR=' .env > "$tmp"
-  chmod 644 "$tmp"
+  # 600, not 644: this file holds SMTP_PASS. It is owned by the deploy user,
+  # which is the only account that needs to read it.
+  chmod 600 "$tmp"
   mv "$tmp" .env
   echo "==> removed BIND_ADDR — $SITE_URL is live, so the port goes back behind Caddy"
 fi
