@@ -178,13 +178,22 @@ warm_images() {
 
   list=$(mktemp)
   for p in $paths; do
-    # Only the widths real devices choose — measured at 360 on a phone and 640
-    # on a 1440px laptop, with 828 for retina. Warming all ten srcset candidates
-    # would triple the work to cache variants nothing requests.
+    # EVERY width in every srcset, not a chosen few.
+    #
+    # This filtered to 360/640/828 — the widths a phone and a laptop pick for
+    # full-width photographs. The affiliation marks render at 110px and so ask
+    # for w=128, which the filter skipped; they were the only cold cohort left
+    # on the page, and they were exactly what hung when the first browser
+    # arrived, blanking the whole ribbon.
+    #
+    # Guessing which widths matter is the bug. The srcset is the authoritative
+    # list of what a browser may ask for, so all of it gets warmed. It is also
+    # far cheaper than it looks: any width at or above the source resolution
+    # collapses onto the same cache entry, so most of these return in
+    # milliseconds.
     curl -fsS --max-time 20 "$base$p" 2>/dev/null \
       | grep -o '/_next/image?url=[^",[:space:]]*' \
-      | sed 's/&amp;/\&/g' \
-      | grep -E '[?&]w=(360|640|828)[&]' >> "$list" || true
+      | sed 's/&amp;/\&/g' >> "$list" || true
   done
   sort -u "$list" -o "$list"
 
