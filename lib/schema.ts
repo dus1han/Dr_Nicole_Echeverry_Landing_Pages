@@ -1,5 +1,5 @@
 import type { LandingPageContent } from '@/content/types';
-import { site } from '@/content/site';
+import { site, pageTitle } from '@/content/site';
 import { ORIGIN } from '@/lib/site-url';
 
 /**
@@ -43,11 +43,21 @@ export function buildJsonLd(content: LandingPageContent) {
     },
   };
 
+  /*
+   * Named from the page, not from the first page that happened to exist.
+   *
+   * This was the literal 'Mommy Makeover' with that procedure's body locations,
+   * so /breast-lift handed Google structured data describing an abdomen, waist,
+   * hips and thighs operation while every visible word on it was about breasts.
+   * Structured data that contradicts the page is worse than none — it is the
+   * machine-readable summary, and it was telling Google the page was about
+   * something else.
+   */
   const procedure = {
     '@type': 'MedicalProcedure',
-    name: 'Mommy Makeover',
+    name: pageTitle(content.slug),
     description: content.whatIsIt.body,
-    bodyLocation: ['Abdomen', 'Breast', 'Waist', 'Hips', 'Thighs'],
+    bodyLocation: content.procedureBodyLocation,
     procedureType: 'https://schema.org/SurgicalProcedure',
     performer: { '@id': `${ORIGIN}/#physician` },
   };

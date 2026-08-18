@@ -18,6 +18,8 @@ export const mommyMakeover: LandingPageContent = {
     ogHeadline: 'Feel Like Yourself Again',
   },
 
+  procedureBodyLocation: ['Abdomen', 'Breast', 'Waist', 'Hips', 'Thighs'],
+
   nav: [
     { label: 'What Is It', href: '#what-is-it' },
     { label: 'Procedures', href: '#procedures' },

@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import { Facebook, Instagram, MapPin, Phone, Mail } from 'lucide-react';
 import { site, telUrl, mailUrl, whatsappUrl } from '@/content/site';
 import { WhatsAppIcon } from '@/components/ui/WhatsAppIcon';
@@ -200,6 +201,44 @@ export function Footer({
           aria-hidden="true"
           className="mb-6 block h-px w-full bg-[linear-gradient(90deg,transparent,rgba(174,133,68,0.45),transparent)]"
         />
+        {/*
+          Links to the other treatment pages, and to the index that lists them.
+
+          The only route between the two campaign pages used to be the logo,
+          which pointed at whichever page happened to be first in the registry —
+          so /breast-lift linked to /mommy-makeover and nothing linked back.
+          Google reaches a page through links, and a page nothing links to is a
+          page it has little reason to trust or revisit.
+
+          Kept as a plain line rather than the link columns the client removed:
+          those duplicated the in-page anchors the sticky nav already carries.
+          These go somewhere else entirely.
+        */}
+        <nav aria-label="Treatments" className="mb-4">
+          <ul className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+            <li>
+              <Link
+                href="/"
+                className="inline-block py-1 font-sans text-xs font-semibold text-plum-700 transition-colors hover:text-rose-600"
+              >
+                All Treatments
+              </Link>
+            </li>
+            {site.landingPages
+              .filter((page) => page.live)
+              .map((page) => (
+                <li key={page.slug}>
+                  <Link
+                    href={`/${page.slug}`}
+                    className="inline-block py-1 font-sans text-xs text-ink/70 transition-colors hover:text-rose-600"
+                  >
+                    {page.title}
+                  </Link>
+                </li>
+              ))}
+          </ul>
+        </nav>
+
         <p className="text-center font-sans text-xs text-muted">{site.legal.copyright}</p>
       </div>
     </footer>

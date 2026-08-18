@@ -36,6 +36,8 @@ export const breastLift: LandingPageContent = {
     ogHeadline: 'Breast Lift & Augmentation in Dubai',
   },
 
+  procedureBodyLocation: ['Breast'],
+
   /** Anchors for this page's own sections. */
   nav: [
     { label: 'What Is It', href: '#what-is-it' },

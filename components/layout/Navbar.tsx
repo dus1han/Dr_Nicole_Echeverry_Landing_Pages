@@ -84,8 +84,18 @@ export function Navbar({
           aria-label="Primary"
           className="container-page flex items-center justify-between gap-6 py-3"
         >
+          {/*
+            The real home, not the first landing page.
+
+            This pointed at landingPages[0], which was harmless while that was
+            the only page — and wrong the moment there were two: on /breast-lift
+            the mark labelled "home" carried a patient reading about breast
+            surgery to the mommy makeover page. It also meant no page on the
+            site linked to / at all, so the one hub Google could use to reach
+            everything received nothing.
+          */}
           <Link
-            href={`/${site.landingPages[0]?.slug ?? ''}`}
+            href="/"
             className="relative block shrink-0"
             aria-label={`${site.doctor.name} — home`}
           >

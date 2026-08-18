@@ -314,6 +314,13 @@ export type LandingPageContent = {
     /** Used by the generated OpenGraph card. */
     ogHeadline: string;
   };
+  /**
+   * Where on the body this page's procedure is performed, for MedicalProcedure
+   * structured data. Per page, because it is the machine-readable claim about
+   * what the page is for — sharing one list across pages told Google the breast
+   * page was about an abdomen.
+   */
+  procedureBodyLocation: string[];
   /** Anchor links shown in the sticky navigation for this page. */
   nav: Array<{ label: string; href: string }>;
   announcements: string[];

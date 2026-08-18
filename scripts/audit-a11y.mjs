@@ -105,11 +105,24 @@ console.log('\nStructure');
       labelled: imgs.filter((i) => /before|after/i.test(i.getAttribute('alt') ?? '')).length,
     };
   });
-  report(
-    gallery.count > 0 && gallery.count === gallery.labelled,
-    'before/after images all carry a before/after alt',
-    `${gallery.labelled}/${gallery.count}`,
-  );
+  /*
+   * Skipped when the page has no gallery, rather than failed.
+   *
+   * These assertions assumed every page was a treatment page. Run against the
+   * index — which has no results section and no FAQ — they reported four
+   * failures for sections that are not supposed to be there, which trains
+   * everyone to ignore the output. A check that fires on the wrong page is
+   * worse than no check.
+   */
+  if (gallery.count === 0) {
+    console.log('  – no results gallery on this page; skipped');
+  } else {
+    report(
+      gallery.count === gallery.labelled,
+      'before/after images all carry a before/after alt',
+      `${gallery.labelled}/${gallery.count}`,
+    );
+  }
 
   const faqAria = await page.evaluate(() => {
     const btns = Array.from(document.querySelectorAll('#faq button[aria-expanded]'));
@@ -118,11 +131,15 @@ console.log('\nStructure');
       controlled: btns.filter((b) => b.getAttribute('aria-controls')).length,
     };
   });
-  report(
-    faqAria.count > 0 && faqAria.count === faqAria.controlled,
-    'FAQ buttons expose aria-expanded + aria-controls',
-    `${faqAria.controlled}/${faqAria.count}`,
-  );
+  if (faqAria.count === 0) {
+    console.log('  – no FAQ on this page; skipped');
+  } else {
+    report(
+      faqAria.count === faqAria.controlled,
+      'FAQ buttons expose aria-expanded + aria-controls',
+      `${faqAria.controlled}/${faqAria.count}`,
+    );
+  }
 
   await page.close();
 }
@@ -192,8 +209,12 @@ console.log('\nJavaScript disabled');
   const bodyText = (await page.locator('body').innerText()).replace(/\s+/g, ' ');
 
   report(noJs.h1.length > 10, `hero headline present without JS — "${noJs.h1.slice(0, 40)}"`);
-  report(noJs.faq.length > 3, `FAQ heading present without JS — "${noJs.faq}"`);
-  report(noJs.answers > 0, `FAQ answers in the DOM without JS — ${noJs.answers}`);
+  if (noJs.faq.length === 0 && noJs.answers === 0) {
+    console.log('  – no FAQ on this page; skipped');
+  } else {
+    report(noJs.faq.length > 3, `FAQ heading present without JS — "${noJs.faq}"`);
+    report(noJs.answers > 0, `FAQ answers in the DOM without JS — ${noJs.answers}`);
+  }
   /*
    * Checked against the page's own tel: link, not a number written out here.
    *

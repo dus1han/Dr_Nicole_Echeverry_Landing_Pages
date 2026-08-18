@@ -1,38 +1,102 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight } from 'lucide-react';
-import { site } from '@/content/site';
+import { ArrowRight, MapPin, Phone } from 'lucide-react';
+import { site, telUrl } from '@/content/site';
+import { doctorCredentials, sharedTrust } from '@/content/shared';
+import { ORIGIN } from '@/lib/site-url';
 import { AuroraBackground } from '@/components/effects/AuroraBackground';
 
 /**
- * Its own title rather than the layout's fallback, which is the full credentials
- * string and too long for a tab.
+ * A one-line description of each treatment page, for the index only.
  *
- * Just the name: this is the directory, not a subject, so there is nothing to
- * put before the pipe. The campaign pages supply their own `Subject | Doctor`.
+ * Deliberately not lifted from each page's meta description: that copy is
+ * written to win a click in a search result for that page, and repeating it
+ * here would put the same sentence on two indexed URLs.
  */
+const SUMMARIES: Record<string, string> = {
+  'mommy-makeover':
+    'A personalised combination of tummy tuck, breast surgery and liposuction to restore the contours changed by pregnancy and breastfeeding.',
+  'breast-lift':
+    'Lift, augmentation, the two combined, or reduction — shaped to your proportions rather than to a size.',
+};
+
+/** The years figure, read from the shared trust stats rather than restated. */
+const yearsStat = sharedTrust.stats.find((stat) => 'value' in stat);
+const years = yearsStat && 'value' in yearsStat ? `${yearsStat.value}${yearsStat.suffix ?? ''} ` : '';
+
 export const metadata: Metadata = {
-  title: site.doctor.name,
+  title: `${site.doctor.name} | Plastic Surgeon in ${site.clinic.city}`,
+  description: `${site.doctor.credentials} in ${site.clinic.city}. Colombian-trained, double board certified, with ${years}years of surgical experience. Private consultations at ${site.clinic.name}.`,
+  alternates: { canonical: '/' },
 };
 
 /**
- * Root index.
+ * The index — the hub every other page links back to.
  *
- * A lightweight directory of the campaign landing pages — replaceable with a
- * real homepage later without touching any campaign page.
+ * It was a bare list of links with 29 words on it. That is enough for a person
+ * who already knows where they are going, and nothing at all for a search
+ * engine: the one page that links to everything else said almost nothing about
+ * who this is or where she practises, so it could not rank for her name and
+ * passed no context to the pages beneath it.
+ *
+ * It stays a directory rather than becoming a third landing page. The campaign
+ * pages must keep their own queries — an index competing with them for
+ * "mommy makeover in Dubai" would split the site against itself.
  */
 export default function Home() {
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebSite',
+        '@id': `${ORIGIN}/#website`,
+        url: ORIGIN,
+        name: site.doctor.name,
+        inLanguage: 'en',
+      },
+      {
+        '@type': 'Physician',
+        '@id': `${ORIGIN}/#physician`,
+        name: site.doctor.name,
+        medicalSpecialty: 'PlasticSurgery',
+        description: `${site.doctor.credentials} practising in ${site.clinic.city}.`,
+        telephone: site.contact.phoneRaw,
+        email: site.contact.email,
+        url: ORIGIN,
+        sameAs: [site.social.instagram, site.social.facebook],
+        address: {
+          '@type': 'PostalAddress',
+          addressRegion: site.clinic.city,
+          addressCountry: 'AE',
+        },
+        // The treatments she offers, tied to the pages that describe them.
+        availableService: site.landingPages
+          .filter((page) => page.live)
+          .map((page) => ({
+            '@type': 'MedicalProcedure',
+            name: page.title,
+            url: `${ORIGIN}/${page.slug}`,
+          })),
+      },
+    ],
+  };
+
   return (
-    <main className="grain relative flex min-h-screen items-center overflow-hidden bg-blush-50">
+    <main className="grain relative min-h-screen overflow-hidden bg-blush-50">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <AuroraBackground />
 
-      <div className="container-page relative z-10 py-24">
+      <div className="container-page relative z-10 py-20 sm:py-24">
         <Image
           src="/logo/logo-plum.png"
           alt={site.doctor.name}
           width={800}
           height={450}
+          sizes="240px"
           priority
           className="h-28 w-auto"
         />
@@ -41,30 +105,84 @@ export default function Home() {
           {site.doctor.credentials} in {site.clinic.city}
         </h1>
 
-        <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted">
-          Explore the treatments below to learn more and book a private consultation.
-        </p>
+        <div className="mt-6 max-w-2xl space-y-4 text-lg leading-relaxed text-ink/80">
+          <p>
+            {site.doctor.name} is a Colombian-trained plastic surgeon practising at{' '}
+            {site.clinic.name} in {site.clinic.city}, specialising in breast surgery, body
+            contouring and post-pregnancy restoration.
+          </p>
+          <p>
+            Every treatment plan is built around one patient&rsquo;s anatomy, lifestyle and goals
+            rather than a standard technique, and every stage of the journey is guided by{' '}
+            {site.doctor.shortName} and a dedicated female team.
+          </p>
+        </div>
 
-        <ul className="mt-12 grid gap-4 sm:grid-cols-2 lg:max-w-3xl">
+        {/* The trust figures the treatment pages carry, so the hub states them too. */}
+        <ul className="mt-8 flex flex-wrap gap-x-8 gap-y-3">
+          {sharedTrust.stats.map((stat) => (
+            <li key={stat.label} className="font-sans text-sm text-plum-700">
+              <span className="font-semibold text-plum-800">
+                {'value' in stat ? `${stat.value}${stat.suffix ?? ''}` : stat.text}
+              </span>{' '}
+              {stat.label}
+            </li>
+          ))}
+        </ul>
+
+        <h2 className="mt-14 font-display text-2xl font-semibold text-plum-800">Treatments</h2>
+
+        <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:max-w-4xl">
           {site.landingPages
             .filter((page) => page.live)
             .map((page) => (
               <li key={page.slug}>
                 <Link
                   href={`/${page.slug}`}
-                  className="group flex items-center justify-between gap-4 rounded-[var(--radius-md)] border border-blush-200 bg-white/80 px-6 py-5 shadow-[var(--shadow-sm)] backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-card)]"
+                  className="group flex h-full flex-col gap-3 rounded-[var(--radius-md)] border border-blush-200 bg-white/80 px-6 py-5 shadow-[var(--shadow-sm)] backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-card)]"
                 >
-                  <span className="font-display text-xl font-semibold text-plum-800">
-                    {page.title}
+                  <span className="flex items-center justify-between gap-4">
+                    <span className="font-display text-xl font-semibold text-plum-800">
+                      {page.title} in {site.clinic.city}
+                    </span>
+                    <ArrowRight
+                      className="h-5 w-5 shrink-0 text-rose-500 transition-transform duration-300 group-hover:translate-x-1"
+                      aria-hidden="true"
+                    />
                   </span>
-                  <ArrowRight
-                    className="h-5 w-5 shrink-0 text-rose-500 transition-transform duration-300 group-hover:translate-x-1"
-                    aria-hidden="true"
-                  />
+                  {SUMMARIES[page.slug] && (
+                    <span className="font-sans text-sm leading-relaxed text-ink/70">
+                      {SUMMARIES[page.slug]}
+                    </span>
+                  )}
                 </Link>
               </li>
             ))}
         </ul>
+
+        {/*
+          Name, address and phone in crawlable text, matching the treatment
+          pages and the structured data exactly. Local search cross-checks these
+          against each other and against the Business Profile.
+        */}
+        <div className="mt-14 flex flex-wrap items-center gap-x-8 gap-y-3 border-t border-plum-900/12 pt-8">
+          <p className="flex items-center gap-2 font-sans text-sm text-ink/75">
+            <MapPin className="h-4 w-4 shrink-0 text-rose-600" aria-hidden="true" />
+            {site.clinic.name}, {site.clinic.city}, {site.clinic.country}
+          </p>
+          <a
+            href={telUrl}
+            className="flex items-center gap-2 py-1 font-sans text-sm font-semibold text-plum-800 transition-colors hover:text-rose-600"
+          >
+            <Phone className="h-4 w-4 shrink-0 text-rose-600" aria-hidden="true" />
+            {site.contact.phoneDisplay}
+          </a>
+        </div>
+
+        <p className="mt-6 font-sans text-xs uppercase tracking-[0.14em] text-muted">
+          {doctorCredentials.label}:{' '}
+          {doctorCredentials.items.map((mark) => mark.name).join(' · ')}
+        </p>
       </div>
     </main>
   );
