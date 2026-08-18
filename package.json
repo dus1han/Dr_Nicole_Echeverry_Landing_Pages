@@ -13,7 +13,8 @@
     "assets": "node scripts/prepare-assets.mjs",
     "check:content": "node scripts/check-content.mjs",
     "check:images": "node scripts/check-images.mjs",
-    "check:contact": "node scripts/check-contact-links.mjs"
+    "check:contact": "node scripts/check-contact-links.mjs",
+    "check:visible": "node scripts/check-visible-content.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",
