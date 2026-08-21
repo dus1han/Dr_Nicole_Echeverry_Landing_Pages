@@ -41,6 +41,12 @@ export const metadata: Metadata = {
   // the page, but a URL discovered elsewhere can still be listed without being
   // fetched. The meta tag is what actually keeps it out of results.
   robots: { index: INDEXABLE, follow: INDEXABLE },
+  // Google Ads / Search Console site ownership. Emits
+  // <meta name="google-site-verification" ...> into every page's head, so it
+  // holds on whichever URL Google decides to check.
+  verification: {
+    google: '4WDOuAwehn41EVBBLXeqmSOeGJkIzAf6Xtmz_LxQ27Q',
+  },
 };
 
 export const viewport: Viewport = {
