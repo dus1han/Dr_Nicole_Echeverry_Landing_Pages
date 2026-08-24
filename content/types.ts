@@ -40,6 +40,27 @@ export type SiteConfig = {
     name: string;
     shortName: string;
     credentials: string;
+    /**
+     * Other spellings and forms of her name that are genuinely in public use.
+     *
+     * Not a keyword list. Google matches an entity by string, and her own live
+     * endpoints spell it "Cheverry" while every display surface spells it
+     * "Echeverry" — so without this the two are unrelated names as far as
+     * search is concerned. Only forms that appear somewhere real belong here.
+     */
+    alternateNames: string[];
+    /** Portrait, for the Person entity. Path under `public/`. */
+    portrait: string;
+    /**
+     * Profiles that are provably the same person, for `sameAs`.
+     *
+     * This is how an entity gets consolidated: Google reconciles a name across
+     * independent sources, and a site that claims no relationship to the
+     * profiles already ranking for that name is treated as a separate, unknown
+     * thing. Every URL here must be verified as hers — a wrong `sameAs` merges
+     * her with somebody else.
+     */
+    profiles: string[];
   };
   clinic: {
     name: string;
@@ -183,6 +204,16 @@ export type CredentialMark = {
   /** Full name — used as the alt text and the tooltip, never rendered as copy. */
   name: string;
   src: string;
+  /**
+   * Which kind of body this is.
+   *
+   * Visually the marks are one row and the distinction does not matter. In
+   * structured data it does: a university belongs in `alumniOf` and a
+   * professional society in `memberOf`, and putting a society in `alumniOf`
+   * states she studied at it. The row is the only place both live, so the
+   * distinction is recorded here rather than re-guessed from the name.
+   */
+  kind: 'society' | 'university';
 };
 
 export type DoctorContent = {

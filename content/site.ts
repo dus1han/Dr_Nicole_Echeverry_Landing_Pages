@@ -14,6 +14,31 @@ export const site: SiteConfig = {
     name: 'Dr. Nicole Echeverry',
     shortName: 'Dr. Nicole',
     credentials: 'Plastic, Aesthetic & Reconstructive Surgeon',
+    /*
+     * Both spellings are in real use — "Echeverry" on the logo and every
+     * display surface, "Cheverry" on her own domain and Instagram handle. A
+     * search engine has no way to know they are one person, so say so.
+     * "Dra." is the Spanish form her Colombian audience and her own accounts
+     * use.
+     */
+    alternateNames: ['Dra. Nicole Echeverry', 'Dr. Nicole Cheverry', 'Dra. Nicole Cheverry'],
+    portrait: '/images/mommy-makeover/doctor-portrait.jpg',
+    /*
+     * Verified as hers: her main site, her two social accounts, and the two
+     * directory profiles docs/open-questions.md already used to confirm the
+     * spelling of her name.
+     *
+     * LinkedIn is deliberately absent — a profile was found under this name but
+     * nothing in the brief confirms it, and an unverified `sameAs` tells Google
+     * that two people are one. See docs/open-questions.md.
+     */
+    profiles: [
+      'https://dranicolecheverry.com',
+      'https://www.facebook.com/dranicolecheverry',
+      'https://www.instagram.com/dra.nicolecheverry_surgery',
+      'https://www.doctify.com/en-ae/specialist/nicole-echeverry',
+      'https://www.realself.com/dr/nicole-echeverry-bogota-colombia',
+    ],
   },
 
   clinic: {

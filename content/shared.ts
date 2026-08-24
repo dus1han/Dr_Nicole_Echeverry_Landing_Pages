@@ -53,21 +53,33 @@ export const doctorCredentials: { label: string; items: CredentialMark[] } = {
     {
       name: 'Sociedad Colombiana de Cirugía Plástica Estética y Reconstructiva',
       src: '/logo/credentials/sccp.png',
+      kind: 'society',
     },
-    { name: 'American Society of Plastic Surgeons', src: '/logo/credentials/asps.png' },
+    {
+      name: 'American Society of Plastic Surgeons',
+      src: '/logo/credentials/asps.png',
+      kind: 'society',
+    },
     {
       name: 'International Society of Aesthetic Plastic Surgery',
       src: '/logo/credentials/isaps.png',
+      kind: 'society',
     },
     {
       name: 'Arab Association of Surgical and Medical Aesthetics',
       src: '/logo/credentials/aasma.png',
+      kind: 'society',
     },
     {
       name: 'Universidad del Sinú — Elías Bechara Zainúm',
       src: '/logo/credentials/universidad-del-sinu.png',
+      kind: 'university',
     },
-    { name: 'Universidad del Tolima', src: '/logo/credentials/universidad-del-tolima.png' },
+    {
+      name: 'Universidad del Tolima',
+      src: '/logo/credentials/universidad-del-tolima.png',
+      kind: 'university',
+    },
   ],
 };
 

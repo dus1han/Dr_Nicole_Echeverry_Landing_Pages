@@ -5,6 +5,7 @@ import { ArrowRight, MapPin, Phone } from 'lucide-react';
 import { site, telUrl } from '@/content/site';
 import { doctorCredentials, sharedTrust } from '@/content/shared';
 import { ORIGIN } from '@/lib/site-url';
+import { ID, doctorEntity, clinicEntity, physicianEntity } from '@/lib/schema';
 import { AuroraBackground } from '@/components/effects/AuroraBackground';
 
 /**
@@ -45,31 +46,41 @@ export const metadata: Metadata = {
  * "mommy makeover in Dubai" would split the site against itself.
  */
 export default function Home() {
+  /*
+   * The index is where the site says who she is, so it carries the fullest
+   * version of the entity: the WebSite, the person, the clinic, and the
+   * practice — all under the same @id values the treatment pages use.
+   *
+   * `mainEntity` on the ProfilePage is the part that matters for a name query.
+   * It states that this page is ABOUT her rather than merely mentioning her,
+   * which is the distinction between a page that can represent the person in
+   * search results and one that cannot.
+   */
   const jsonLd = {
     '@context': 'https://schema.org',
     '@graph': [
       {
         '@type': 'WebSite',
-        '@id': `${ORIGIN}/#website`,
+        '@id': ID.website,
         url: ORIGIN,
         name: site.doctor.name,
+        alternateName: site.doctor.alternateNames,
         inLanguage: 'en',
+        publisher: { '@id': ID.doctor },
       },
       {
-        '@type': 'Physician',
-        '@id': `${ORIGIN}/#physician`,
-        name: site.doctor.name,
-        medicalSpecialty: 'PlasticSurgery',
-        description: `${site.doctor.credentials} practising in ${site.clinic.city}.`,
-        telephone: site.contact.phoneRaw,
-        email: site.contact.email,
+        '@type': 'ProfilePage',
+        '@id': `${ORIGIN}/#webpage`,
         url: ORIGIN,
-        sameAs: [site.social.instagram, site.social.facebook],
-        address: {
-          '@type': 'PostalAddress',
-          addressRegion: site.clinic.city,
-          addressCountry: 'AE',
-        },
+        name: `${site.doctor.name} | Plastic Surgeon in ${site.clinic.city}`,
+        isPartOf: { '@id': ID.website },
+        inLanguage: 'en',
+        mainEntity: { '@id': ID.doctor },
+      },
+      doctorEntity(),
+      clinicEntity(),
+      {
+        ...physicianEntity(`${site.doctor.credentials} practising in ${site.clinic.city}.`),
         // The treatments she offers, tied to the pages that describe them.
         availableService: site.landingPages
           .filter((page) => page.live)
