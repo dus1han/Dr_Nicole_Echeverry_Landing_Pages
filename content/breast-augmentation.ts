@@ -5,7 +5,7 @@ import {
   doctorPullQuote,
   sharedBooking,
   sharedReviews,
-  sharedTrust,
+  femaleLedTrust,
   whyTrustPillars,
 } from './shared';
 
@@ -123,33 +123,16 @@ export const breastAugmentation: LandingPageContent = {
   /* ---------------------------------------------------------------- */
 
   /*
-   * PAGE-LOCAL, and the only block on this page that departs from
-   * `content/shared.ts`.
+   * "100% Female-Led Team" in place of "Zero scars on body" (changes.docx,
+   * 27 Aug 2026). Shared with /breast-lift, which was given the same change
+   * straight afterwards — see `femaleLedTrust` in content/shared.ts.
    *
-   * The client's document asks for two changes here: remove "Zero scars on
-   * body" and add "100% Female-Led Team". Applying that to `sharedTrust` would
-   * silently rewrite /mommy-makeover and /breast-lift as well, and their
-   * document speaks only for this page — so the change is made here and the
-   * shared strip is left alone.
-   *
-   * The other three figures are `sharedTrust`'s, restated rather than imported
-   * so this file is one readable list. If the clinic confirms they want the
-   * same change everywhere, the fix is to edit `sharedTrust` and delete this
-   * block — not to leave both.
-   *
-   * Worth knowing: docs/open-questions.md already flagged "Zero scars on body"
-   * as a claim that reads oddly on a surgical page, so this is very likely
-   * meant for all three.
+   * /mommy-makeover still shows "Zero scars on body". Two of the three pages
+   * now disagree with the third, which is worth putting back to the client:
+   * docs/open-questions.md had already flagged that figure as a claim that
+   * reads oddly on a surgical page.
    */
-  trust: {
-    isPlaceholder: false,
-    stats: [
-      { value: 19, suffix: '+', label: 'Years of experience' },
-      { text: 'Double', label: 'Board certified' },
-      { text: '100%', label: 'Female-led team' },
-      { text: 'Personalized', label: 'Surgical planning' },
-    ],
-  },
+  trust: femaleLedTrust,
 
   /* ---------------------------------------------------------------- */
 

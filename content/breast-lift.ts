@@ -5,7 +5,7 @@ import {
   doctorPullQuote,
   sharedBooking,
   sharedReviews,
-  sharedTrust,
+  femaleLedTrust,
   whyTrustPillars,
 } from './shared';
 
@@ -86,7 +86,12 @@ export const breastLift: LandingPageContent = {
 
   /* ---------------------------------------------------------------- */
 
-  trust: sharedTrust,
+  /*
+   * "100% Female-Led Team" in place of "Zero scars on body", asked for on
+   * /breast-augmentation first and then here. Shared with that page rather
+   * than copied — see `femaleLedTrust` in content/shared.ts.
+   */
+  trust: femaleLedTrust,
 
   /* ---------------------------------------------------------------- */
 

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { breastLift as content } from '@/content/breast-lift';
 import { buildJsonLd } from '@/lib/schema';
-import { pageTitle } from '@/content/site';
+import { pageTitle, site } from '@/content/site';
 import { PageShell } from '@/components/layout/PageShell';
 import { Hero } from '@/components/sections/Hero';
 import { TrustStrip } from '@/components/sections/TrustStrip';
@@ -28,6 +28,10 @@ export const metadata: Metadata = {
   description: content.meta.description,
   alternates: { canonical: `/${content.slug}` },
   openGraph: {
+    // Not inherited from app/layout.tsx: Next replaces the whole
+    // `openGraph` object when a page declares one, so a site name set only
+    // at the root reaches the index and nothing else.
+    siteName: site.doctor.name,
     title: content.meta.title,
     description: content.meta.description,
     url: `/${content.slug}`,

@@ -37,6 +37,25 @@ export const metadata: Metadata = {
   },
   description: site.doctor.credentials,
   authors: [{ name: site.doctor.name }],
+  /*
+   * The name of the SITE, as opposed to the name of any one page.
+   *
+   * Google's second choice after the homepage's `WebSite` structured data when
+   * it decides what to print above a result, and it was absent entirely — so
+   * the only spellings on offer were the ones in the JSON-LD and whatever it
+   * could infer from the hostname. `dranicolecheverry.com` reads as "Dra"
+   * whichever way you look at it, so leaving this unsaid was leaving the answer
+   * to a guess.
+   *
+   * Set at the root so every page carries it. Each page still overrides
+   * `openGraph.title` with its own — a site name and a page title are different
+   * things, and Next merges rather than replaces.
+   */
+  openGraph: {
+    siteName: site.doctor.name,
+    type: 'website',
+    locale: 'en_AE',
+  },
   // Belt and braces with robots.txt: a disallow rule asks crawlers not to fetch
   // the page, but a URL discovered elsewhere can still be listed without being
   // fetched. The meta tag is what actually keeps it out of results.

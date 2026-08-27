@@ -67,12 +67,26 @@ export default function Home() {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@graph': [
+      /*
+       * NO `alternateName` HERE, deliberately — this is the node Google reads
+       * the SITE NAME from, and it only reads it from the homepage.
+       *
+       * It used to carry `site.doctor.alternateNames`, on the reasoning that
+       * more spellings meant more ways to match her. On a Person that is
+       * exactly right and it still does it there. On a WebSite it means
+       * something else entirely: `alternateName` is offered to Google as
+       * another name the SITE may be displayed under, so listing "Dra. Nicole
+       * Echeverry" invited Google to label the result with it — which is what
+       * it did, over the correct `name` directly above.
+       *
+       * Google also expects a single string here, not three. If a short form is
+       * ever wanted, add one string, and only a form of the SITE's name.
+       */
       {
         '@type': 'WebSite',
         '@id': ID.website,
         url: ORIGIN,
         name: site.doctor.name,
-        alternateName: site.doctor.alternateNames,
         inLanguage: 'en',
         publisher: { '@id': ID.doctor },
       },

@@ -2,6 +2,7 @@ import type {
   BookingContent,
   CredentialMark,
   ReviewsContent,
+  TrustStat,
   TrustStripContent,
   WhyTrustContent,
 } from './types';
@@ -21,6 +22,14 @@ import type {
  * `whyTrustPillars` and `doctorBio` below, which take the treatment name.
  */
 
+/*
+ * The three figures every page agrees on. Only the third slot is contested —
+ * see the two strips below.
+ */
+const TRUST_YEARS: TrustStat = { value: 19, suffix: '+', label: 'Years of experience' };
+const TRUST_BOARD: TrustStat = { text: 'Double', label: 'Board certified' };
+const TRUST_PLANNING: TrustStat = { text: 'Personalized', label: 'Surgical planning' };
+
 export const sharedTrust: TrustStripContent = {
   /*
    * Client-supplied, 3 Aug 2026 — these replaced four invented figures.
@@ -29,13 +38,39 @@ export const sharedTrust: TrustStripContent = {
    * See docs/open-questions.md: surgery leaves a scar by definition, so this
    * reads as a claim about placement rather than absence, and it is worth a
    * second look before it runs in paid advertising on any page.
+   *
+   * Only /mommy-makeover still uses this. Both breast pages have moved to
+   * `femaleLedTrust` below at the client's request — so if they confirm the
+   * change was meant for the whole site, this export goes away rather than
+   * gaining a third caller.
    */
   isPlaceholder: false,
   stats: [
-    { value: 19, suffix: '+', label: 'Years of experience' },
-    { text: 'Double', label: 'Board certified' },
+    TRUST_YEARS,
+    TRUST_BOARD,
     { text: 'Zero', label: 'Scars on body' },
-    { text: 'Personalized', label: 'Surgical planning' },
+    TRUST_PLANNING,
+  ],
+};
+
+/**
+ * The same strip with "Zero scars on body" replaced by the all-female team.
+ *
+ * Asked for on /breast-augmentation (changes.docx, 27 Aug 2026) and then on
+ * /breast-lift. Shared rather than written into each of the two files: the
+ * strips are identical, and two copies of four figures is precisely the
+ * arrangement where one gets corrected and the other quietly does not.
+ *
+ * It pairs with the "An All-Female Team" pillar in `whyTrustPillars` — the
+ * figure states it, the pillar explains it.
+ */
+export const femaleLedTrust: TrustStripContent = {
+  isPlaceholder: false,
+  stats: [
+    TRUST_YEARS,
+    TRUST_BOARD,
+    { text: '100%', label: 'Female-led team' },
+    TRUST_PLANNING,
   ],
 };
 
