@@ -21,6 +21,14 @@ import {
  */
 const IMG = '/images/breast-lift';
 
+/*
+ * The one exception to the sharing described above. This page's procedure card
+ * now carries its own photograph, so it lives in its own folder — writing it
+ * into /images/breast-lift would have silently re-cut the augmentation card on
+ * /breast-lift, which still wants the original.
+ */
+const OWN_IMG = '/images/breast-augmentation';
+
 /** Named once so the shared blocks and the copy cannot disagree about it. */
 const TREATMENT = 'Breast Augmentation';
 
@@ -179,10 +187,10 @@ export const breastAugmentation: LandingPageContent = {
         // "Breast Augmentation, Personalised to You".
         description:
           'Breast augmentation is highly individual. Implant size, shape and placement are considered according to your anatomy, existing breast tissue, chest proportions, skin quality and the result you would like to achieve. During your consultation, Dr. Nicole will also assess breast symmetry, natural breast position, desired projection and whether augmentation alone or a combination with a breast lift would be more appropriate. The surgical approach, incision placement and implant options are then discussed as part of a personalised plan designed around your body rather than a standard implant size or look.',
-        // "Let's use the same image" — /breast-lift's augmentation photograph.
+        // This page's own photograph rather than /breast-lift's — see OWN_IMG.
         image: {
-          src: `${IMG}/procedure-augmentation.jpg`,
-          alt: 'A woman in soft white lingerie against a warm neutral background',
+          src: `${OWN_IMG}/procedure-augmentation.jpg`,
+          alt: 'Close-up of a woman in a soft white bra against a warm neutral background',
         },
       },
     ],

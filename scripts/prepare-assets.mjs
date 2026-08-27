@@ -180,6 +180,25 @@ const BL_PHOTOS = [
   ['6e3b7b40-cd66-48d0-ab6c-f8447fafb415.png', 'candidacy.jpg', 1100],
 ];
 
+/* ------------------------------------------------------------------ *
+ * Page 3 — /breast-augmentation
+ *
+ * The page reuses /breast-lift's photographs for everything except its one
+ * procedure card, which the client supplied separately. Only that card is
+ * built here; the shared frames keep coming from OUT_IMG_BL, which is why
+ * content/breast-augmentation.ts still points IMG at /images/breast-lift.
+ * ------------------------------------------------------------------ */
+const SRC_BA = join(ROOT, '..', 'Breast aug');
+const OUT_IMG_BA = join(ROOT, 'public', 'images', 'breast-augmentation');
+
+const BA_PHOTOS = [
+  // 1448 wide is the source, and it is kept rather than cut down. This card is
+  // the only one on its page, so Procedures.tsx centres it at max-w-2xl —
+  // 672 CSS px, or 1344 real pixels on a 2x screen. The other pages' procedure
+  // cards sit in a grid at roughly half that width and are cut to 1100.
+  ['breast aug.png', 'procedure-augmentation.jpg', 1448],
+];
+
 const BL_RESULT_CASES = [
   ['Untitled design (32).png', 'case-1'],
   // Replaced at the client's request; supplied in the later delivery folder.
@@ -190,7 +209,8 @@ const BL_RESULT_CASES = [
 const exists = async (p) => access(p).then(() => true).catch(() => false);
 
 async function ensureDirs() {
-  for (const d of [OUT_IMG, OUT_RESULTS, OUT_LOGO, OUT_CREDS, OUT_IMG_BL, OUT_RESULTS_BL]) {
+  const dirs = [OUT_IMG, OUT_RESULTS, OUT_LOGO, OUT_CREDS, OUT_IMG_BL, OUT_RESULTS_BL, OUT_IMG_BA];
+  for (const d of dirs) {
     await mkdir(d, { recursive: true });
   }
 }
@@ -741,6 +761,24 @@ async function main() {
       outDir: OUT_IMG_BL,
       frames: BL_HERO_FRAMES,
       portrait: BL_HERO_PORTRAIT,
+    });
+  }
+
+  /*
+   * --- /breast-augmentation ------------------------------------------------
+   *
+   * Skipped rather than fatal when its source folder is absent, for the same
+   * reason as /breast-lift above.
+   */
+  console.log('\n\nPreparing /breast-augmentation…');
+  if (!(await exists(SRC_BA))) {
+    console.warn(`  ! source folder not found, skipping:\n    ${SRC_BA}`);
+  } else {
+    await copyPhotos({
+      label: 'Photographs',
+      srcDirs: [SRC_BA],
+      outDir: OUT_IMG_BA,
+      photos: BA_PHOTOS,
     });
   }
 
