@@ -38,11 +38,21 @@ export function Procedures(content: ProceduresContent) {
           Four cards therefore lay out 2×2 rather than 4×1: at this container
           width four abreast leaves each card too narrow for a heading and three
           benefit lines without the text turning ragged.
+
+          ONE card is its own case and never enters the grid. Dropped into a
+          two-column layout it sits in the left half with the right half empty,
+          which reads as a card that failed to load rather than as the only
+          procedure this page offers. Centred at a text measure it reads as
+          deliberate — /breast-augmentation is the page that needs this.
         */}
         <RevealGroup
           className={cn(
-            'mt-10 grid gap-6 md:grid-cols-2',
-            content.items.length % 3 === 0 ? 'lg:grid-cols-3' : 'lg:grid-cols-2',
+            'mt-10 grid gap-6',
+            content.items.length === 1
+              ? 'mx-auto max-w-2xl'
+              : content.items.length % 3 === 0
+                ? 'md:grid-cols-2 lg:grid-cols-3'
+                : 'md:grid-cols-2 lg:grid-cols-2',
           )}
         >
           {content.items.map((item) => (
@@ -74,24 +84,34 @@ export function Procedures(content: ProceduresContent) {
                   </div>
 
                   <div className="flex flex-1 flex-col gap-4 p-7">
-                    <h3 className="font-display text-[1.5rem] font-semibold leading-tight text-plum-800">
-                      {item.name}
-                    </h3>
+                    {/* Omitted when the section heading has already named the
+                        operation — see the note on `name` in content/types.ts. */}
+                    {item.name && (
+                      <h3 className="font-display text-[1.5rem] font-semibold leading-tight text-plum-800">
+                        {item.name}
+                      </h3>
+                    )}
 
                     <p className="text-[0.9375rem] leading-[1.7] text-muted">
                       {item.description}
                     </p>
 
-                    <ul className="mt-auto flex flex-col gap-3 pt-2">
-                      {item.benefits.map((benefit) => (
-                        <li key={benefit} className="flex items-start gap-3">
-                          <CheckDraw />
-                          <span className="pt-0.5 font-sans text-sm font-medium text-plum-800">
-                            {benefit}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
+                    {/* Rendered only when the client supplied benefit lines.
+                        A `<ul>` with no `<li>` inside it is invalid markup, and
+                        inventing three to fill it would be a claim about the
+                        surgery that nobody made. */}
+                    {item.benefits && item.benefits.length > 0 && (
+                      <ul className="mt-auto flex flex-col gap-3 pt-2">
+                        {item.benefits.map((benefit) => (
+                          <li key={benefit} className="flex items-start gap-3">
+                            <CheckDraw />
+                            <span className="pt-0.5 font-sans text-sm font-medium text-plum-800">
+                              {benefit}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
                 </article>
               </TiltCard>

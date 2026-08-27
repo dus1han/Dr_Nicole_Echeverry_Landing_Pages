@@ -40,7 +40,31 @@ export const metadata: Metadata = {
   // Belt and braces with robots.txt: a disallow rule asks crawlers not to fetch
   // the page, but a URL discovered elsewhere can still be listed without being
   // fetched. The meta tag is what actually keeps it out of results.
-  robots: { index: INDEXABLE, follow: INDEXABLE },
+  /*
+   * `max-image-preview: large` is what lets a Google result carry a full-width
+   * thumbnail instead of none. It matters here because emitting a robots meta
+   * tag at all REPLACES Google's defaults — so declaring `index, follow` and
+   * stopping, as this did, is how a page ends up listed with no picture beside
+   * it. `og:image` does not help: Google builds its own thumbnail from images
+   * in the page body and ignores the share card, which is why the portrait is
+   * also named as `primaryImageOfPage` in lib/schema.ts.
+   *
+   * The snippet and video limits are set to unlimited for the same reason —
+   * once the tag exists, anything left unsaid is a limit, not a default.
+   */
+  robots: INDEXABLE
+    ? {
+        index: true,
+        follow: true,
+        googleBot: {
+          index: true,
+          follow: true,
+          'max-image-preview': 'large',
+          'max-snippet': -1,
+          'max-video-preview': -1,
+        },
+      }
+    : { index: false, follow: false },
   // Google Ads / Search Console site ownership. Emits
   // <meta name="google-site-verification" ...> into every page's head, so it
   // holds on whichever URL Google decides to check.

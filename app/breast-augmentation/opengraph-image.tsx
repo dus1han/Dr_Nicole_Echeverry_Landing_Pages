@@ -1,5 +1,5 @@
 import { ImageResponse } from 'next/og';
-import { mommyMakeover as content } from '@/content/mommy-makeover';
+import { breastAugmentation as content } from '@/content/breast-augmentation';
 import { ogCard, OG_SIZE, OG_CONTENT_TYPE } from '@/lib/og';
 
 export const alt = content.meta.title;

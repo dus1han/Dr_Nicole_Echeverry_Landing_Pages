@@ -34,6 +34,7 @@ export const breastLift: LandingPageContent = {
     description:
       'Restore breast shape, fullness and symmetry with a personalised Breast Lift & Augmentation in Dubai by Dr. Nicole Echeverry — world-class breast restoration inspired by Colombian artistry. Book a private consultation.',
     ogHeadline: 'Breast Lift & Augmentation in Dubai',
+    ogSubline: 'Restore Beautiful Shape, Fullness & Confidence',
   },
 
   procedureBodyLocation: ['Breast'],

@@ -168,17 +168,40 @@ export type WhatIsItContent = {
   body: string;
   /** Optional — omit and the chips speak for themselves. */
   leadIn?: string;
-  /** Each chip scroll-links to its card in the procedures section. */
-  chips: Array<{ label: string; href: string }>;
+  /**
+   * The row of pills beneath the body copy.
+   *
+   * `href` is optional, and that distinction is the point. On a page with
+   * several procedures each chip scroll-links to its own card below, so the row
+   * is navigation. On a page with ONE procedure there is nowhere to send the
+   * visitor — /breast-augmentation's row states what the operation achieves —
+   * and four pills all pointing at the same anchor would be a link that appears
+   * to do nothing four times over. Without an href a chip renders as plain
+   * text, not as a dead link.
+   */
+  chips: Array<{ label: string; href?: string }>;
   image: ImageAsset;
   imageCaption: string;
 };
 
 export type Procedure = {
   id: string;
-  name: string;
+  /**
+   * Optional. A page with several cards needs one on each to tell them apart;
+   * a page with a single card usually does not, because the section heading
+   * directly above it has already named the operation — /breast-augmentation
+   * read "Breast Augmentation, Personalised to You" and then "Breast
+   * Augmentation" again, two lines apart.
+   */
+  name?: string;
   description: string;
-  benefits: string[];
+  /**
+   * Optional. Omitted rather than filled with invented lines when the client's
+   * copy for a card is a paragraph and nothing else — an empty `<ul>` is not
+   * valid markup, and three plausible-sounding benefits nobody wrote are a
+   * claim about the surgery.
+   */
+  benefits?: string[];
   image: ImageAsset;
 };
 
@@ -343,7 +366,15 @@ export type LandingPageContent = {
     title: string;
     description: string;
     /** Used by the generated OpenGraph card. */
+    /** The big line on the generated share card. */
     ogHeadline: string;
+    /**
+     * The supporting line beneath it. Required, and required to be DIFFERENT
+     * from `ogHeadline` — /mommy-makeover's hero lead-in happens to be word for
+     * word its own `ogHeadline`, so deriving this from the hero printed the
+     * same sentence twice on the card. Two fields, stated once each.
+     */
+    ogSubline: string;
   };
   /**
    * Where on the body this page's procedure is performed, for MedicalProcedure

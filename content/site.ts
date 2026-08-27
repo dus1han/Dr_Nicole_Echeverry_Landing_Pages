@@ -100,6 +100,7 @@ export const site: SiteConfig = {
   landingPages: [
     { slug: 'mommy-makeover', title: 'Mommy Makeover', live: true },
     { slug: 'breast-lift', title: 'Breast Lift & Augmentation', live: true },
+    { slug: 'breast-augmentation', title: 'Breast Augmentation', live: true },
   ],
 };
 

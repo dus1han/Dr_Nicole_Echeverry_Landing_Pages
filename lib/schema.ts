@@ -152,6 +152,29 @@ export function buildJsonLd(content: LandingPageContent) {
     })),
   };
 
+  /*
+   * The image Google should reach for when it builds a result thumbnail.
+   *
+   * Named explicitly because the alternative is Google choosing: it picks from
+   * the images in the page body, and every candidate here is an anonymous
+   * torso from the treatment photography. `primaryImageOfPage` says which one
+   * represents the page, and the surgeon's portrait is the answer on all of
+   * them — a name query wants a face.
+   *
+   * This is a DIFFERENT mechanism from `og:image`, which Google does not use
+   * for search thumbnails at all. The share card covers WhatsApp and the social
+   * networks; this covers Google. Both are needed, and `max-image-preview:
+   * large` in app/layout.tsx is what permits the result to be large enough to
+   * be worth having.
+   */
+  const primaryImage = {
+    '@type': 'ImageObject',
+    '@id': `${url}#primaryimage`,
+    url: `${ORIGIN}${site.doctor.portrait}`,
+    contentUrl: `${ORIGIN}${site.doctor.portrait}`,
+    caption: `${site.doctor.name}, ${site.doctor.credentials}`,
+  };
+
   const webPage = {
     '@type': 'WebPage',
     '@id': url,
@@ -161,6 +184,8 @@ export function buildJsonLd(content: LandingPageContent) {
     inLanguage: 'en',
     isPartOf: { '@id': ID.website },
     about: { '@id': ID.doctor },
+    primaryImageOfPage: { '@id': primaryImage['@id'] },
+    image: { '@id': primaryImage['@id'] },
   };
 
   return {
@@ -168,6 +193,7 @@ export function buildJsonLd(content: LandingPageContent) {
     '@graph': [
       { '@type': 'WebSite', '@id': ID.website, url: ORIGIN, name: site.doctor.name, inLanguage: 'en' },
       webPage,
+      primaryImage,
       doctorEntity(),
       clinicEntity(),
       physician,

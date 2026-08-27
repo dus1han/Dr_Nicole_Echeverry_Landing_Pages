@@ -27,6 +27,7 @@ export const mommyMakeover: LandingPageContent = {
     description:
       'Feel like yourself again with a personalised Mommy Makeover in Dubai by Dr. Nicole Echeverry — world-class body contouring inspired by Colombian aesthetic artistry. Book a private consultation.',
     ogHeadline: 'Feel Like Yourself Again',
+    ogSubline: 'Mommy Makeover in Dubai',
   },
 
   procedureBodyLocation: ['Abdomen', 'Breast', 'Waist', 'Hips', 'Thighs'],

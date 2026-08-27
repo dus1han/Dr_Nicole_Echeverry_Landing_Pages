@@ -91,16 +91,34 @@ export function WhatIsIt(content: WhatIsItContent) {
             </Reveal>
           )}
 
+          {/*
+            A chip with an href is a link to its card below; one without is a
+            statement. /breast-augmentation has a single procedure, so its row
+            lists what the operation achieves and has nowhere to link to — and a
+            pill that looks clickable but moves the page nowhere is worse than a
+            plain one. Same pill, minus the hover-lift and the arrow rotation,
+            so the two kinds still read as one row.
+          */}
           <RevealGroup className="flex flex-wrap gap-3">
             {content.chips.map((chip) => (
-              <RevealItem key={chip.href}>
-                <a
-                  href={chip.href}
-                  className="group inline-flex items-center gap-2 rounded-[var(--radius-pill)] border border-blush-200 bg-white px-5 py-2.5 font-sans text-sm font-semibold text-plum-800 shadow-[var(--shadow-sm)] transition-all duration-300 hover:-translate-y-0.5 hover:border-rose-300 hover:shadow-[var(--shadow-card)]"
-                >
-                  <span className="h-1.5 w-1.5 rotate-45 bg-[image:var(--gradient-brand)] transition-transform duration-300 group-hover:rotate-[135deg]" />
-                  {chip.label}
-                </a>
+              <RevealItem key={chip.label}>
+                {chip.href ? (
+                  <a
+                    href={chip.href}
+                    className="group inline-flex items-center gap-2 rounded-[var(--radius-pill)] border border-blush-200 bg-white px-5 py-2.5 font-sans text-sm font-semibold text-plum-800 shadow-[var(--shadow-sm)] transition-all duration-300 hover:-translate-y-0.5 hover:border-rose-300 hover:shadow-[var(--shadow-card)]"
+                  >
+                    <span className="h-1.5 w-1.5 rotate-45 bg-[image:var(--gradient-brand)] transition-transform duration-300 group-hover:rotate-[135deg]" />
+                    {chip.label}
+                  </a>
+                ) : (
+                  <span className="inline-flex items-center gap-2 rounded-[var(--radius-pill)] border border-blush-200 bg-white px-5 py-2.5 font-sans text-sm font-semibold text-plum-800 shadow-[var(--shadow-sm)]">
+                    <span
+                      aria-hidden="true"
+                      className="h-1.5 w-1.5 rotate-45 bg-[image:var(--gradient-brand)]"
+                    />
+                    {chip.label}
+                  </span>
+                )}
               </RevealItem>
             ))}
           </RevealGroup>

@@ -20,6 +20,14 @@ const SUMMARIES: Record<string, string> = {
     'A personalised combination of tummy tuck, breast surgery and liposuction to restore the contours changed by pregnancy and breastfeeding.',
   'breast-lift':
     'Lift, augmentation, the two combined, or reduction — shaped to your proportions rather than to a size.',
+  /*
+   * Deliberately written against /breast-lift's line rather than beside it.
+   * The two pages overlap, and a directory that describes both the same way
+   * gives a visitor no reason to choose one — this one is about volume, that
+   * one about position as well.
+   */
+  'breast-augmentation':
+    'Implants chosen for your anatomy, chest proportions and desired projection — volume restored without a standard size or look.',
 };
 
 /** The years figure, read from the shared trust stats rather than restated. */
