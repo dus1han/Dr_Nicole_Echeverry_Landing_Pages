@@ -100,17 +100,29 @@ export function Navbar({
             aria-label={`${site.doctor.name} — home`}
           >
             {/*
-              `sizes` matters here: the logo renders ~100px wide, but without
+              `sizes` matters here: the logo renders ~94px wide, but without
               it next/image requested a 1600px variant for a 56px-tall mark
               and it became an early LCP candidate.
+
+              220px was still more than double what the mark occupies. Next
+              builds its candidate widths from `sizes` at 1x AND 2x, so 220
+              asked for a 640px-wide variant — 21KB of PNG for a box measured
+              at 164x98 device pixels, which Lighthouse flagged as 20KB of
+              pure waste. 110px asks for 128w and 256w instead.
+
+              The intrinsic size is the file's OWN 1075x643, not the 800x450
+              that used to be declared here. With `h-14 w-auto` the browser
+              derives the width from whatever ratio it is told, so a wrong
+              ratio reserves a box ~6px too wide and then snaps to the real
+              one the moment the image decodes.
             */}
             <Image
               src="/logo/logo-plum.png"
               alt={site.doctor.name}
-              width={800}
-              height={450}
+              width={1075}
+              height={643}
               priority
-              sizes="220px"
+              sizes="110px"
               className={cn(
                 'w-auto transition-all duration-300',
                 scrolled ? 'h-11' : 'h-14',
@@ -176,9 +188,9 @@ export function Navbar({
                 <Image
                   src="/logo/logo-plum.png"
                   alt={site.doctor.name}
-                  width={800}
-                  height={450}
-                  sizes="220px"
+                  width={1075}
+                  height={643}
+                  sizes="110px"
                   className="h-12 w-auto"
                 />
                 <button

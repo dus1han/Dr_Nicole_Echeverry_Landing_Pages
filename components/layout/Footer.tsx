@@ -78,9 +78,9 @@ export function Footer({
             <Image
               src="/logo/logo-plum.png"
               alt={site.doctor.name}
-              width={800}
-              height={450}
-              sizes="520px"
+              width={1075}
+              height={643}
+              sizes="330px"
               className="relative h-40 w-auto sm:h-48"
             />
           </div>

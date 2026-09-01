@@ -514,9 +514,23 @@ async function buildIcons() {
       .resize(inner, inner, { fit: 'contain', background: TRANSPARENT })
       .toBuffer();
 
+    /*
+     * PALETTE, not truecolour.
+     *
+     * This is one plum glyph on a flat ground — a few dozen distinct RGBA
+     * values in total, and every one of them an anti-aliasing step on the same
+     * hue. Encoded as truecolour, icon.png came to 85KB: a favicon costing
+     * more than the LCP photograph, downloaded by every visitor on every page.
+     *
+     * Measured against the truecolour original, flattened onto cream so the
+     * arbitrary RGB under transparent pixels cannot skew the comparison: a
+     * maximum channel difference of 2/255 at the 32px and 48px a browser
+     * actually renders a favicon at. 85KB -> 19KB for a difference nobody can
+     * see.
+     */
     await sharp({ create: { width: size, height: size, channels: 4, background } })
       .composite([{ input: glyph, gravity: 'centre' }])
-      .png({ compressionLevel: 9 })
+      .png({ palette: true, colours: 64, compressionLevel: 9, effort: 10 })
       .toFile(join(ROOT, 'app', name));
 
     console.log(`  ✓ app/${name} (${size}×${size})`);
@@ -578,6 +592,32 @@ async function buildResults({
   console.log('  see docs/open-questions.md.');
 }
 
+/*
+ * AVIF settings for the hero frames.
+ *
+ * The hero is the LCP element on every page, so this is the one image on the
+ * site where bytes are worth measuring rather than guessing at.
+ *
+ * 62 was chosen by comparing each candidate back against the ORIGINAL PNG,
+ * not against the JPEG. Against hero-1's 1672x941 source:
+ *
+ *   shipping JPEG (q80 mozjpeg)   49,866 B   43.52 dB
+ *   AVIF q60                      17,241 B   43.64 dB
+ *   AVIF q62                      19,144 B   43.85 dB
+ *   AVIF q65                      21,883 B   44.15 dB
+ *
+ * So q62 is both SMALLER and closer to the original than what it replaces —
+ * 62% fewer bytes at higher fidelity. Going further down the curve keeps
+ * saving bytes, but q55 (13KB) falls below the JPEG on fidelity, and on a
+ * plastic-surgery page the photography is the product.
+ *
+ * The JPEG is still written. It is the <picture> fallback, and it is what
+ * every non-AVIF client gets.
+ */
+const AVIF_QUALITY = 62;
+/** sharp's slowest-but-smallest is 9; 6 is within ~2% of it and far quicker. */
+const AVIF_EFFORT = 6;
+
 /**
  * Hero frames for one page.
  *
@@ -612,6 +652,12 @@ async function buildHeroFrames({
       .jpeg({ quality: 80, mozjpeg: true, progressive: true })
       .toFile(join(outDir, out));
 
+    // An AVIF companion, offered first in the <picture> and with the JPEG kept
+    // as the fallback. See AVIF_QUALITY for why 62 and not something rounder.
+    await sharp(from)
+      .avif({ quality: AVIF_QUALITY, effort: AVIF_EFFORT })
+      .toFile(join(outDir, out.replace(/\.jpg$/, '.avif')));
+
     /*
      * A portrait companion for phones — art direction, not a resize.
      *
@@ -637,6 +683,11 @@ async function buildHeroFrames({
       .extract(win)
       .jpeg({ quality: 82, mozjpeg: true, progressive: true })
       .toFile(join(outDir, portraitName));
+
+    await sharp(from)
+      .extract(win)
+      .avif({ quality: AVIF_QUALITY, effort: AVIF_EFFORT })
+      .toFile(join(outDir, portraitName.replace(/\.jpg$/, '.avif')));
 
     const after = (await stat(join(outDir, out))).size;
     const afterP = (await stat(join(outDir, portraitName))).size;

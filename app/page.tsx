@@ -127,9 +127,9 @@ export default function Home() {
         <Image
           src="/logo/logo-plum.png"
           alt={site.doctor.name}
-          width={800}
-          height={450}
-          sizes="240px"
+          width={1075}
+          height={643}
+          sizes="190px"
           priority
           className="h-28 w-auto"
         />

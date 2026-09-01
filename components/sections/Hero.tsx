@@ -64,12 +64,43 @@ export function Hero(content: HeroContent) {
           The `-portrait` companion is derived rather than listed in content
           because the same script writes both, so the pair cannot drift apart.
         */}
-        {content.frames.map((frame, i) => (
+        {content.frames.map((frame, i) => {
+          const portrait = frame.src.replace(/\.jpg$/, '-portrait.jpg');
+          return (
           <picture key={frame.src}>
+            {/*
+              AVIF first, JPEG behind it, at both crops.
+
+              This is the LCP element, and the JPEGs were the largest thing on
+              the critical path after the document itself: 138KB of hero on a
+              phone, of which the browser needs the first frame before it can
+              paint. The AVIF companions are 59KB for the same three frames,
+              and were tuned against the ORIGINAL PNG rather than against the
+              JPEG — they are measurably CLOSER to the source than the files
+              they take over from. See AVIF_QUALITY in scripts/prepare-assets.
+
+              Every one is written by that script alongside its JPEG, so an
+              AVIF cannot go missing for a frame that exists. That matters more
+              than it looks: a <source> whose file 404s does NOT fall back to
+              the <img>, it renders broken.
+            */}
+            <source
+              type="image/avif"
+              media="(max-width: 767px)"
+              srcSet={portrait.replace(/\.jpg$/, '.avif')}
+              width={706}
+              height={941}
+            />
             <source
               media="(max-width: 767px)"
-              srcSet={frame.src.replace(/\.jpg$/, '-portrait.jpg')}
+              srcSet={portrait}
               width={706}
+              height={941}
+            />
+            <source
+              type="image/avif"
+              srcSet={frame.src.replace(/\.jpg$/, '.avif')}
+              width={1672}
               height={941}
             />
             <img
@@ -87,7 +118,8 @@ export function Hero(content: HeroContent) {
               className="anim-hero-cross absolute inset-0 h-full w-full object-cover object-center"
             />
           </picture>
-        ))}
+          );
+        })}
 
         {/*
           A vignette, not a wash. It deepens the corners and leaves the centre

@@ -44,9 +44,9 @@ export default function ThankYouPage() {
           <Image
             src="/logo/logo-plum.png"
             alt={site.doctor.name}
-            width={800}
-            height={450}
-            sizes="260px"
+            width={1075}
+            height={643}
+            sizes="165px"
             priority
             className="mx-auto h-24 w-auto"
           />
