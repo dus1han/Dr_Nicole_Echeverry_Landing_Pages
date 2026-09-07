@@ -36,8 +36,56 @@ const rise = (delay: number) => ({
 const FRAME_STAGGER = -8;
 
 export function Hero(content: HeroContent) {
+  /*
+   * The first frame is the LCP element on every page, and it was being found
+   * far too late: Lighthouse measured 891ms of "load delay" — a quarter of the
+   * whole LCP — between the document arriving and the image being requested.
+   *
+   * The cause is the art direction below. A bare <img src> is spotted by the
+   * preload scanner while the HTML is still streaming, but this is a <picture>
+   * whose real candidates live in <source media> elements, and the scanner
+   * cannot resolve which one applies until it has the document's layout
+   * viewport. So the fetch waited for the parser, and by then a dozen script
+   * chunks were already queued ahead of it on the connection.
+   *
+   * Two preloads with mutually exclusive media queries — the browser evaluates
+   * `media` before fetching, so exactly ONE of these downloads. They mirror the
+   * <source> pair verbatim; if the two ever drift, the page pays for both.
+   *
+   * AVIF only, deliberately. A preload for the JPEG fallback would be a second
+   * copy of the same picture on the one connection that matters most, and
+   * every browser that reaches this page without AVIF support is outside the
+   * declared browserslist anyway.
+   *
+   * React 19 hoists `rel="preload"` links into <head>, so these end up ahead of
+   * the scripts despite being rendered here, in the component that owns them.
+   */
+  const lcp = content.frames[0];
+  const lcpDesktopAvif = lcp?.src.replace(/\.jpg$/, '.avif');
+  const lcpMobileAvif = lcp?.src.replace(/\.jpg$/, '-portrait.avif');
+
   return (
     <section className="relative isolate overflow-hidden bg-cream">
+      {lcp ? (
+        <>
+          <link
+            rel="preload"
+            as="image"
+            type="image/avif"
+            href={lcpMobileAvif}
+            media="(max-width: 767px)"
+            fetchPriority="high"
+          />
+          <link
+            rel="preload"
+            as="image"
+            type="image/avif"
+            href={lcpDesktopAvif}
+            media="(min-width: 768px)"
+            fetchPriority="high"
+          />
+        </>
+      ) : null}
       {/* ---------------- Photograph layer ---------------- */}
       {/*
         Full-bleed behind the copy at EVERY width.

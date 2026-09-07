@@ -94,8 +94,16 @@ export function Navbar({
             site linked to / at all, so the one hub Google could use to reach
             everything received nothing.
           */}
+          {/*
+            No prefetch. In view from the first paint, so Next fetched the home
+            route's RSC payload and its chunk during load — work competing with
+            the page's own hydration on the one campaign that has to convert.
+            Nobody arrives on an ad landing page in order to go to the homepage;
+            the rare visitor who does can wait the extra moment.
+          */}
           <Link
             href="/"
+            prefetch={false}
             className="relative block shrink-0"
             aria-label={`${site.doctor.name} — home`}
           >

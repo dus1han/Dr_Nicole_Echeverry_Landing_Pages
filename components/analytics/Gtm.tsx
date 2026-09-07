@@ -24,8 +24,30 @@ export function GtmScript({ id }: { id?: string }) {
   const GTM_ID = resolveId(id);
   if (!GTM_ID) return null;
 
+  /*
+   * `lazyOnload`, not `afterInteractive`.
+   *
+   * The container is by far the heaviest thing on the page, and none of it is
+   * ours: gtm.js is 148KB, and it then pulls a separate 187KB gtag.js for EACH
+   * of the two GA4 properties configured inside it. That is ~520KB of
+   * third-party JavaScript against ~144KB for the entire application.
+   *
+   * On `afterInteractive` all of it was fetched and executed as soon as
+   * hydration finished, which is exactly the window the page needs for its own
+   * work — measured at 380ms of Total Blocking Time, and it was also taking
+   * bandwidth from the hero photograph while that was still the pending LCP.
+   * `lazyOnload` moves it behind the load event, so the container arrives once
+   * the page is painted and interactive rather than competing with it.
+   *
+   * The trade is real and worth stating: a visitor who leaves within a second
+   * or two of arriving may now go uncounted. Conversion tracking is unaffected
+   * — the form posts through to /thank-you, which is a fresh navigation, and
+   * the tag fires there on a page nobody bounces off. `gclid` capture is
+   * likewise independent of this: ClickIdCapture reads it straight from the
+   * URL and does not wait for GTM.
+   */
   return (
-    <Script id="gtm-container" strategy="afterInteractive">
+    <Script id="gtm-container" strategy="lazyOnload">
       {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
