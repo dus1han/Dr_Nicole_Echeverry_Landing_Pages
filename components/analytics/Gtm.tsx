@@ -25,29 +25,32 @@ export function GtmScript({ id }: { id?: string }) {
   if (!GTM_ID) return null;
 
   /*
-   * `lazyOnload`, not `afterInteractive`.
+   * `afterInteractive`, and NOT `lazyOnload` — this was measured both ways.
    *
-   * The container is by far the heaviest thing on the page, and none of it is
-   * ours: gtm.js is 148KB, and it then pulls a separate 187KB gtag.js for EACH
-   * of the two GA4 properties configured inside it. That is ~520KB of
-   * third-party JavaScript against ~144KB for the entire application.
+   * The container is by far the heaviest thing on the page and none of it is
+   * ours: gtm.js is 148KB, and it then pulls a SEPARATE 187KB gtag.js for each
+   * of the two GA4 properties configured inside it. ~524KB of third-party
+   * JavaScript against ~144KB for the whole application, and Lighthouse
+   * attributes 1,136ms of blocking time to it.
    *
-   * On `afterInteractive` all of it was fetched and executed as soon as
-   * hydration finished, which is exactly the window the page needs for its own
-   * work — measured at 380ms of Total Blocking Time, and it was also taking
-   * bandwidth from the hero photograph while that was still the pending LCP.
-   * `lazyOnload` moves it behind the load event, so the container arrives once
-   * the page is painted and interactive rather than competing with it.
+   * Deferring it looks like the obvious fix and makes things worse. On
+   * `lazyOnload` the container waits for the load event, so on a real
+   * connection the two gtag.js evaluations landed at 8.3s and 10.7s as 411ms
+   * and 600ms long tasks — alone, late, with nothing to overlap. Total
+   * Blocking Time went from 380ms to 1,076ms and the performance score fell
+   * from 79 to 60, because TBT counts every long task between FCP and
+   * interactive and pushing the work later only drags interactive out with it.
    *
-   * The trade is real and worth stating: a visitor who leaves within a second
-   * or two of arriving may now go uncounted. Conversion tracking is unaffected
-   * — the form posts through to /thank-you, which is a fresh navigation, and
-   * the tag fires there on a page nobody bounces off. `gclid` capture is
-   * likewise independent of this: ClickIdCapture reads it straight from the
-   * URL and does not wait for GTM.
+   * On `afterInteractive` the same work runs early, overlapping hydration that
+   * has to happen anyway, and the page settles sooner.
+   *
+   * The real cost here is not the strategy, it is the payload: TWO GA4
+   * properties each loading their own gtag.js. Removing one is worth ~187KB
+   * and roughly half that blocking time, and it is a change inside the GTM
+   * container rather than in this file.
    */
   return (
-    <Script id="gtm-container" strategy="lazyOnload">
+    <Script id="gtm-container" strategy="afterInteractive">
       {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
