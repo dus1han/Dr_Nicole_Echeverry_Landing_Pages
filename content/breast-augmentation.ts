@@ -281,21 +281,42 @@ export const breastAugmentation: LandingPageContent = {
         id: 'case-1',
         image: {
           src: `${IMG}/results/case-1.jpg`,
-          alt: 'Before and after a Breast Lift & Augmentation',
+          alt: 'Before and after a Breast Lift & Augmentation, angled view',
         },
       },
       {
         id: 'case-2',
         image: {
           src: `${IMG}/results/case-2.jpg`,
-          alt: 'Before and after a Breast Lift & Augmentation',
+          alt: 'Before and after a Breast Lift & Augmentation, front view',
         },
       },
       {
         id: 'case-3',
         image: {
           src: `${IMG}/results/case-3.jpg`,
-          alt: 'Before and after a Breast Lift & Augmentation',
+          alt: 'Before and after a Breast Lift & Augmentation, front view',
+        },
+      },
+      {
+        id: 'case-4',
+        image: {
+          src: `${IMG}/results/case-4.jpg`,
+          alt: 'Before and after a Breast Lift & Augmentation, side view',
+        },
+      },
+      {
+        id: 'case-5',
+        image: {
+          src: `${IMG}/results/case-5.jpg`,
+          alt: 'Before and after a Breast Lift & Augmentation, side view',
+        },
+      },
+      {
+        id: 'case-6',
+        image: {
+          src: `${IMG}/results/case-6.jpg`,
+          alt: 'Before and after a Breast Lift & Augmentation, side view',
         },
       },
     ],

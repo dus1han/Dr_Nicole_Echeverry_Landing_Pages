@@ -9,9 +9,13 @@ import { scaleIn } from '@/lib/motion';
 /**
  * Before & after gallery.
  *
- * Replaces the drag-to-reveal slider: a compact side-by-side gallery shows all
- * three cases at once instead of hiding two behind tabs and requiring a drag
- * to see either half of the third. It also needs no client-side JavaScript.
+ * Replaces the drag-to-reveal slider: a compact side-by-side gallery shows
+ * every case at once instead of hiding most of them behind tabs and requiring
+ * a drag to see either half of any one. It also needs no client-side
+ * JavaScript.
+ *
+ * The set is content-driven and currently runs to six cases per page, so this
+ * must stay indifferent to how many it is handed.
  */
 export function BeforeAfter(content: ResultsContent) {
   return (
@@ -36,10 +40,10 @@ export function BeforeAfter(content: ResultsContent) {
         {/*
           One column, then three — never two.
 
-          With three wide cases a two-column breakpoint puts two on the first
-          row and strands the third, which reads as a missing fourth case rather
-          than a deliberate set. Going straight from one to three keeps every row
-          full at any width.
+          The set is a multiple of three, so three columns leaves every row
+          full. A two-column breakpoint would strand the last card on a row of
+          its own at odd counts, which reads as a case that failed to load
+          rather than the end of a deliberate set.
         */}
         <RevealGroup className="mt-10 grid gap-5 lg:grid-cols-3">
           {content.cases.map((item) => (

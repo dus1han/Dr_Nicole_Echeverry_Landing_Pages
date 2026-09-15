@@ -27,6 +27,8 @@ const SRC_CREDS = join(SRC, 'Logos for description');
 const SRC_HERO = join(SRC, 'Tummy Tuck');
 /** Later client deliveries: the English lockup, a society mark, a new case. */
 const SRC_NEW = join(ROOT, '..', 'New logos');
+/** Later delivery again: four replacement before/after composites. */
+const SRC_NEW_BA = join(ROOT, '..', 'New B&A');
 
 /**
  * Hero frames — [source file, output slug].
@@ -199,11 +201,27 @@ const BA_PHOTOS = [
   ['breast aug.png', 'procedure-augmentation.jpg', 1448],
 ];
 
+/*
+ * Six cases, renumbered 1-6 after a removal — the slugs are positions in the
+ * gallery, not patient identifiers, so they are kept contiguous rather than
+ * left with a hole at case-1.
+ *
+ * The original case-1 ('Untitled design (32).png') was dropped at the client's
+ * request. It had a strip of video-player UI baked into the top-left of the
+ * frame — the composite had been exported from a screen recording rather than
+ * from the originals — which is not something that can be cropped out without
+ * cutting into the patient.
+ *
+ * The four 'Luis - Nicole' files are the replacement delivery. Same 700x380
+ * composite as the rest of the set, same clinic watermark, before on the left.
+ */
 const BL_RESULT_CASES = [
-  ['Untitled design (32).png', 'case-1'],
-  // Replaced at the client's request; supplied in the later delivery folder.
-  ['Untitled design (38).png', 'case-2'],
-  ['Untitled design (34).png', 'case-3'],
+  ['Untitled design (38).png', 'case-1'],
+  ['Untitled design (34).png', 'case-2'],
+  ['Luis - Nicole - Before after.png', 'case-3'],
+  ['Luis - Nicole - Before after (1).png', 'case-4'],
+  ['Luis - Nicole - Before after (2).png', 'case-5'],
+  ['Luis - Nicole - Before after (3).png', 'case-6'],
 ];
 
 const exists = async (p) => access(p).then(() => true).catch(() => false);
@@ -803,7 +821,7 @@ async function main() {
       photos: BL_PHOTOS,
     });
     await buildResults({
-      srcDirs: [SRC_BL_RESULTS, SRC_NEW],
+      srcDirs: [SRC_BL_RESULTS, SRC_NEW, SRC_NEW_BA],
       outDir: OUT_RESULTS_BL,
       cases: BL_RESULT_CASES,
     });
