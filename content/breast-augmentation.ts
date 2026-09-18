@@ -147,7 +147,7 @@ export const breastAugmentation: LandingPageContent = {
   whatIsIt: {
     eyebrow: 'The Procedure',
     heading: 'What is Breast Augmentation?',
-    body: 'Breast augmentation enhances or restores breast volume using carefully selected implants to create a shape that complements your natural body proportions. Rather than focusing simply on size, Dr. Nicole considers your existing breast tissue, chest proportions, symmetry, desired fullness and overall body shape.',
+    body: 'Breast augmentation is a surgical procedure designed to enhance or restore breast volume, shape and projection. Depending on your anatomy and goals, augmentation may involve breast implants, fat transfer, or a personalised combination of techniques where appropriate.',
     /*
      * Statements, not links — see the note on `chips` in content/types.ts.
      * /breast-lift's four chips each jump to one of its four procedure cards;
@@ -179,12 +179,12 @@ export const breastAugmentation: LandingPageContent = {
    */
   procedures: {
     eyebrow: 'What It Involves',
-    heading: 'Breast Augmentation, Personalised to You',
+    heading: 'Breast Augmentation Options',
     items: [
       {
         id: 'augmentation',
         // No `name`: the section heading two lines above already says
-        // "Breast Augmentation, Personalised to You".
+        // "Breast Augmentation Options".
         description:
           'Breast augmentation is highly individual. Implant size, shape and placement are considered according to your anatomy, existing breast tissue, chest proportions, skin quality and the result you would like to achieve. During your consultation, Dr. Nicole will also assess breast symmetry, natural breast position, desired projection and whether augmentation alone or a combination with a breast lift would be more appropriate. The surgical approach, incision placement and implant options are then discussed as part of a personalised plan designed around your body rather than a standard implant size or look.',
         // This page's own photograph rather than /breast-lift's — see OWN_IMG.

@@ -190,8 +190,8 @@ export type Procedure = {
    * Optional. A page with several cards needs one on each to tell them apart;
    * a page with a single card usually does not, because the section heading
    * directly above it has already named the operation — /breast-augmentation
-   * read "Breast Augmentation, Personalised to You" and then "Breast
-   * Augmentation" again, two lines apart.
+   * read "Breast Augmentation Options" and then "Breast Augmentation" again,
+   * two lines apart.
    */
   name?: string;
   description: string;
