@@ -108,9 +108,27 @@ export function Faq({ treatment, ...content }: FaqContent & { treatment?: string
                     )}
                   >
                     <div className={cn('overflow-hidden', !isOpen && 'invisible')}>
-                      <p className="px-6 pb-6 text-[0.9375rem] leading-[1.78] text-muted sm:px-7">
-                        {item.answer}
-                      </p>
+                      {/*
+                        A paragraph per blank-line-separated block, rather than
+                        one <p> for the whole answer.
+
+                        Some client answers arrive as two paragraphs, and
+                        rendering them into a single <p> silently glued them
+                        into one wall of text — the copy said one thing and the
+                        page showed another. Answers with no blank line are
+                        unaffected: they split into a single block and render
+                        exactly as before.
+                      */}
+                      <div className="flex flex-col gap-4 px-6 pb-6 sm:px-7">
+                        {item.answer.split(/\n{2,}/).map((para) => (
+                          <p
+                            key={para}
+                            className="text-[0.9375rem] leading-[1.78] text-muted"
+                          >
+                            {para}
+                          </p>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>

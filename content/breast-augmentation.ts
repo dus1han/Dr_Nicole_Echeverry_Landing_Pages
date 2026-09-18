@@ -44,8 +44,10 @@ const TREATMENT = 'Breast Augmentation';
  * document is a DELTA against /breast-lift: it gives new copy for the title,
  * hero, "What is…", "What it involves" and the FAQ, and marks candidacy, the
  * surgeon, her philosophy, the gallery, the journey and the reviews as "same
- * section". Those are taken from /breast-lift verbatim, with one exception
- * noted at `candidacy` below.
+ * section". Those were taken from /breast-lift verbatim.
+ *
+ * Candidacy is no longer among them — a later delivery (18 Sep 2026) gave
+ * this page its own copy for that section. See the note above `candidacy`.
  */
 export const breastAugmentation: LandingPageContent = {
   slug: 'breast-augmentation',
@@ -237,29 +239,43 @@ export const breastAugmentation: LandingPageContent = {
   /* ---------------------------------------------------------------- */
 
   /*
-   * "Am I a good candidate? - Same section".
+   * Client copy, 18 Sep 2026. No longer /breast-lift's.
    *
-   * Taken from /breast-lift word for word, with ONE change: the closing
-   * sentence named "a Breast Lift & Augmentation" as the solution. Left alone
-   * it would recommend a different operation from the one this page is about,
-   * on a page whose own FAQ tells the reader the two are not the same thing.
+   * This section used to be /breast-lift's word for word, which is why the
+   * note that stood here flagged "Feel your breasts have begun to sag or sit
+   * lower than before" as a LIFT indication sitting on the augmentation page.
+   * The new list drops it, so that objection is resolved rather than still
+   * outstanding.
    *
-   * The criteria are untouched, including "Feel your breasts have begun to sag"
-   * — that is the client's list and it is theirs to shorten. It does describe a
-   * lift indication rather than an augmentation one, which is worth raising
-   * with them.
+   * The register changes with it: the old copy told the reader an operation
+   * "may be the right solution" and asserted what they would like, where this
+   * describes what a patient might come in to discuss. On a surgical page
+   * that is the more defensible of the two, and it is theirs either way.
+   *
+   * `leadIn` is KEPT, and it is the one line here not supplied in the new
+   * copy. Two reasons: the field is required by CandidacyContent, and every
+   * new criterion is a sentence fragment — "Would like to increase or restore
+   * breast volume" has no subject, so without a lead-in the list dangles off
+   * the end of the paragraph. It is also the client's own existing wording
+   * rather than something invented here. If they want it gone the field has
+   * to become optional and Candidacy.tsx has to stop rendering the <p>.
    */
   candidacy: {
     eyebrow: 'Candidacy',
     heading: 'Am I a good candidate?',
-    body: 'Many women notice changes in their breasts over time, particularly after pregnancy, breastfeeding, weight loss, or the natural ageing process. If you’ve been thinking about restoring breast shape, improving fullness, or achieving better symmetry, a Breast Augmentation may be the right solution.',
+    body: 'Breast augmentation may be considered by patients who would like to increase or restore breast volume, address differences in breast size or discuss changes following pregnancy, breastfeeding or weight changes.',
     leadIn: 'You may be a suitable candidate if you:',
+    /*
+     * No trailing full stops, unlike the list this replaces. That is how the
+     * client supplied them and they are consistent with each other, which is
+     * the only thing that shows on the page.
+     */
     criteria: [
-      'Have lost breast volume after pregnancy or weight loss.',
-      'Feel your breasts have begun to sag or sit lower than before.',
-      'Would like fuller breasts while maintaining natural proportions.',
-      'Have uneven breast size or shape.',
-      'Want to improve how clothing and swimwear fit.',
+      'Would like to increase or restore breast volume',
+      'Would like to discuss breast shape or proportion',
+      'Have differences in breast size or symmetry',
+      'Have experienced volume changes after pregnancy, breastfeeding or weight loss',
+      'Would like to understand whether breast implants are suitable for your goals',
     ],
     cta: { label: 'Request an Honest Assessment', href: '#book' },
     image: {
@@ -476,6 +492,26 @@ export const breastAugmentation: LandingPageContent = {
         answer:
           'Most patients return to light daily activities within 1–2 weeks, although healing varies from person to person. Your recovery timeline will be discussed during your consultation.',
       },
+      /*
+       * Client copy, 18 Sep 2026. Placed directly after the question above
+       * because they cover the same ground and should be read together.
+       *
+       * As supplied it said "within around one week", against the 1–2 weeks
+       * the answer above gives. Two different recovery figures for the same
+       * operation, and both feed this page's FAQPage structured data, so the
+       * disagreement would have gone to Google as well as to the reader. The
+       * clinic settled it at 1–2 weeks (18 Sep 2026) and this answer carries
+       * that figure. Keep the two in step: changing one means changing both.
+       *
+       * Two edits to the supplied text, neither a wording choice:
+       *   "scar care advise" → "advice" (misspelling)
+       *   Title Case question → sentence case, to match the other fifteen
+       */
+      {
+        question: 'What to expect during Breast Augmentation recovery?',
+        answer:
+          'Recovery after breast augmentation is gradual, and every patient heals at her own pace. During the first few days, some swelling, tightness, tenderness, and temporary sensitivity are expected. You’ll wear a supportive surgical bra to support the breasts as they heal and settle into their new shape.\n\nMany patients can return to light daily activities within 1–2 weeks, depending on their recovery and the type of procedure performed. Strenuous exercise, heavy lifting, and upper-body workouts should be avoided until the doctor advises. Scheduled follow-up appointments allow Dr. Nicole to monitor your healing, provide scar care advice and guide you through each stage of recovery.',
+      },
       {
         question: 'How long do breast implants last?',
         answer:
@@ -486,10 +522,23 @@ export const breastAugmentation: LandingPageContent = {
         answer:
           'Your recovery includes scheduled follow-up appointments, personalized aftercare guidance, and ongoing support to ensure your healing progresses smoothly.',
       },
+      /*
+       * Client copy, 18 Sep 2026. Two paragraphs, separated by a blank line
+       * and rendered as two by Faq.tsx.
+       *
+       * This is the only mention of ABU DHABI on the site — every other page,
+       * the metadata and the JSON-LD say Dubai. Queried with the client and
+       * confirmed correct (18 Sep 2026), so it stays. Worth knowing it is
+       * deliberate rather than a stray, because this answer feeds the FAQPage
+       * structured data and is therefore a geography signal to Google.
+       *
+       * Question wording is the client's; only its capitalisation was changed,
+       * to sentence case, so it sits with the other fifteen.
+       */
       {
-        question: 'How much does Breast Augmentation or Breast Lift cost in Dubai?',
+        question: 'How much does Breast Augmentation cost in Dubai & Abu Dhabi?',
         answer:
-          'The cost of breast surgery varies depending on your individual treatment plan. Factors can include the type of procedure, the choice of breast implants where applicable, surgical complexity, anaesthesia and facility requirements, and whether procedures such as a Breast Lift and Augmentation are performed together. Following your consultation and assessment, you will receive a personalised surgical plan and the relevant treatment cost.',
+          'The cost of breast augmentation in Dubai and Abu Dhabi varies because every procedure is personalized to the patient. Your final price will depend on factors such as the type and brand of implant, surgical technique, and whether breast augmentation is combined with a lift or another procedure.\n\nDr. Nicole first assesses your anatomy, desired breast shape and volume, and the most suitable surgical approach. Following your consultation, you’ll receive a clear, personalized quotation based on your recommended treatment plan.',
       },
       {
         question: 'What happens during my consultation?',
