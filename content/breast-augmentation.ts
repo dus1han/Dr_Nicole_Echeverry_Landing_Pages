@@ -69,10 +69,11 @@ export const breastAugmentation: LandingPageContent = {
   /**
    * Anchors for this page's own sections.
    *
-   * "What It Involves" rather than /breast-lift's "Procedures": this page has
-   * one operation, and a plural label above a single card is the kind of small
-   * inaccuracy a visitor notices without being able to say why. It is also the
-   * section's own eyebrow, so the nav and the heading agree.
+   * "What It Involves" rather than /breast-lift's "Procedures". It was chosen
+   * when this page had a single card, to avoid a plural label above it; the
+   * section now carries three technique cards, so either label would be
+   * accurate and this one is kept because it is also the section's own
+   * eyebrow, which keeps the nav and the heading agreeing.
    */
   nav: [
     { label: 'What Is It', href: '#what-is-it' },
@@ -150,9 +151,10 @@ export const breastAugmentation: LandingPageContent = {
     body: 'Breast augmentation is a surgical procedure designed to enhance or restore breast volume, shape and projection. Depending on your anatomy and goals, augmentation may involve breast implants, fat transfer, or a personalised combination of techniques where appropriate.',
     /*
      * Statements, not links — see the note on `chips` in content/types.ts.
-     * /breast-lift's four chips each jump to one of its four procedure cards;
-     * this page has one card, so the client's four lines say what the operation
-     * achieves instead and carry no href.
+     * /breast-lift's four chips each jump to one of its four procedure cards.
+     * This page has three cards, but these four lines are outcomes rather than
+     * techniques and do not correspond to them one for one, so there is no
+     * card to send a reader to and they carry no href.
      */
     chips: [
       { label: 'Restore fullness lost after pregnancy, breastfeeding or weight changes' },
@@ -170,27 +172,62 @@ export const breastAugmentation: LandingPageContent = {
   /* ---------------------------------------------------------------- */
 
   /*
-   * One card, because the client's document describes one operation.
+   * Three techniques, supplied by the client 17 Sep 2026, replacing the single
+   * card this section used to carry.
    *
-   * `benefits` is absent rather than empty: their copy for this card is the
-   * paragraph and nothing else, and three invented bullet points under a
-   * surgical description would be a claim nobody made. The section renders a
-   * single centred card at a text measure — see the note in Procedures.tsx.
+   * This is what makes the section heading honest. "Breast Augmentation
+   * Options" went in ahead of the cards and was briefly a plural promising a
+   * choice the page then did not lay out; the three cards are the choice.
+   *
+   * Each card now carries a `name`, which the single card deliberately omitted
+   * — with one card the heading above it had already named the operation, and
+   * with three the reader needs to know which technique they are reading about.
+   *
+   * `benefits` stays absent on all three. The client's copy for each is one
+   * paragraph, and bullet points nobody wrote under a description of surgery
+   * are an invented claim about what the technique achieves.
+   *
+   * A count divisible by three lays out 3-across on desktop and 2-across on
+   * tablet with no part-empty row — see the grid note in Procedures.tsx.
    */
   procedures: {
     eyebrow: 'What It Involves',
     heading: 'Breast Augmentation Options',
     items: [
       {
-        id: 'augmentation',
-        // No `name`: the section heading two lines above already says
-        // "Breast Augmentation Options".
+        id: 'implants',
+        name: 'Breast Implants',
         description:
-          'Breast augmentation is highly individual. Implant size, shape and placement are considered according to your anatomy, existing breast tissue, chest proportions, skin quality and the result you would like to achieve. During your consultation, Dr. Nicole will also assess breast symmetry, natural breast position, desired projection and whether augmentation alone or a combination with a breast lift would be more appropriate. The surgical approach, incision placement and implant options are then discussed as part of a personalised plan designed around your body rather than a standard implant size or look.',
-        // This page's own photograph rather than /breast-lift's — see OWN_IMG.
+          'Breast implants can be selected according to your breast width, existing tissue, desired projection and overall proportions. Dr. Nicole works with established implant brands including Motiva, Mentor, Polytech and GCA, with implant selection personalised during consultation.',
+        /*
+         * One designed set, in this page's own folder rather than
+         * /breast-lift's — see OWN_IMG. Cropped 4:3 from square sources by
+         * `buildOptionCards` in scripts/prepare-assets.mjs so the file matches
+         * the card box instead of being trimmed by the browser.
+         */
         image: {
-          src: `${OWN_IMG}/procedure-augmentation.jpg`,
-          alt: 'Close-up of a woman in a soft white bra against a warm neutral background',
+          src: `${OWN_IMG}/option-implants.jpg`,
+          alt: 'A woman in a soft pink bra beside an inset illustration of a breast implant',
+        },
+      },
+      {
+        id: 'fat-transfer',
+        name: 'Fat Transfer',
+        description:
+          'For suitable patients, fat transfer may be considered to enhance breast volume using carefully selected fat from another area of the body. Suitability depends on your anatomy, available donor fat and desired degree of augmentation.',
+        image: {
+          src: `${OWN_IMG}/option-fat-transfer.jpg`,
+          alt: 'A woman in a soft pink bra beside an inset illustration of a vial and syringe',
+        },
+      },
+      {
+        id: 'hybrid',
+        name: 'Hybrid Breast Augmentation',
+        description:
+          'In selected cases, implants and fat transfer may be combined to refine breast shape, contour or proportions. Dr. Nicole will determine whether a hybrid approach is appropriate following an individual assessment.',
+        image: {
+          src: `${OWN_IMG}/option-hybrid.jpg`,
+          alt: 'A woman in a soft pink bra beside an inset illustration of an implant and a syringe',
         },
       },
     ],

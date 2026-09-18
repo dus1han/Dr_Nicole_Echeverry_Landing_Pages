@@ -171,13 +171,14 @@ export type WhatIsItContent = {
   /**
    * The row of pills beneath the body copy.
    *
-   * `href` is optional, and that distinction is the point. On a page with
-   * several procedures each chip scroll-links to its own card below, so the row
-   * is navigation. On a page with ONE procedure there is nowhere to send the
-   * visitor — /breast-augmentation's row states what the operation achieves —
-   * and four pills all pointing at the same anchor would be a link that appears
-   * to do nothing four times over. Without an href a chip renders as plain
-   * text, not as a dead link.
+   * `href` is optional, and that distinction is the point. Where each chip
+   * names a procedure it scroll-links to its own card below and the row is
+   * navigation, as on /breast-lift. Where the chips are OUTCOMES rather than
+   * procedures there is nothing to link them to — /breast-augmentation's row
+   * states what the operation achieves, and those four lines do not map onto
+   * its three technique cards — and pills pointing at an arbitrary card would
+   * be a link that appears to do nothing. Without an href a chip renders as
+   * plain text, not as a dead link.
    */
   chips: Array<{ label: string; href?: string }>;
   image: ImageAsset;
@@ -187,11 +188,12 @@ export type WhatIsItContent = {
 export type Procedure = {
   id: string;
   /**
-   * Optional. A page with several cards needs one on each to tell them apart;
-   * a page with a single card usually does not, because the section heading
-   * directly above it has already named the operation — /breast-augmentation
-   * read "Breast Augmentation Options" and then "Breast Augmentation" again,
-   * two lines apart.
+   * Optional. A page with several cards needs one on each to tell them apart,
+   * which is why all three of /breast-augmentation's carry one. A page with a
+   * single card usually does not, because the section heading directly above
+   * it has already named the operation: that page previously read "Breast
+   * Augmentation Options" and then "Breast Augmentation" again, two lines
+   * apart.
    */
   name?: string;
   description: string;

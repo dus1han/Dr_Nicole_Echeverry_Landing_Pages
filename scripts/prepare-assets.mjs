@@ -185,20 +185,36 @@ const BL_PHOTOS = [
 /* ------------------------------------------------------------------ *
  * Page 3 — /breast-augmentation
  *
- * The page reuses /breast-lift's photographs for everything except its one
- * procedure card, which the client supplied separately. Only that card is
- * built here; the shared frames keep coming from OUT_IMG_BL, which is why
- * content/breast-augmentation.ts still points IMG at /images/breast-lift.
+ * The page reuses /breast-lift's photographs for everything except the three
+ * technique cards in "Breast Augmentation Options", which the client supplied
+ * separately. Only those are built here; the shared frames keep coming from
+ * OUT_IMG_BL, which is why content/breast-augmentation.ts still points IMG at
+ * /images/breast-lift.
+ *
+ * There is no `SRC_BA` any more. The page used to carry a single procedure
+ * card built from a 'Breast aug' delivery folder; the three options replaced
+ * it, so that folder, its BA_PHOTOS entry and the procedure-augmentation.jpg
+ * they produced are all gone rather than left generating an image nothing
+ * renders.
  * ------------------------------------------------------------------ */
-const SRC_BA = join(ROOT, '..', 'Breast aug');
 const OUT_IMG_BA = join(ROOT, 'public', 'images', 'breast-augmentation');
 
-const BA_PHOTOS = [
-  // 1448 wide is the source, and it is kept rather than cut down. This card is
-  // the only one on its page, so Procedures.tsx centres it at max-w-2xl —
-  // 672 CSS px, or 1344 real pixels on a 2x screen. The other pages' procedure
-  // cards sit in a grid at roughly half that width and are cut to 1100.
-  ['breast aug.png', 'procedure-augmentation.jpg', 1448],
+/*
+ * The three augmentation-option cards, supplied 17 Sep 2026 - [source, slug].
+ *
+ * A designed set rather than three unrelated photographs: one model, one
+ * dusty-pink backdrop, and an inset circle carrying that option's instrument
+ * (an implant, a vial and syringe, both together). They only read as a set if
+ * all three are cropped identically, which is what buildOptionCards does.
+ */
+const SRC_BA_OPTIONS = join(ROOT, '..', 'Options', 'BA Images');
+
+const BA_OPTION_CARDS = [
+  // "Imaplant.png" is the client's spelling of the source file. Left alone -
+  // renaming their delivery is how the next re-run stops finding it.
+  ['Imaplant.png', 'option-implants.jpg'],
+  ['Fat transfer.png', 'option-fat-transfer.jpg'],
+  ['Hybrid.png', 'option-hybrid.jpg'],
 ];
 
 /*
@@ -283,6 +299,56 @@ async function copyPhotos({
  * frame while the window, plant and sofa still read behind her, which is what
  * makes it feel like a real clinic rather than a stock cut-out.
  */
+/**
+ * Procedure-option cards, cropped to the shape the card actually renders.
+ *
+ * The sources are 1254x1254 squares and Procedures.tsx puts them in an
+ * `aspect-4/3` box under `object-cover`, so a quarter of every image height
+ * would be downloaded and then thrown away by the browser. Cropping here
+ * means the file matches the box it is shown in.
+ *
+ * The crop is anchored at the TOP rather than centred. Centred is what
+ * `object-cover` would have done and it is wrong for this set: the subject
+ * runs chin-to-waist, so taking the excess off both edges trims the neckline
+ * and the lower torso at once. Anchoring at the top keeps the neckline and
+ * drops only the abdomen, which is not what any of the three photographs is
+ * about. It also keeps the inset instrument circle, which sits mid-left,
+ * comfortably inside the frame.
+ *
+ * 1100px wide to match the other multi-card procedure images: these sit three
+ * abreast at roughly 30vw, so 1100 still covers a 2x screen.
+ */
+async function buildOptionCards() {
+  console.log('\n- Procedure options');
+
+  if (!(await exists(SRC_BA_OPTIONS))) {
+    console.warn(`  ! source folder not found, skipping:\n    ${SRC_BA_OPTIONS}`);
+    return;
+  }
+
+  const WIDTH = 1100;
+  const ASPECT = 4 / 3;
+
+  for (const [file, dest] of BA_OPTION_CARDS) {
+    const from = join(SRC_BA_OPTIONS, file);
+    if (!(await exists(from))) {
+      console.warn(`  ! ${file} not found - skipped`);
+      continue;
+    }
+
+    const { width, height } = await sharp(from).metadata();
+    const keep = Math.min(height, Math.round(width / ASPECT));
+
+    await sharp(from)
+      .extract({ left: 0, top: 0, width, height: keep })
+      .resize({ width: WIDTH, withoutEnlargement: true })
+      .jpeg({ quality: 86, mozjpeg: true })
+      .toFile(join(OUT_IMG_BA, dest));
+
+    console.log(`  + ${dest} (${width}x${height} -> ${WIDTH}x${Math.round(WIDTH / ASPECT)})`);
+  }
+}
+
 async function buildHero() {
   console.log('\n· Hero');
   const src = join(SRC, 'her.png');
@@ -836,20 +902,13 @@ async function main() {
   /*
    * --- /breast-augmentation ------------------------------------------------
    *
-   * Skipped rather than fatal when its source folder is absent, for the same
-   * reason as /breast-lift above.
+   * Just the three option cards now. Everything else on the page is
+   * /breast-lift's, by path rather than by copy. buildOptionCards skips
+   * rather than throws when its source folder is absent, for the same reason
+   * as /breast-lift above.
    */
   console.log('\n\nPreparing /breast-augmentation…');
-  if (!(await exists(SRC_BA))) {
-    console.warn(`  ! source folder not found, skipping:\n    ${SRC_BA}`);
-  } else {
-    await copyPhotos({
-      label: 'Photographs',
-      srcDirs: [SRC_BA],
-      outDir: OUT_IMG_BA,
-      photos: BA_PHOTOS,
-    });
-  }
+  await buildOptionCards();
 
   console.log('\nDone.\n');
 }
