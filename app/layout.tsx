@@ -4,6 +4,7 @@ import { site } from '@/content/site';
 import { ScrollProgress } from '@/components/layout/ScrollProgress';
 import { RevealObserver } from '@/components/ui/RevealObserver';
 import { GtmScript, GtmNoScript } from '@/components/analytics/Gtm';
+import { ClarityScript } from '@/components/analytics/Clarity';
 import { ClickIdCapture } from '@/components/analytics/ClickIdCapture';
 import { ORIGIN, INDEXABLE } from '@/lib/site-url';
 import './globals.css';
@@ -137,6 +138,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Must be the first thing in <body> — GTM's documented placement. */}
         <GtmNoScript id={site.analytics.gtmId} />
         <GtmScript id={site.analytics.gtmId} />
+        {/*
+          After GTM rather than before it. Both are `afterInteractive`, so both
+          are queued once hydration finishes and the order here is the order
+          they execute in. Conversion tracking is what the ad spend depends on;
+          session recording is what explains it afterwards, and it can wait the
+          few milliseconds.
+        */}
+        <ClarityScript id={site.analytics.clarityId} />
         <ClickIdCapture />
         <RevealObserver />
 

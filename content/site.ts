@@ -95,6 +95,8 @@ export const site: SiteConfig = {
   analytics: {
     // Dr. Nicole's own container. Supplied by the client, 3 Aug 2026.
     gtmId: 'GTM-WF7NSMXG',
+    // Session recording and heatmaps. Supplied by the client, 23 Sep 2026.
+    clarityId: 'ympfztmm3z',
   },
 
   landingPages: [

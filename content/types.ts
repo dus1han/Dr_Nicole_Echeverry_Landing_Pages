@@ -106,6 +106,21 @@ export type SiteConfig = {
      * build can point at a different container.
      */
     gtmId: string;
+    /**
+     * Microsoft Clarity project ID, e.g. `abcdefghij`.
+     *
+     * Here for the same reasons as `gtmId` above: it belongs to the client
+     * rather than to the codebase, and it is a public loader ID visible in the
+     * page source of every site that uses Clarity.
+     *
+     * Unlike the Google Ads pixels, this one is NOT configured inside GTM.
+     * Clarity reconstructs the session from the first paint, so loading it a
+     * container-load late would lose the opening seconds — see the note in
+     * components/analytics/Clarity.tsx.
+     *
+     * `NEXT_PUBLIC_CLARITY_ID` overrides this when set.
+     */
+    clarityId: string;
   };
   /** Every landing page in the project. Drives the footer list and sitemap. */
   landingPages: Array<{ slug: string; title: string; live: boolean }>;
